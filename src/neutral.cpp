@@ -13,7 +13,10 @@ int main(int argc, char *argv[]) {
     GenomeStructure genome = args_genome.get_model();
     NeutralModel neutral_fitness{};
     Population population(args.population_size.getValue(), genome, neutral_fitness);
-    population.run(args.number_of_generations.getValue());
-    population.trace.write_tsv(args.output_path.getValue());
+
+    Trace trace{};
+    population.run(args.burn_in.getValue(), trace);
+    Process process(population, args.number_of_generations.getValue(), trace);
+    trace.write_tsv(args.output_path.getValue());
     return 0;
 }

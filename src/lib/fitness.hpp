@@ -5,19 +5,15 @@
 class FitnessModel {
   public:
     explicit FitnessModel() = default;
-
-    virtual double fitness(double v) const = 0;
-
     virtual ~FitnessModel() = default;
+    virtual double fitness(double v) const = 0;
 };
 
 class NeutralModel : public FitnessModel {
   public:
     explicit NeutralModel() = default;
-
-    double fitness(double v) const override { return 1.0; }
-
     ~NeutralModel() override = default;
+    double fitness(double v) const override { return 1.0; }
 };
 
 class GaussianModel final : public FitnessModel {
@@ -52,4 +48,17 @@ class GaussianArgParse {
         false, 2.0, "double", cmd};
 
     GaussianModel get_model() { return GaussianModel(peakness.getValue(), epistasis.getValue()); }
+};
+
+class DirectionalModel final : public FitnessModel {
+  public:
+    explicit DirectionalModel() = default;
+    ~DirectionalModel() override = default;
+    double fitness(double v) const override {
+        if (v < 0) {
+            return 0.0;
+        } else {
+            return v;
+        }
+    }
 };

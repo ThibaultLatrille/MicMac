@@ -72,15 +72,13 @@ class Individual {
 
     void parent_loci_sampling(Individual const &parent) {
         for (auto const &locus_pair : parent.loci) {
-            if (locus_pair.second) {
+            if (locus_pair.second or bernouilli_distr(generator)) {
                 auto it = loci.find(locus_pair.first);
                 if (it != loci.end()) {
                     it->second = true;
                 } else {
                     loci[locus_pair.first] = false;
                 }
-            } else {
-                if (bernouilli_distr(generator)) { loci[locus_pair.first] = false; }
             }
         }
     }
@@ -121,9 +119,9 @@ class Population {
     // Parameters
     u_long population_size{};
     u_long elapsed{0};
+    u_long id{0};
     GenomeStructure const &genome{};
     FitnessModel const &fitness_function;
-    Trace trace{};
 
     // Individuals composing the population
     vector<Individual> parents{};
@@ -155,23 +153,24 @@ class Population {
         parents = move(children);
     };
 
-    void run(u_long nbr_generations) {
+    void run(u_long nbr_generations, Trace &trace) {
+        cout << "Population " << id << " for " << nbr_generations << " generations." << endl;
         // Run under selection
         u_long last_pct = 0;
         for (u_long sample{1}; sample <= nbr_generations; sample++) {
             mutation();
             selection_and_random_mating();
             elapsed++;
-            add_to_trace();
-            u_long pct = 100 * sample / nbr_generations;
+            add_to_trace(trace);
+            u_long pct = 10 * sample / nbr_generations;
             if (pct != last_pct) {
-                cout << pct << "% (" << sample << " generations)" << endl;
+                cout << pct * 10 << "% (" << sample << " generations)" << endl;
                 last_pct = pct;
             }
         }
     };
 
-    void add_to_trace() {
+    void add_to_trace(Trace &trace) {
         vector<double> fitnesses(population_size, 0);
         transform(parents.begin(), parents.end(), fitnesses.begin(),
             [](Individual const &b) { return b.fitness; });
@@ -180,10 +179,25 @@ class Population {
         transform(parents.begin(), parents.end(), phenotypes.begin(),
             [](Individual const &b) { return b.phenotype; });
 
+        trace.add("Population", id);
         trace.add("Generation", elapsed);
         trace.add("Fitness mean", mean(fitnesses));
         trace.add("Fitness var", variance(fitnesses));
         trace.add("Phenotype mean", mean(phenotypes));
         trace.add("Phenotype var", variance(phenotypes));
     };
+};
+
+class Process {
+  private:
+    Population pop1;
+    Population pop2;
+
+  public:
+    explicit Process(Population &pop, u_long nbr_generations, Trace &trace) : pop1{pop}, pop2{pop} {
+        pop1.id = 1;
+        pop1.run(nbr_generations, trace);
+        pop2.id = 2;
+        pop2.run(nbr_generations, trace);
+    }
 };

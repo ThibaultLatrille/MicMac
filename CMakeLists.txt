@@ -21,3 +21,4 @@ include_directories("utils")
 
 add_executable(neutral src/neutral.cpp)
 add_executable(stabilizing src/stabilizing.cpp)
+add_executable(directional src/directional.cpp)
