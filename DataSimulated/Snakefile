@@ -1,0 +1,33 @@
+import numpy
+import os
+import pandas as pd
+
+ROOT = os.path.abspath('..')
+FOLDER = os.path.abspath('.')
+NBR_REP = 50
+SIMULATORS = ["neutral", "stabilizing"]
+
+rule all:
+    input:
+        expand(FOLDER + "/Experiments/{simulator}.pdf", simulator=SIMULATORS)
+
+rule run_simulations:
+    input:
+        exec=ROOT + '/simulator/build/{simulator}'
+    output:
+        file=FOLDER + "/Experiments/{simulator}/{rep}.tsv"
+    params:
+        folder= lambda wildcards: FOLDER + "/Experiments/" + wildcards.simulator
+    shell:
+        'mkdir -p {params.folder} && {input.exec} --seed {wildcards.rep} --output {output.file}'
+
+rule plot_scatter:
+    input:
+        exp=expand(FOLDER + "/Experiments/{{simulator}}/{rep}.tsv", rep=range(1, 50)),
+        script=ROOT + '/scripts/plot_scatter.py'
+    params:
+        folder= lambda wildcards: FOLDER + "/Experiments/" + wildcards.simulator
+    output:
+        plot=FOLDER + "/Experiments/{simulator}.pdf"
+    shell:
+        'python3 {input.script} --folder {params.folder} --output {output.plot}'
