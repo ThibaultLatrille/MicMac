@@ -5,7 +5,8 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 *~
-/cmake-build-debug
+cmake-build-debug
 build
 test
+DataSimulated/Experiments
 .idea/
