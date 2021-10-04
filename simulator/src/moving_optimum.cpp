@@ -9,13 +9,13 @@ int main(int argc, char *argv[]) {
     CmdLine cmd{"stabilizing", ' ', "0.1"};
     OutputArgParse args(cmd);
     GenomeStructureArgParse args_genome(cmd);
-    GaussianArgParse args_gaussian(cmd);
+    MovingOptimumArgParse args_moving_optimum(cmd);
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
     GenomeStructure genome = args_genome.get_model();
-    GaussianModel gaussian_fitness = args_gaussian.get_model();
-    Population population(args.population_size.getValue(), genome, gaussian_fitness);
+    MovingOptimumModel moving_optimum_fitness = args_moving_optimum.get_moving_optimum_model(args_genome.number_loci.getValue());
+    Population population(args.population_size.getValue(), genome, moving_optimum_fitness);
 
     Trace trace{};
     population.run(args.burn_in.getValue(), trace);

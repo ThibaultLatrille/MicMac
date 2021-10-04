@@ -56,3 +56,7 @@ test: debug
 	build/neutral --output test/neutral_run
 	@echo "\n\e[35m\e[1m== Stabilizing run =====================================================\e[0m"
 	build/stabilizing --output test/stabilizing_run
+	@echo "\n\e[35m\e[1m== Directional run =====================================================\e[0m"
+	build/directional --output test/directional_run
+	@echo "\n\e[35m\e[1m== Moving optimum run =====================================================\e[0m"
+	build/moving_optimum --output test/moving_optimum_run

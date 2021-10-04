@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
     Trace trace{};
     population.run(args.burn_in.getValue(), trace);
-    Process process(population, args.number_of_generations.getValue(), trace);
+    Process process(population, args.number_of_generations.getValue(), args.number_of_lineages.getValue(), trace);
     trace.write_tsv(args.output_path.getValue());
     return 0;
 }

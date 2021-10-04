@@ -14,12 +14,12 @@ int main(int argc, char *argv[]) {
 
     generator.seed(args.seed.getValue());
     GenomeStructure genome = args_genome.get_model();
-    GaussianModel gaussian_fitness = args_gaussian.get_model();
+    GaussianModel gaussian_fitness = args_gaussian.get_model(args_genome.number_loci.getValue());
     Population population(args.population_size.getValue(), genome, gaussian_fitness);
 
     Trace trace{};
     population.run(args.burn_in.getValue(), trace);
-    Process process(population, args.number_of_generations.getValue(), trace);
+    Process process(population, args.number_of_generations.getValue(), args.number_of_lineages.getValue(), trace);
     trace.write_tsv(args.output_path.getValue());
     return 0;
 }

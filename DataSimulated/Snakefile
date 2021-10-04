@@ -1,33 +1,50 @@
-import numpy
+import numpy as np
 import os
-import pandas as pd
 
 ROOT = os.path.abspath('..')
 FOLDER = os.path.abspath('.')
-NBR_REP = 50
-SIMULATORS = ["neutral", "stabilizing"]
+REPLICATES = [int(i) for i in np.linspace(5000, 40000, 100)]
+SIMULATORS = {"neutral": "",
+              "directional": "",
+              "stabilizing" : "--peakness 0.1 --epistasis 2.0",
+              "moving_optimum" : "--peakness 0.1 --epistasis 2.0 --std_optimum 1.0"}
+CORE_PARAMS = "--mutation_mean_effect_size 1.0 " + \
+           "--mutation_rate_per_loci_per_generation 1e-5 " + \
+           "--population_size 100 " + \
+           "--number_of_generations 500 " + \
+           "--number_of_lineages 100 " + \
+           "--burn_in 500 " + \
+           "--seed 42 "
 
 rule all:
     input:
-        expand(FOLDER + "/Experiments/{simulator}.pdf", simulator=SIMULATORS)
+        expand(FOLDER + "/Experiments/scatter_plot.pdf")
 
 rule run_simulations:
     input:
         exec=ROOT + '/simulator/build/{simulator}'
     output:
-        file=FOLDER + "/Experiments/{simulator}/{rep}.tsv"
+        file=FOLDER + "/Experiments/{simulator}/replicate_{scaling}.tsv",
     params:
-        folder= lambda wildcards: FOLDER + "/Experiments/" + wildcards.simulator
+        folder= lambda wildcards: FOLDER + "/Experiments/" + wildcards.simulator,
+        simulator= lambda wildcards: SIMULATORS[wildcards.simulator]
     shell:
-        'mkdir -p {params.folder} && {input.exec} --seed {wildcards.rep} --output {output.file}'
+        'mkdir -p {params.folder} && {input.exec} {params.simulator} {CORE_PARAMS} --number_loci {wildcards.scaling} --output {output.file}'
+
+rule plot_trajectory:
+    input:
+        exp=FOLDER + "/Experiments/{simulator}/replicate_{scaling}.tsv",
+        script=ROOT + '/scripts/plot_trajectory.py'
+    output:
+        plot=FOLDER + "/Experiments/{simulator}/replicate_{scaling}.pdf",
+    shell:
+        'python3 {input.script} --input {input.exp} --output {output.plot}'
 
 rule plot_scatter:
     input:
-        exp=expand(FOLDER + "/Experiments/{{simulator}}/{rep}.tsv", rep=range(1, 50)),
+        exp=expand(FOLDER + "/Experiments/{simulator}/replicate_{scaling}.pdf", scaling=REPLICATES, simulator=SIMULATORS.keys()),
         script=ROOT + '/scripts/plot_scatter.py'
-    params:
-        folder= lambda wildcards: FOLDER + "/Experiments/" + wildcards.simulator
     output:
-        plot=FOLDER + "/Experiments/{simulator}.pdf"
+        plot=FOLDER + "/Experiments/scatter_plot.pdf"
     shell:
-        'python3 {input.script} --folder {params.folder} --output {output.plot}'
+        'python3 {input.script} --folder {FOLDER}/Experiments --output {output.plot}'

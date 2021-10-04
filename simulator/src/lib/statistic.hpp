@@ -16,3 +16,8 @@ double variance(std::vector<double> const &v) {
     double m = mean(v);
     return (s2 / static_cast<double>(v.size())) - m * m;
 }
+
+// Function for variance
+double sum_squarred(std::vector<double> const &v) {
+    return std::accumulate(v.begin(), v.end(), 0.0, [](double a, double b) { return a + b * b; });
+}

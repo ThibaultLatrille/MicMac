@@ -17,6 +17,8 @@ class OutputArgParse {
         "", "population_size", "Number of individuals", false, 100, "u_long", cmd};
     TCLAP::ValueArg<u_long> number_of_generations{"", "number_of_generations",
         "Number of generations on each lineage", false, 1000, "u_long", cmd};
+    TCLAP::ValueArg<u_long> number_of_lineages{
+        "", "number_of_lineages", "Number of lineages", false, 2, "u_long", cmd};
     TCLAP::ValueArg<u_long> burn_in{"", "burn_in",
         "Burn-in period in number of generations (before speciation).", false, 1000, "u_long", cmd};
     TCLAP::ValueArg<std::string> output_path{"o", "output", "output path", true, "", "string", cmd};
