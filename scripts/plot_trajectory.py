@@ -18,10 +18,8 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', required=True, type=str, dest="output", help="Output path")
     args = parser.parse_args()
 
-    df = pd.read_csv(args.input, sep="\t")
-    populations = list(sorted(set(df["Population"])))
-    for pop in populations:
-        ddf = df[df["Population"] == pop]
+    groups = [v for k, v in pd.read_csv(args.input, sep="\t").groupby("Lineage")]
+    for ddf in groups:
         plt.plot(ddf["Generation"], ddf["Phenotype mean"])
     plt.ylabel("Mean phenotype ($\\bar{X}$)", fontsize=fontsize)
     plt.xlabel("time ($t$)", fontsize=fontsize)
@@ -31,8 +29,7 @@ if __name__ == '__main__':
     plt.savefig(args.output.replace(".pdf", ".png"), format="png")
     plt.clf()
 
-    for pop in populations:
-        ddf = df[df["Population"] == pop]
+    for ddf in groups:
         plt.plot(ddf["Generation"], ddf["Phenotype var"])
     plt.ylabel("Phenotype variance ($V_G$)", fontsize=fontsize)
     plt.xlabel("time ($t$)", fontsize=fontsize)
@@ -40,4 +37,14 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.savefig(args.output.replace(".pdf", "_Vg.pdf"), format="pdf")
     plt.savefig(args.output.replace(".pdf", "_Vg.png"), format="png")
+    plt.clf()
+
+    for ddf in groups:
+        plt.plot(ddf["Generation"], ddf["Population size"])
+    plt.ylabel("Population size ($N_e$)", fontsize=fontsize)
+    plt.xlabel("time ($t$)", fontsize=fontsize)
+    plt.xticks(fontsize=fontsize_legend)
+    plt.tight_layout()
+    plt.savefig(args.output.replace(".pdf", "_Ne.pdf"), format="pdf")
+    plt.savefig(args.output.replace(".pdf", "_Ne.png"), format="png")
     plt.clf()

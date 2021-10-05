@@ -92,17 +92,33 @@ class MovingOptimumArgParse : GaussianArgParse {
     }
 };
 
-class DirectionalModel final : public FitnessModel {
+class DirectionalModel : public GaussianModel {
+  protected:
+    double std_optimum{0};
+
   public:
     explicit DirectionalModel() = default;
-    ~DirectionalModel() override = default;
+    explicit DirectionalModel(
+        double const &peakness, double const &epistasis, double const &std_optimum)
+        : GaussianModel(peakness, epistasis), std_optimum{std_optimum} {}
 
     double fitness(double v) const override {
-        if (v < 0) {
-            return 0.0;
-        } else {
-            return v;
-        }
+        return exp(-peakness * pow((v - optimum), epistasis));
     }
-    void update() override{};
+    void update() override { optimum += std_optimum; };
+
+    ~DirectionalModel() override = default;
+};
+
+class DirectionalArgParse : GaussianArgParse {
+  public:
+    explicit DirectionalArgParse(TCLAP::CmdLine &cmd) : GaussianArgParse(cmd) {}
+
+    TCLAP::ValueArg<double> std_optimum{"", "std_optimum",
+        "Standard deviation of the change in optimum.", false, 1.0, "double", cmd};
+
+    DirectionalModel get_directional_model(u_long nb_loci) {
+        return DirectionalModel(
+            peakness.getValue() / static_cast<double>(nb_loci), epistasis.getValue(), std_optimum.getValue());
+    }
 };

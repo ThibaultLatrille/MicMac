@@ -1,50 +1,62 @@
 import numpy as np
 import os
 
+EXPERIMENT = "CST_POP_SIZE"
 ROOT = os.path.abspath('..')
-FOLDER = os.path.abspath('.')
-REPLICATES = [int(i) for i in np.linspace(5000, 40000, 100)]
+FOLDER = os.path.abspath('.') + "/Experiments/" + EXPERIMENT + "/"
+REPLICATES = [int(i) for i in np.linspace(5000, 40000, 25)]
 SIMULATORS = {"neutral": "",
-              "directional": "",
               "stabilizing" : "--peakness 0.1 --epistasis 2.0",
+              "directional": "--peakness 0.1 --epistasis 2.0 --std_optimum 1.0",
               "moving_optimum" : "--peakness 0.1 --epistasis 2.0 --std_optimum 1.0"}
 CORE_PARAMS = "--mutation_mean_effect_size 1.0 " + \
            "--mutation_rate_per_loci_per_generation 1e-5 " + \
            "--population_size 100 " + \
+           "--population_size_min 20 " + \
+           "--brownian_sigma 0.0 " + \
+           "--noise_sigma 0.0 " + \
+           "--noise_theta 0.9 " + \
            "--number_of_generations 500 " + \
-           "--number_of_lineages 100 " + \
+           "--number_of_lineages 25 " + \
            "--burn_in 500 " + \
            "--seed 42 "
 
+os.makedirs(FOLDER, exist_ok=True)
+with open(FOLDER + "config.txt", "w") as f:
+    f.write(str(REPLICATES))
+    f.write(CORE_PARAMS.replace("--", "\n"))
+    for k, v in SIMULATORS.items():
+        f.write("\n" + k + v.replace("--", "\n\t"))
+
 rule all:
     input:
-        expand(FOLDER + "/Experiments/scatter_plot.pdf")
+        expand(FOLDER + "scatter_plot.pdf")
 
 rule run_simulations:
     input:
         exec=ROOT + '/simulator/build/{simulator}'
     output:
-        file=FOLDER + "/Experiments/{simulator}/replicate_{scaling}.tsv",
+        file=FOLDER + "{simulator}/replicate_{scaling}.tsv",
     params:
-        folder= lambda wildcards: FOLDER + "/Experiments/" + wildcards.simulator,
+        folder= lambda wildcards: FOLDER + wildcards.simulator,
         simulator= lambda wildcards: SIMULATORS[wildcards.simulator]
     shell:
         'mkdir -p {params.folder} && {input.exec} {params.simulator} {CORE_PARAMS} --number_loci {wildcards.scaling} --output {output.file}'
 
 rule plot_trajectory:
     input:
-        exp=FOLDER + "/Experiments/{simulator}/replicate_{scaling}.tsv",
+        exp=FOLDER + "{simulator}/replicate_{scaling}.tsv",
         script=ROOT + '/scripts/plot_trajectory.py'
     output:
-        plot=FOLDER + "/Experiments/{simulator}/replicate_{scaling}.pdf",
+        plot=FOLDER + "{simulator}/replicate_{scaling}.pdf",
     shell:
         'python3 {input.script} --input {input.exp} --output {output.plot}'
 
 rule plot_scatter:
     input:
-        exp=expand(FOLDER + "/Experiments/{simulator}/replicate_{scaling}.pdf", scaling=REPLICATES, simulator=SIMULATORS.keys()),
+        exp=expand(FOLDER + "{simulator}/replicate_{scaling}.pdf", scaling=REPLICATES, simulator=SIMULATORS.keys()),
         script=ROOT + '/scripts/plot_scatter.py'
     output:
-        plot=FOLDER + "/Experiments/scatter_plot.pdf"
+        plot=FOLDER + "scatter_plot.pdf"
     shell:
-        'python3 {input.script} --folder {FOLDER}/Experiments --output {output.plot}'
+        'python3 {input.script} --folder {FOLDER} --output {output.plot}'

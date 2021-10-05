@@ -12,9 +12,6 @@ class OutputArgParse {
 
   public:
     explicit OutputArgParse(TCLAP::CmdLine &cmd) : cmd{cmd} {}
-
-    TCLAP::ValueArg<u_long> population_size{
-        "", "population_size", "Number of individuals", false, 100, "u_long", cmd};
     TCLAP::ValueArg<u_long> number_of_generations{"", "number_of_generations",
         "Number of generations on each lineage", false, 1000, "u_long", cmd};
     TCLAP::ValueArg<u_long> number_of_lineages{

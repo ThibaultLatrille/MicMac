@@ -1,5 +1,3 @@
-#include "argparse.hpp"
-#include "fitness.hpp"
 #include "wright_fisher.hpp"
 
 using namespace TCLAP;
@@ -9,12 +7,13 @@ int main(int argc, char *argv[]) {
     CmdLine cmd{"stabilizing", ' ', "0.1"};
     OutputArgParse args(cmd);
     GenomeStructureArgParse args_genome(cmd);
+    PopulationSizeArgParse args_pop_size(cmd);
+    DirectionalArgParse args_directional(cmd);
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
-    GenomeStructure genome = args_genome.get_model();
-    DirectionalModel directional_fitness{};
-    Population population(args.population_size.getValue(), genome, directional_fitness);
+    DirectionalModel directional_fitness = args_directional.get_directional_model(args_genome.number_loci.getValue());
+    Population population(args_genome.get_model(), directional_fitness, args_pop_size.get_model());
 
     Trace trace{};
     population.run(args.burn_in.getValue(), trace);
