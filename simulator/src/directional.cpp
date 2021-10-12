@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
-    DirectionalModel directional_fitness = args_directional.get_directional_model(args_genome.number_loci.getValue());
+    DirectionalModel directional_fitness = args_directional.get_directional_model();
     Population population(args_genome.get_model(), directional_fitness, args_pop_size.get_model());
 
     Trace trace{};

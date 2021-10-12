@@ -12,7 +12,8 @@ int main(int argc, char *argv[]) {
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
-    GaussianModel gaussian_fitness = args_gaussian.get_model(args_genome.number_loci.getValue());
+    GaussianModel gaussian_fitness =
+        args_gaussian.get_gaussian_model();
     Population population(args_genome.get_model(), gaussian_fitness, args_pop_size.get_model());
 
     Trace trace{};

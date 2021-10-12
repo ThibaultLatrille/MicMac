@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
-    MovingOptimumModel moving_optimum_fitness = args_moving_optimum.get_moving_optimum_model(args_genome.number_loci.getValue());
+    MovingOptimumModel moving_optimum_fitness = args_moving_optimum.get_moving_optimum_model();
     Population population(args_genome.get_model(), moving_optimum_fitness, args_pop_size.get_model());
     Trace trace{};
 

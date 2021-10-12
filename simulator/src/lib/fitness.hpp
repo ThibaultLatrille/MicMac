@@ -37,10 +37,41 @@ class GaussianModel : public FitnessModel {
     explicit GaussianModel(double const &peakness, double const &epistasis)
         : peakness{peakness}, epistasis{epistasis} {}
 
-    double fitness(double v) const override { return exp(-peakness * pow(v, epistasis)); }
+    double fitness(double v) const override {
+        return exp(-peakness * pow((v - optimum), epistasis));
+    }
     void update() override{};
     ~GaussianModel() override = default;
 };
+
+
+class MovingOptimumModel : public GaussianModel {
+  protected:
+    double std_optimum{0};
+
+  public:
+    explicit MovingOptimumModel() = default;
+    explicit MovingOptimumModel(
+        double const &peakness, double const &epistasis, double const &std_optimum)
+        : GaussianModel(peakness, epistasis), std_optimum{std_optimum} {}
+
+    void update() override { optimum += std_optimum * normal_distrib(generator); };
+
+    ~MovingOptimumModel() override = default;
+};
+
+class DirectionalModel : public MovingOptimumModel {
+  public:
+    explicit DirectionalModel() = default;
+    explicit DirectionalModel(
+        double const &peakness, double const &epistasis, double const &std_optimum)
+        : MovingOptimumModel(peakness, epistasis, std_optimum) {}
+
+    void update() override { optimum += std_optimum; };
+
+    ~DirectionalModel() override = default;
+};
+
 
 class GaussianArgParse {
   protected:
@@ -58,67 +89,31 @@ class GaussianArgParse {
         "function (exp(-alpha*(phenotype^beta))",
         false, 2.0, "double", cmd};
 
-    GaussianModel get_model(u_long nb_loci) { return GaussianModel(peakness.getValue() / static_cast<double>(nb_loci), epistasis.getValue()); }
-};
-
-class MovingOptimumModel : public GaussianModel {
-  protected:
-    double std_optimum{0};
-
-  public:
-    explicit MovingOptimumModel() = default;
-    explicit MovingOptimumModel(
-        double const &peakness, double const &epistasis, double const &std_optimum)
-        : GaussianModel(peakness, epistasis), std_optimum{std_optimum} {}
-
-    double fitness(double v) const override {
-        return exp(-peakness * pow((v - optimum), epistasis));
+    GaussianModel get_gaussian_model() {
+        return GaussianModel(
+            peakness.getValue(), epistasis.getValue());
     }
-    void update() override { optimum += std_optimum * normal_distrib(generator); };
-
-    ~MovingOptimumModel() override = default;
 };
 
-class MovingOptimumArgParse : GaussianArgParse {
+class MovingOptimumArgParse : public GaussianArgParse {
   public:
     explicit MovingOptimumArgParse(TCLAP::CmdLine &cmd) : GaussianArgParse(cmd) {}
 
     TCLAP::ValueArg<double> std_optimum{"", "std_optimum",
         "Standard deviation of the change in optimum.", false, 1.0, "double", cmd};
 
-    MovingOptimumModel get_moving_optimum_model(u_long nb_loci) {
-        return MovingOptimumModel(
-            peakness.getValue() / static_cast<double>(nb_loci), epistasis.getValue(), std_optimum.getValue());
+    MovingOptimumModel get_moving_optimum_model() {
+        return MovingOptimumModel(peakness.getValue(),
+            epistasis.getValue(), std_optimum.getValue());
     }
 };
 
-class DirectionalModel : public GaussianModel {
-  protected:
-    double std_optimum{0};
-
+class DirectionalArgParse : public MovingOptimumArgParse {
   public:
-    explicit DirectionalModel() = default;
-    explicit DirectionalModel(
-        double const &peakness, double const &epistasis, double const &std_optimum)
-        : GaussianModel(peakness, epistasis), std_optimum{std_optimum} {}
+    explicit DirectionalArgParse(TCLAP::CmdLine &cmd) : MovingOptimumArgParse(cmd) {}
 
-    double fitness(double v) const override {
-        return exp(-peakness * pow((v - optimum), epistasis));
-    }
-    void update() override { optimum += std_optimum; };
-
-    ~DirectionalModel() override = default;
-};
-
-class DirectionalArgParse : GaussianArgParse {
-  public:
-    explicit DirectionalArgParse(TCLAP::CmdLine &cmd) : GaussianArgParse(cmd) {}
-
-    TCLAP::ValueArg<double> std_optimum{"", "std_optimum",
-        "Standard deviation of the change in optimum.", false, 1.0, "double", cmd};
-
-    DirectionalModel get_directional_model(u_long nb_loci) {
-        return DirectionalModel(
-            peakness.getValue() / static_cast<double>(nb_loci), epistasis.getValue(), std_optimum.getValue());
+    DirectionalModel get_directional_model() {
+        return DirectionalModel(peakness.getValue(),
+            epistasis.getValue(), std_optimum.getValue());
     }
 };
