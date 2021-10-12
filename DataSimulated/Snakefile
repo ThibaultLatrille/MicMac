@@ -1,32 +1,21 @@
 import numpy as np
 import os
 
-EXPERIMENT = "CST_POP_SIZE"
-ROOT = os.path.abspath('..')
-FOLDER = os.path.abspath('.') + "/Experiments/" + EXPERIMENT + "/"
-REPLICATES = [int(i) for i in np.linspace(5000, 40000, 25)]
-SIMULATORS = {"neutral": "",
-              "stabilizing" : "--peakness 0.1 --epistasis 2.0",
-              "directional": "--peakness 0.1 --epistasis 2.0 --std_optimum 1.0",
-              "moving_optimum" : "--peakness 0.1 --epistasis 2.0 --std_optimum 1.0"}
-CORE_PARAMS = "--mutation_mean_effect_size 1.0 " + \
-           "--mutation_rate_per_loci_per_generation 1e-5 " + \
-           "--population_size 100 " + \
-           "--population_size_min 20 " + \
-           "--brownian_sigma 0.0 " + \
-           "--noise_sigma 0.0 " + \
-           "--noise_theta 0.9 " + \
-           "--number_of_generations 500 " + \
-           "--number_of_lineages 25 " + \
-           "--burn_in 500 " + \
-           "--seed 42 "
+ROOT = os.path.abspath('../../..')
+FOLDER = os.path.abspath('.') + "/"
 
-os.makedirs(FOLDER, exist_ok=True)
-with open(FOLDER + "config.txt", "w") as f:
-    f.write(str(REPLICATES))
-    f.write(CORE_PARAMS.replace("--", "\n"))
-    for k, v in SIMULATORS.items():
-        f.write("\n" + k + v.replace("--", "\n\t"))
+configfile: 'config.yaml'
+
+REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"], config["max_number_loci"], config["nb_genes"])]
+SIMULATOR_PARAMS = {k: "" for k in config["simulators"]}
+SIMULATOR_PARAMS["core"] = ""
+for simulator in SIMULATOR_PARAMS.keys():
+    print(simulator)
+    if simulator not in config:
+        continue
+    for param, value in config[simulator].items():
+        print(param, value)
+        SIMULATOR_PARAMS[simulator] += ' --{0} {1}'.format(param.lower(), value)
 
 rule all:
     input:
@@ -39,9 +28,9 @@ rule run_simulations:
         file=FOLDER + "{simulator}/replicate_{scaling}.tsv",
     params:
         folder= lambda wildcards: FOLDER + wildcards.simulator,
-        simulator= lambda wildcards: SIMULATORS[wildcards.simulator]
+        simulator= lambda wildcards: SIMULATOR_PARAMS["core"] + SIMULATOR_PARAMS[wildcards.simulator]
     shell:
-        'mkdir -p {params.folder} && {input.exec} {params.simulator} {CORE_PARAMS} --number_loci {wildcards.scaling} --output {output.file}'
+        'mkdir -p {params.folder} && {input.exec} {params.simulator} --number_loci {wildcards.scaling} --output {output.file}'
 
 rule plot_trajectory:
     input:
@@ -54,7 +43,7 @@ rule plot_trajectory:
 
 rule plot_scatter:
     input:
-        exp=expand(FOLDER + "{simulator}/replicate_{scaling}.pdf", scaling=REPLICATES, simulator=SIMULATORS.keys()),
+        exp=expand(FOLDER + "{simulator}/replicate_{scaling}.pdf", scaling=REPLICATES, simulator=config["simulators"]),
         script=ROOT + '/scripts/plot_scatter.py'
     output:
         plot=FOLDER + "scatter_plot.pdf"
