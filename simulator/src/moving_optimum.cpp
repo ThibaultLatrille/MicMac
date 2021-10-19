@@ -12,12 +12,20 @@ int main(int argc, char *argv[]) {
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
-    MovingOptimumModel moving_optimum_fitness = args_moving_optimum.get_moving_optimum_model();
-    Population population(args_genome.get_model(), moving_optimum_fitness, args_pop_size.get_model());
-    Trace trace{};
+    generator_pop_size.seed(args.seed_pop_size.getValue());
+    MovingOptimumModel mo_fitness = args_moving_optimum.get_moving_optimum_model();
+    Population population(args_genome.get_model(), mo_fitness, args_pop_size.get_model());
 
+    double root_age{args.number_of_generations.getValue()};
+    Tree tree = args.newick_path.getValue().empty()
+                    ? Tree(args.number_of_lineages.getValue(), root_age)
+                    : Tree(args.newick_path.getValue());
+    tree.set_root_age(root_age);
+
+    Trace trace{};
     population.run(args.burn_in.getValue(), trace);
-    Process process(population, args.number_of_generations.getValue(), args.number_of_lineages.getValue(), trace);
+    Process process(tree, population, trace);
     trace.write_tsv(args.output_path.getValue());
+    tree.write_newick(args.output_path.getValue());
     return 0;
 }

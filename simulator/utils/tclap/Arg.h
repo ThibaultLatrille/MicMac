@@ -338,13 +338,13 @@ class Arg
 
 		/**
 		 * Returns a short ID for the usage.
-		 * \param valueId - The value used in the id.
+		 * \param valueId - The value used in the mane.
 		 */
 		virtual std::string shortID( const std::string& valueId = "val" ) const;
 
 		/**
 		 * Returns a long ID for the usage.
-		 * \param valueId - The value used in the id.
+		 * \param valueId - The value used in the mane.
 		 */
 		virtual std::string longID( const std::string& valueId = "val" ) const;
 

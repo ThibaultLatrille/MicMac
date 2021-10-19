@@ -1,14 +1,15 @@
 simulators: ["neutral", "stabilizing", "directional", "moving_optimum"]
 min_number_loci: 5000
 max_number_loci: 40000
-nb_genes: 250
+nb_genes: 500
+newick: "trees/mammal_subtree.tre.annotated"
 stabilizing:
   peakness: 0.02
   epistasis: 2.0
 directional:
   peakness: 0.02
   epistasis: 2.0
-  std_optimum: 1.0
+  std_optimum: 0.02
 moving_optimum:
   peakness: 0.02
   epistasis: 2.0
@@ -18,8 +19,8 @@ core:
   mutation_rate_per_loci_per_generation: 1e-5
   population_size: 50
   population_size_min: 20
-  brownian_sigma: 0.02
-  noise_sigma: 0.1
+  brownian_sigma: 0.0
+  noise_sigma: 0.0
   noise_theta: 0.9
   number_of_generations: 1000
   number_of_lineages: 50

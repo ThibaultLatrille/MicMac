@@ -12,13 +12,17 @@ class OutputArgParse {
 
   public:
     explicit OutputArgParse(TCLAP::CmdLine &cmd) : cmd{cmd} {}
-    TCLAP::ValueArg<u_long> number_of_generations{"", "number_of_generations",
-        "Number of generations on each lineage", false, 1000, "u_long", cmd};
+    TCLAP::ValueArg<double> number_of_generations{"", "number_of_generations",
+        "Number of generations from root to leaf", false, 1000, "u_long", cmd};
     TCLAP::ValueArg<u_long> number_of_lineages{
         "", "number_of_lineages", "Number of lineages", false, 2, "u_long", cmd};
+    TCLAP::ValueArg<std::string> newick_path{
+        "", "newick", "input newick tree path", false, "", "string", cmd};
     TCLAP::ValueArg<u_long> burn_in{"", "burn_in",
         "Burn-in period in number of generations (before speciation).", false, 1000, "u_long", cmd};
     TCLAP::ValueArg<std::string> output_path{"o", "output", "output path", true, "", "string", cmd};
     TCLAP::ValueArg<u_long> seed{
-        "", "seed", "Random number generation seed", false, 0, "u_long", cmd};
+        "", "seed", "Random number generator seed", false, 0, "u_long", cmd};
+    TCLAP::ValueArg<u_long> seed_pop_size{"", "seed_pop_size",
+        "Random number generator seed (specific to the population size)", false, 0, "u_long", cmd};
 };

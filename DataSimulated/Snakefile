@@ -10,11 +10,9 @@ REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"], config["max
 SIMULATOR_PARAMS = {k: "" for k in config["simulators"]}
 SIMULATOR_PARAMS["core"] = ""
 for simulator in SIMULATOR_PARAMS.keys():
-    print(simulator)
     if simulator not in config:
         continue
     for param, value in config[simulator].items():
-        print(param, value)
         SIMULATOR_PARAMS[simulator] += ' --{0} {1}'.format(param.lower(), value)
 
 rule all:
@@ -23,14 +21,16 @@ rule all:
 
 rule run_simulations:
     input:
-        exec=ROOT + '/simulator/build/{simulator}'
+        exec=ROOT + '/simulator/build/{simulator}',
+        newick=ROOT + '/simulator/' + config["newick"]
     output:
         file=FOLDER + "{simulator}/replicate_{scaling}.tsv",
+        nhx=FOLDER + "{simulator}/replicate_{scaling}.tsv.nhx",
     params:
         folder= lambda wildcards: FOLDER + wildcards.simulator,
         simulator= lambda wildcards: SIMULATOR_PARAMS["core"] + SIMULATOR_PARAMS[wildcards.simulator]
     shell:
-        'mkdir -p {params.folder} && {input.exec} {params.simulator} --number_loci {wildcards.scaling} --output {output.file}'
+        'mkdir -p {params.folder} && {input.exec} --newick {input.newick} {params.simulator} --number_loci {wildcards.scaling} --output {output.file}'
 
 rule plot_trajectory:
     input:
@@ -47,5 +47,6 @@ rule plot_scatter:
         script=ROOT + '/scripts/plot_scatter.py'
     output:
         plot=FOLDER + "scatter_plot.pdf"
+    threads: len(config["simulators"])
     shell:
         'python3 {input.script} --folder {FOLDER} --output {output.plot}'

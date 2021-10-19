@@ -64,7 +64,7 @@ class ArgException : public std::exception
 		std::string error() const { return ( _errorText ); }
 
 		/**
-		 * Returns the argument id.
+		 * Returns the argument mane.
 		 */
 		std::string argId() const  
 		{ 
@@ -75,7 +75,7 @@ class ArgException : public std::exception
 		}
 
 		/**
-		 * Returns the arg id and error text. 
+		 * Returns the arg mane and error text.
 		 */
 		const char* what() const throw() 
 		{

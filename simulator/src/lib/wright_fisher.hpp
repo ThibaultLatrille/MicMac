@@ -5,6 +5,7 @@
 #include "fitness.hpp"
 #include "random.hpp"
 #include "statistic.hpp"
+#include "tree.hpp"
 
 #define duration(a) std::chrono::duration_cast<std::chrono::nanoseconds>(a).count()
 #define timeNow() std::chrono::high_resolution_clock::now()
@@ -152,28 +153,25 @@ class PopulationSizeProcess {
     double ornstein_uhlenbeck{0};
     double ornstein_uhlenbeck_sigma;
     double ornstein_uhlenbeck_theta;
-    std::default_random_engine &generator;
     std::normal_distribution<double> normal_distrib;
 
   public:
     explicit PopulationSizeProcess(u_long population_size, u_long population_size_min,
-        double brownian_sigma, double ornstein_uhlenbeck_sigma, double ornstein_uhlenbeck_theta,
-        std::default_random_engine &gen)
+        double brownian_sigma, double ornstein_uhlenbeck_sigma, double ornstein_uhlenbeck_theta)
         : population_size{population_size},
           population_size_min{population_size_min},
           brownian_sigma{brownian_sigma},
           ornstein_uhlenbeck_sigma{ornstein_uhlenbeck_sigma},
-          ornstein_uhlenbeck_theta{ornstein_uhlenbeck_theta},
-          generator{gen} {
+          ornstein_uhlenbeck_theta{ornstein_uhlenbeck_theta} {
         brownian = log(population_size);
         brownian_min = log(population_size_min);
         normal_distrib = std::normal_distribution<double>(0.0, 1.0);
     }
 
     void update() {
-        ornstein_uhlenbeck += ornstein_uhlenbeck_sigma * normal_distrib(generator) -
+        ornstein_uhlenbeck += ornstein_uhlenbeck_sigma * normal_distrib(generator_pop_size) -
                               ornstein_uhlenbeck_theta * ornstein_uhlenbeck;
-        brownian += brownian_sigma * normal_distrib(generator);
+        brownian += brownian_sigma * normal_distrib(generator_pop_size);
         if (brownian < brownian_min) { brownian = 2 * brownian_min - brownian; }
         population_size = static_cast<u_long>(exp(ornstein_uhlenbeck + brownian));
     }
@@ -205,26 +203,38 @@ class PopulationSizeArgParse {
 
     PopulationSizeProcess get_model() {
         return PopulationSizeProcess(population_size.getValue(), population_size_min.getValue(),
-            brownian_sigma.getValue(), noise_sigma.getValue(), noise_theta.getValue(), generator);
+            brownian_sigma.getValue(), noise_sigma.getValue(), noise_theta.getValue());
     }
 };
 
 class Population {
   public:
     u_long elapsed{0};
-    u_long id{0};
+    std::string name{"ROOT"};
     GenomeStructure genome;
     FitnessModel &fitness_function;
     PopulationSizeProcess pop_size;
+    double fitness_optimum;
 
     // Individuals composing the population
     vector<Individual> parents{};
+
     ~Population() = default;
     explicit Population(
         const GenomeStructure &genome, FitnessModel &f_model, const PopulationSizeProcess &pop_size)
         : genome(genome), fitness_function{f_model}, pop_size(pop_size) {
+        fitness_optimum = fitness_function.get_optimum();
         parents.resize(pop_size.get_population_size());
     };
+
+    void update(Population const &pop) {
+        elapsed = pop.elapsed;
+        genome = pop.genome;
+        pop_size = pop.pop_size;
+        parents = pop.parents;
+        fitness_optimum = pop.fitness_optimum;
+        fitness_function.set_optimum(fitness_optimum);
+    }
 
     bool check() const {
         return all_of(parents.begin(), parents.end(), [this](auto const &p) {
@@ -266,7 +276,7 @@ class Population {
             for (auto const &v : loci_to_remove) { loci_tmp.erase(v); }
             if (loci_tmp.empty()) { break; }
         }
-        cout << loci_tmp.size() << " fixation events." << endl;
+        // cout << loci_tmp.size() << " fixation events." << endl;
         for (auto const &fixation : loci_tmp) {
             genome.background_phenotype += genome[fixation] * 2;
             genome[fixation] = -genome[fixation];
@@ -276,13 +286,13 @@ class Population {
     }
 
     void run(u_long nbr_generations, Trace &trace) {
-        cout << "Population " << id << " for " << nbr_generations << " generations." << endl;
+        cout << "Population " << name << " for " << nbr_generations << " generations." << endl;
         // Run under selection
         u_long last_pct = 0;
         for (u_long sample{1}; sample <= nbr_generations; sample++) {
             elapsed++;
             pop_size.update();
-            trace.add("Lineage", id);
+            trace.add("Lineage", name);
             trace.add("Generation", elapsed);
             trace.add("Population size", pop_size.get_population_size());
 
@@ -313,34 +323,56 @@ class Population {
             trace.add("Fitness mean", mean(fitness_vector));
             trace.add("Fitness var", variance(fitness_vector));
 
-            u_long pct = 10 * sample / nbr_generations;
+            u_long pct = 25 * sample / nbr_generations;
             fitness_function.update();
             if (pct != last_pct) {
-                cout << pct * 10 << "% (" << sample << " generations)" << endl;
                 last_pct = pct;
                 t_start = timeNow();
                 fixation();
                 timer.fixation += duration(timeNow() - t_start);
             }
         }
+        fitness_optimum = fitness_function.get_optimum();
     };
 };
 
 class Process {
   private:
+    static double years_computed;
+    Tree &tree;
     vector<Population> populations;
 
   public:
-    explicit Process(
-        Population const &pop, u_long nbr_generations, u_long nbr_lineages, Trace &trace) {
-        double optimum = pop.fitness_function.get_optimum();
-        for (u_long i = 1; i < nbr_lineages + 1; ++i) {
+    explicit Process(Tree &intree, Population const &pop, Trace &trace) : tree{intree} {
+        for (Tree::NodeIndex i = 0; i < static_cast<int>(tree.nb_nodes()); ++i) {
             populations.emplace_back(pop);
-            populations.back().id = i;
-            populations.back().fitness_function.set_optimum(optimum);
-            populations.back().run(nbr_generations, trace);
+            populations.back().name = tree.node_name(i);
         }
+        run_recursive(tree.root(), trace);
         timer_count();
+    }
+
+
+    // Recursively iterate through the subtree.
+    void run_recursive(Tree::NodeIndex node, Trace &trace) {
+        // Substitutions of the DNA sequence is generated.
+
+        if (!tree.is_root(node)) {
+            populations.at(node).run(static_cast<u_long>(tree.node_length(node)), trace);
+
+            years_computed += tree.node_length(node);
+            std::cout << years_computed << " years computed in total ("
+                      << static_cast<int>(100 * years_computed / tree.total_length())
+                      << "%) at node " << tree.node_name(node) << " ("
+                      << static_cast<int>(100 * tree.node_length(node) / tree.total_length())
+                      << "%)." << std::endl;
+        }
+
+        // Iterate through the direct children.
+        for (auto &child : tree.children(node)) {
+            populations.at(child).update(populations.at(node));
+            run_recursive(child, trace);
+        }
     }
 
     static void timer_count() {
@@ -354,3 +386,6 @@ class Process {
                   << timer.fixation / 1e9 << "s)" << std::endl;
     }
 };
+
+// Initialize static variables
+double Process::years_computed = 0.0;

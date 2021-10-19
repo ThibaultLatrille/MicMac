@@ -53,7 +53,7 @@ test: debug
 	@rm -rf test
 	@mkdir test
 	@echo "\n\e[35m\e[1m== Neutral run =========================================================\e[0m"
-	build/neutral --output test/neutral_run
+	build/neutral --newick trees/mammal_subtree.tre.annotated --output test/neutral_run
 	@echo "\n\e[35m\e[1m== Stabilizing run =====================================================\e[0m"
 	build/stabilizing --output test/stabilizing_run
 	@echo "\n\e[35m\e[1m== Directional run =====================================================\e[0m"

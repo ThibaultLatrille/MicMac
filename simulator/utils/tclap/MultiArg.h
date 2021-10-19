@@ -200,13 +200,13 @@ public:
 	const_iterator end() const { return _values.end(); }
 
 	/**
-	 * Returns the a short id string.  Used in the usage. 
+	 * Returns the a short mane string.  Used in the usage.
 	 * \param val - value to be used.
 	 */
 	virtual std::string shortID(const std::string& val="val") const;
 
 	/**
-	 * Returns the a long id string.  Used in the usage. 
+	 * Returns the a long mane string.  Used in the usage.
 	 * \param val - value to be used.
 	 */
 	virtual std::string longID(const std::string& val="val") const;
