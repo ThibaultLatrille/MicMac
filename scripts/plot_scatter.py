@@ -37,7 +37,7 @@ def get_node_names(root, target1, target2):
     return nodes
 
 
-def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title=""):
+def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title="", histy_logscale=False):
     color_models = colors(x)
     fig = plt.figure(figsize=(1920 / my_dpi, 880 / my_dpi), dpi=my_dpi)
     set_nb_points = set([len(nb) for nb in x.values()])
@@ -58,14 +58,13 @@ def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title=""):
 
     ax_histx.tick_params(axis="x", labelbottom=False)
     ax_histy.tick_params(axis="y", labelleft=False)
-
     max_x = max([np.max(x_i) for x_i in x.values()])
     max_y = max([np.max(x_i) for x_i in y.values()])
 
     idf = np.linspace(0, max_x, 30)
     ax.plot(idf, idf, '-', linewidth=0.5, color="black")
     for id_m, m in enumerate(x):
-        ax.scatter(x[m], y[m], color=color_models[id_m], alpha=0.2)
+        ax.scatter(x[m], y[m], color=color_models[id_m], alpha=0.1)
         results = sm.OLS(y[m], x[m]).fit()
         a = results.params[0]
         linear = a * idf
@@ -76,6 +75,8 @@ def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title=""):
     ax_histx.hist(x.values(), color=color_models, **hist_step)
     ax_histy.hist(y.values(), color=color_models, orientation='horizontal', **hist_filled)
     ax_histy.hist(y.values(), color=color_models, orientation='horizontal', **hist_step)
+    if histy_logscale:
+        ax_histy.set_xscale("log")
     ax.set_xlabel(x_label, fontsize=fontsize)
     ax.set_ylabel(y_label, fontsize=fontsize)
     ax.set_xlim((0, max_x * 1.05))
@@ -102,7 +103,7 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
         x_mean = np.mean(x[m])
         x_median = np.median(x[m])
         ax.plot((x_mean, x_mean), (0, max_y), linewidth=3, color=color_models[id_m],
-                label=(m.replace("_", " ").capitalize() + ' (mean {0:.2g}; median {0:.2g})'.format(x_mean, x_median)))
+                label=(m.replace("_", " ").capitalize() + ' (mean {0:.2g}; median {1:.2g})'.format(x_mean, x_median)))
         ax.plot((x_median, x_median), (0, max_y), linewidth=2, linestyle='--', color=color_models[id_m])
 
     ax.set_xlabel(x_label, fontsize=fontsize)
@@ -202,11 +203,12 @@ if __name__ == '__main__':
 
     x_str = r"Variance within $\left( \frac{\bar{V_G}}{\bar{N_e}} t \right)$"
     y_str = r"Variance between (Var$[\bar{X}]$)"
-    scatter_plot(Vg_scaled_pair, Vi, x_str, y_str, args.output, "pairs", nb_genes, ' - Contemporary data')
+    scatter_plot(Vg_scaled_pair, Vi, x_str, y_str, args.output, "pairs", nb_genes,
+                 title=' - Contemporary data', histy_logscale=True)
     scatter_plot(Vg_harm_pair, Vi, x_str, y_str, replace(".pdf", "_mean.pdf"), "pairs", nb_genes,
-                 ' - Mean along ancestry')
+                 title=' - Mean along ancestry', histy_logscale=True)
     scatter_plot(Vg_mean_pair, Vi, x_str, y_str, replace(".pdf", "_harm.pdf"), "pairs", nb_genes,
-                 ' - Harmonic mean along ancestry')
+                 title=' - Harmonic mean along ancestry', histy_logscale=True)
     scatter_plot(Vm, Vg, "$2 N_e V_M$", "$V_G$", replace(".pdf", "_Vg_Vm.pdf"), "species", nb_genes)
     scatter_plot(Vm_theo, Vg, "Expected $2 N_e V_M$", "$V_G$", replace(".pdf", "_Vg_Vme.pdf"), "species", nb_genes)
 

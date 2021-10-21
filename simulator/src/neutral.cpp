@@ -1,7 +1,6 @@
 #include "wright_fisher.hpp"
 
 using namespace TCLAP;
-using namespace std;
 
 int main(int argc, char *argv[]) {
     CmdLine cmd{"neutral", ' ', "0.1"};

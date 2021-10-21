@@ -84,10 +84,7 @@ class Tree {
 
     const std::set<NodeIndex>& children(NodeIndex node) const { return children_.at(node); }
     NodeIndex parent(NodeIndex node) const { return parent_.at(node); }
-    std::string node_name(NodeIndex node) const {
-        std::cout << name_.at(node) << std::endl;
-        return name_.at(node);
-    }
+    std::string node_name(NodeIndex node) const { return name_.at(node); }
     double node_length(NodeIndex node) const { return length_[node]; }
     double total_length() const {
         double tot = 0.0;

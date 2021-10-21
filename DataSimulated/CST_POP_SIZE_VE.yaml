@@ -15,7 +15,7 @@ moving_optimum:
   epistasis: 2.0
   std_optimum: 1.0
 core:
-  variance_environment: 0.0
+  variance_environment: 1.0
   mutation_mean_effect_size: 1.0
   mutation_rate_per_loci_per_generation: 1e-5
   population_size: 50

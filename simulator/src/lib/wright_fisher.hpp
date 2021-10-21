@@ -7,14 +7,6 @@
 #include "statistic.hpp"
 #include "tree.hpp"
 
-#define duration(a) std::chrono::duration_cast<std::chrono::nanoseconds>(a).count()
-#define timeNow() std::chrono::high_resolution_clock::now()
-
-typedef std::chrono::high_resolution_clock::time_point TimeVar;
-
-using namespace TCLAP;
-using namespace std;
-
 struct TimeElapsed {
     double mutation{0.0};
     double selection{0.0};
@@ -23,21 +15,32 @@ struct TimeElapsed {
 
 TimeElapsed timer;
 
+using namespace TCLAP;
+using namespace std;
+
+#define duration(a) chrono::duration_cast<chrono::nanoseconds>(a).count()
+#define timeNow() chrono::high_resolution_clock::now()
+
+typedef chrono::high_resolution_clock::time_point TimeVar;
+
+
 class GenomeStructure : public vector<double> {
   public:
     u_long number_loci{};
     double mutation_mean_effect_size{};
     double mutation_rate_per_loci_per_generation{};
-    double background_phenotype{0};
+    double background_genotype{0};
     double expected_var{0};
+    double std_environment{0};
 
     GenomeStructure() = default;
     ~GenomeStructure() = default;
-    explicit GenomeStructure(u_long n, double radius, double mu)
+    explicit GenomeStructure(u_long n, double radius, double mu, double variance_environment)
         : vector<double>(n, 0),
           number_loci{n},
           mutation_mean_effect_size{radius},
-          mutation_rate_per_loci_per_generation{mu} {
+          mutation_rate_per_loci_per_generation{mu},
+          std_environment{sqrt(variance_environment)} {
         for (u_long i = 0; i < number_loci; ++i) {
             (*this)[i] = mutation_mean_effect_size * normal_distrib(generator);
         }
@@ -66,16 +69,20 @@ class GenomeStructureArgParse {
     TCLAP::ValueArg<double> mutation_rate_per_loci_per_generation{"",
         "mutation_rate_per_loci_per_generation", "Mutation rate per locus per generation", false,
         1e-5, "double", cmd};
+    TCLAP::ValueArg<double> variance_environment{
+        "", "variance_environment", "Environmental variance (Ve).", false, 0.0, "double", cmd};
 
     GenomeStructure get_model() {
         return GenomeStructure(number_loci.getValue(), mutation_mean_effect_size.getValue(),
-            mutation_rate_per_loci_per_generation.getValue());
+            mutation_rate_per_loci_per_generation.getValue(), variance_environment.getValue());
     }
 };
 
 class Individual {
   public:
     map<u_long, bool> loci{};
+    double genotype{0.0};
+    double environment{0.0};
     double phenotype{0.0};
     double fitness{1.0};
 
@@ -86,12 +93,16 @@ class Individual {
         : loci{} {
         parent_loci_sampling(mum);
         parent_loci_sampling(dad);
-        phenotype = compute_phenotype(genome);
+        genotype = compute_genotype(genome);
+        if (genome.std_environment != 0.0) {
+            environment = genome.std_environment * normal_distrib(generator);
+        }
+        phenotype = genotype + environment;
         update_fitness(fitness_model);
     };
 
-    double compute_phenotype(GenomeStructure const &genome) const {
-        double p = genome.background_phenotype;
+    double compute_genotype(GenomeStructure const &genome) const {
+        double p = genome.background_genotype;
         for (auto const &locus : loci) { p += genome[locus.first] * (1 + locus.second); }
         return p;
     }
@@ -129,11 +140,12 @@ class Individual {
                     } else {
                         loci.erase(it);
                     }
-                    phenotype -= genome.at(locus);
+                    genotype -= genome.at(locus);
                 } else {
                     loci[locus] = false;
-                    phenotype += genome.at(locus);
+                    genotype += genome.at(locus);
                 }
+                phenotype = genotype + environment;
             }
         }
         update_fitness(fitness_model);
@@ -153,7 +165,7 @@ class PopulationSizeProcess {
     double ornstein_uhlenbeck{0};
     double ornstein_uhlenbeck_sigma;
     double ornstein_uhlenbeck_theta;
-    std::normal_distribution<double> normal_distrib;
+    normal_distribution<double> normal_distrib;
 
   public:
     explicit PopulationSizeProcess(u_long population_size, u_long population_size_min,
@@ -165,7 +177,7 @@ class PopulationSizeProcess {
           ornstein_uhlenbeck_theta{ornstein_uhlenbeck_theta} {
         brownian = log(population_size);
         brownian_min = log(population_size_min);
-        normal_distrib = std::normal_distribution<double>(0.0, 1.0);
+        normal_distrib = normal_distribution<double>(0.0, 1.0);
     }
 
     void update() {
@@ -175,7 +187,7 @@ class PopulationSizeProcess {
         if (brownian < brownian_min) { brownian = 2 * brownian_min - brownian; }
         population_size = static_cast<u_long>(exp(ornstein_uhlenbeck + brownian));
     }
-    u_long get_population_size() const { return std::max(population_size, population_size_min); }
+    u_long get_population_size() const { return max(population_size, population_size_min); }
 };
 
 
@@ -210,11 +222,12 @@ class PopulationSizeArgParse {
 class Population {
   public:
     u_long elapsed{0};
-    std::string name{"ROOT"};
+    string name{"ROOT"};
     GenomeStructure genome;
     FitnessModel &fitness_function;
     PopulationSizeProcess pop_size;
     double fitness_optimum;
+    double heritability{0};
 
     // Individuals composing the population
     vector<Individual> parents{};
@@ -237,8 +250,8 @@ class Population {
     }
 
     bool check() const {
-        return all_of(parents.begin(), parents.end(), [this](auto const &p) {
-            return abs(p.phenotype - p.compute_phenotype(genome)) < 1e-3;
+        return all_of(parents.begin(), parents.end(), [this](Individual const &p) {
+            return abs(p.genotype - p.compute_genotype(genome)) < 1e-3;
         });
     }
 
@@ -252,13 +265,17 @@ class Population {
             [](Individual const &b) { return b.fitness; });
         discrete_distribution<u_long> parent_distrib(fitness_vector.begin(), fitness_vector.end());
 
+        vector<double> x, y;
         vector<Individual> children;
         children.reserve(pop_size.get_population_size());
-        for (u_long i{0}; i < parents.size(); i++) {
+        for (u_long i{0}; i < pop_size.get_population_size(); i++) {
             u_long mum = parent_distrib(generator);
             u_long dad = parent_distrib(generator);
+            x.push_back((parents[mum].phenotype + parents[dad].phenotype) / 2);
             children.emplace_back(parents[mum], parents[dad], genome, fitness_function);
+            y.push_back(children.back().phenotype);
         }
+        heritability = slope(x, y);
         parents = move(children);
     };
 
@@ -276,9 +293,8 @@ class Population {
             for (auto const &v : loci_to_remove) { loci_tmp.erase(v); }
             if (loci_tmp.empty()) { break; }
         }
-        // cout << loci_tmp.size() << " fixation events." << endl;
         for (auto const &fixation : loci_tmp) {
-            genome.background_phenotype += genome[fixation] * 2;
+            genome.background_genotype += genome[fixation] * 2;
             genome[fixation] = -genome[fixation];
             for (auto &p : parents) { p.loci.erase(fixation); }
         }
@@ -299,29 +315,38 @@ class Population {
             TimeVar t_start = timeNow();
             selection_and_random_mating();
             timer.selection += duration(timeNow() - t_start);
+            trace.add("Heritability", heritability);
 
             trace.add("Mutational expected var", genome.expected_variance());
-            vector<double> phenotypes(parents.size(), 0);
-            transform(parents.begin(), parents.end(), phenotypes.begin(),
+            vector<double> traits(parents.size(), 0);
+            transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.phenotype; });
 
-            double var_mutational = -variance(phenotypes);
+            double var_mutational = -variance(traits);
             t_start = timeNow();
             mutation();
             timer.mutation += duration(timeNow() - t_start);
 
-            transform(parents.begin(), parents.end(), phenotypes.begin(),
+            transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.phenotype; });
-            var_mutational += variance(phenotypes);
+            var_mutational += variance(traits);
             trace.add("Mutational var", var_mutational);
-            trace.add("Phenotype mean", mean(phenotypes));
-            trace.add("Phenotype var", variance(phenotypes));
+            trace.add("Phenotype mean", mean(traits));
+            trace.add("Phenotype var", variance(traits));
 
-            vector<double> fitness_vector(parents.size(), 0);
-            transform(parents.begin(), parents.end(), fitness_vector.begin(),
+            transform(parents.begin(), parents.end(), traits.begin(),
+                [](Individual const &b) { return b.genotype; });
+            trace.add("Genotype mean", mean(traits));
+            trace.add("Genotype var", variance(traits));
+
+            transform(parents.begin(), parents.end(), traits.begin(),
+                [](Individual const &b) { return b.environment; });
+            trace.add("Environment var", variance(traits));
+
+            transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.fitness; });
-            trace.add("Fitness mean", mean(fitness_vector));
-            trace.add("Fitness var", variance(fitness_vector));
+            trace.add("Fitness mean", mean(traits));
+            trace.add("Fitness var", variance(traits));
 
             u_long pct = 25 * sample / nbr_generations;
             fitness_function.update();
@@ -338,12 +363,12 @@ class Population {
 
 class Process {
   private:
-    static double years_computed;
+    static double generations_computed;
     Tree &tree;
     vector<Population> populations;
 
   public:
-    explicit Process(Tree &intree, Population const &pop, Trace &trace) : tree{intree} {
+    explicit Process(Tree &tree, Population const &pop, Trace &trace) : tree{tree} {
         for (Tree::NodeIndex i = 0; i < static_cast<int>(tree.nb_nodes()); ++i) {
             populations.emplace_back(pop);
             populations.back().name = tree.node_name(i);
@@ -360,12 +385,12 @@ class Process {
         if (!tree.is_root(node)) {
             populations.at(node).run(static_cast<u_long>(tree.node_length(node)), trace);
 
-            years_computed += tree.node_length(node);
-            std::cout << years_computed << " years computed in total ("
-                      << static_cast<int>(100 * years_computed / tree.total_length())
-                      << "%) at node " << tree.node_name(node) << " ("
-                      << static_cast<int>(100 * tree.node_length(node) / tree.total_length())
-                      << "%)." << std::endl;
+            generations_computed += tree.node_length(node);
+            cout << generations_computed << " generations computed in total ("
+                 << static_cast<int>(100 * generations_computed / tree.total_length())
+                 << "%) at node " << tree.node_name(node) << " ("
+                 << static_cast<int>(100 * tree.node_length(node) / tree.total_length()) << "%)."
+                 << endl;
         }
 
         // Iterate through the direct children.
@@ -377,15 +402,15 @@ class Process {
 
     static void timer_count() {
         double total_time = timer.mutation + timer.selection + timer.fixation;
-        std::cout << std::setprecision(3) << total_time / 1e9 << "s total time" << std::endl;
-        std::cout << 100 * timer.mutation / total_time << "% of time spent in mutation ("
-                  << timer.mutation / 1e9 << "s)" << std::endl;
-        std::cout << 100 * timer.selection / total_time << "% of time spent in selection ("
-                  << timer.selection / 1e9 << "s)" << std::endl;
-        std::cout << 100 * timer.fixation / total_time << "% of time spent in fixation ("
-                  << timer.fixation / 1e9 << "s)" << std::endl;
+        cout << setprecision(3) << total_time / 1e9 << "s total time" << endl;
+        cout << 100 * timer.mutation / total_time << "% of time spent in mutation ("
+             << timer.mutation / 1e9 << "s)" << endl;
+        cout << 100 * timer.selection / total_time << "% of time spent in selection ("
+             << timer.selection / 1e9 << "s)" << endl;
+        cout << 100 * timer.fixation / total_time << "% of time spent in fixation ("
+             << timer.fixation / 1e9 << "s)" << endl;
     }
 };
 
 // Initialize static variables
-double Process::years_computed = 0.0;
+double Process::generations_computed = 0.0;

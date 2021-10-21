@@ -90,8 +90,7 @@ class GaussianArgParse {
         false, 2.0, "double", cmd};
 
     GaussianModel get_gaussian_model() {
-        return GaussianModel(
-            peakness.getValue(), epistasis.getValue());
+        return GaussianModel(peakness.getValue(), epistasis.getValue());
     }
 };
 
@@ -103,8 +102,8 @@ class MovingOptimumArgParse : public GaussianArgParse {
         "Standard deviation of the change in optimum.", false, 1.0, "double", cmd};
 
     MovingOptimumModel get_moving_optimum_model() {
-        return MovingOptimumModel(peakness.getValue(),
-            epistasis.getValue(), std_optimum.getValue());
+        return MovingOptimumModel(
+            peakness.getValue(), epistasis.getValue(), std_optimum.getValue());
     }
 };
 
@@ -113,7 +112,6 @@ class DirectionalArgParse : public MovingOptimumArgParse {
     explicit DirectionalArgParse(TCLAP::CmdLine &cmd) : MovingOptimumArgParse(cmd) {}
 
     DirectionalModel get_directional_model() {
-        return DirectionalModel(peakness.getValue(),
-            epistasis.getValue(), std_optimum.getValue());
+        return DirectionalModel(peakness.getValue(), epistasis.getValue(), std_optimum.getValue());
     }
 };
