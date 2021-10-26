@@ -20,6 +20,4 @@ include_directories("src/lib")
 include_directories("utils")
 
 add_executable(neutral src/neutral.cpp)
-add_executable(stabilizing src/stabilizing.cpp)
-add_executable(directional src/directional.cpp)
-add_executable(moving_optimum src/moving_optimum.cpp)
+add_executable(selection src/selection.cpp)

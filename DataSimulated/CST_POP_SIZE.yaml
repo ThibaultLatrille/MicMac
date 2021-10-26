@@ -1,19 +1,31 @@
-simulators: ["neutral", "stabilizing", "directional", "moving_optimum"]
 min_number_loci: 5000
 max_number_loci: 40000
 nb_genes: 250
-newick: "trees/mammal_subtree.tre.annotated"
-stabilizing:
-  peakness: 0.02
-  epistasis: 2.0
-directional:
-  peakness: 0.02
-  epistasis: 2.0
-  std_optimum: 0.02
-moving_optimum:
-  peakness: 0.02
-  epistasis: 2.0
-  std_optimum: 1.0
+tree: "trees/mammal_subtree.tre.annotated"
+simulators:
+  neutral:
+    model: "neutral"
+  moving_optimum:
+    model: "selection"
+    peakness: 0.02
+    epistasis: 2.0
+    bias_optimum: 0.0
+    sigma_optimum: 1.0
+    theta_optimum: 0.0
+  stabilizing:
+    model: "selection"
+    peakness: 0.02
+    epistasis: 2.0
+    bias_optimum: 0.0
+    sigma_optimum: 1.0
+    theta_optimum: 0.5
+  directional:
+    model: "selection"
+    peakness: 0.02
+    epistasis: 2.0
+    bias_optimum: 0.05
+    sigma_optimum: 1.0
+    theta_optimum: 0.5
 core:
   variance_environment: 0.0
   mutation_mean_effect_size: 1.0

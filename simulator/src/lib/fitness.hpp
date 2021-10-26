@@ -3,9 +3,17 @@
 #include "random.hpp"
 #include "tclap/CmdLine.h"
 
+class FitnessState {
+  public:
+    double drift{0};
+    double fitness_optimum{0};
+    explicit FitnessState() = default;
+    ~FitnessState() = default;
+};
+
 class FitnessModel {
   protected:
-    double optimum{0};
+    FitnessState state{};
 
   public:
     explicit FitnessModel() = default;
@@ -13,8 +21,8 @@ class FitnessModel {
 
     virtual double fitness(double v) const = 0;
 
-    void set_optimum(double v) { optimum = v; }
-    double get_optimum() const { return optimum; }
+    void set_state(FitnessState const &s) { state = s; }
+    FitnessState get_state() const { return state; }
     virtual void update() = 0;
 };
 
@@ -27,59 +35,53 @@ class NeutralModel : public FitnessModel {
     void update() override{};
 };
 
-class GaussianModel : public FitnessModel {
+
+class OrnsteinUhlenbeckBiasModel : public FitnessModel {
   protected:
     double peakness{};
     double epistasis{};
+    double bias{};
+    double sigma{};
+    double theta{};
 
   public:
-    explicit GaussianModel() = default;
-    explicit GaussianModel(double const &peakness, double const &epistasis)
-        : peakness{peakness}, epistasis{epistasis} {}
+    explicit OrnsteinUhlenbeckBiasModel() = default;
+    explicit OrnsteinUhlenbeckBiasModel(double const &peakness, double const &epistasis,
+        double const &bias_optimum, double const &sigma_optimum, double const &theta_optimum)
+        : peakness{peakness},
+          epistasis{epistasis},
+          bias{bias_optimum},
+          sigma{sigma_optimum},
+          theta{theta_optimum} {}
+
+    void update() override {
+        state.drift += bias;
+        state.fitness_optimum +=
+            sigma * normal_distrib(generator) + theta * (state.drift - state.fitness_optimum);
+    }
 
     double fitness(double v) const override {
-        return exp(-peakness * pow((v - optimum), epistasis));
+        return exp(-peakness * pow((v - state.fitness_optimum), epistasis));
     }
-    void update() override{};
-    ~GaussianModel() override = default;
+    ~OrnsteinUhlenbeckBiasModel() override = default;
 };
 
-
-class MovingOptimumModel : public GaussianModel {
-  protected:
-    double std_optimum{0};
-
-  public:
-    explicit MovingOptimumModel() = default;
-    explicit MovingOptimumModel(
-        double const &peakness, double const &epistasis, double const &std_optimum)
-        : GaussianModel(peakness, epistasis), std_optimum{std_optimum} {}
-
-    void update() override { optimum += std_optimum * normal_distrib(generator); };
-
-    ~MovingOptimumModel() override = default;
-};
-
-class DirectionalModel : public MovingOptimumModel {
-  public:
-    explicit DirectionalModel() = default;
-    explicit DirectionalModel(
-        double const &peakness, double const &epistasis, double const &std_optimum)
-        : MovingOptimumModel(peakness, epistasis, std_optimum) {}
-
-    void update() override { optimum += std_optimum; };
-
-    ~DirectionalModel() override = default;
-};
-
-
-class GaussianArgParse {
+class OrnsteinUhlenbeckBiasArgParse {
   protected:
     TCLAP::CmdLine &cmd;
 
   public:
-    explicit GaussianArgParse(TCLAP::CmdLine &cmd) : cmd{cmd} {}
+    explicit OrnsteinUhlenbeckBiasArgParse(TCLAP::CmdLine &cmd) : cmd{cmd} {}
 
+    TCLAP::ValueArg<double> bias_optimum{"", "bias_optimum",
+        "The Ornstein–Uhlenbeck bias (>0) applied to the fitness optimum at each generation", false,
+        0.1, "double", cmd};
+    TCLAP::ValueArg<double> sigma_optimum{"", "sigma_optimum",
+        "The Ornstein–Uhlenbeck sigma (>0) applied to the fitness optimum at each generation",
+        false, 0.1, "double", cmd};
+    TCLAP::ValueArg<double> theta_optimum{"", "theta_optimum",
+        "The Ornstein–Uhlenbeck theta (0<=theta<1) applied to the optimum at each generation",
+        false, 0.9, "double", cmd};
     TCLAP::ValueArg<double> peakness{"", "peakness",
         "'alpha' parameter (peakness) of the fitness function "
         "(exp(-alpha*(phenotype^beta))",
@@ -89,29 +91,9 @@ class GaussianArgParse {
         "function (exp(-alpha*(phenotype^beta))",
         false, 2.0, "double", cmd};
 
-    GaussianModel get_gaussian_model() {
-        return GaussianModel(peakness.getValue(), epistasis.getValue());
-    }
-};
 
-class MovingOptimumArgParse : public GaussianArgParse {
-  public:
-    explicit MovingOptimumArgParse(TCLAP::CmdLine &cmd) : GaussianArgParse(cmd) {}
-
-    TCLAP::ValueArg<double> std_optimum{"", "std_optimum",
-        "Standard deviation of the change in optimum.", false, 1.0, "double", cmd};
-
-    MovingOptimumModel get_moving_optimum_model() {
-        return MovingOptimumModel(
-            peakness.getValue(), epistasis.getValue(), std_optimum.getValue());
-    }
-};
-
-class DirectionalArgParse : public MovingOptimumArgParse {
-  public:
-    explicit DirectionalArgParse(TCLAP::CmdLine &cmd) : MovingOptimumArgParse(cmd) {}
-
-    DirectionalModel get_directional_model() {
-        return DirectionalModel(peakness.getValue(), epistasis.getValue(), std_optimum.getValue());
+    OrnsteinUhlenbeckBiasModel get_model() {
+        return OrnsteinUhlenbeckBiasModel(peakness.getValue(), epistasis.getValue(),
+            bias_optimum.getValue(), sigma_optimum.getValue(), theta_optimum.getValue());
     }
 };

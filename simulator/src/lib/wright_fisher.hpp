@@ -162,30 +162,29 @@ class PopulationSizeProcess {
     double brownian_min;
     double brownian_sigma;
 
-    double ornstein_uhlenbeck{0};
-    double ornstein_uhlenbeck_sigma;
-    double ornstein_uhlenbeck_theta;
+    double ou{0};
+    double ou_sigma;
+    double ou_theta;
     normal_distribution<double> normal_distrib;
 
   public:
     explicit PopulationSizeProcess(u_long population_size, u_long population_size_min,
-        double brownian_sigma, double ornstein_uhlenbeck_sigma, double ornstein_uhlenbeck_theta)
+        double brownian_sigma, double ou_sigma, double ou_theta)
         : population_size{population_size},
           population_size_min{population_size_min},
           brownian_sigma{brownian_sigma},
-          ornstein_uhlenbeck_sigma{ornstein_uhlenbeck_sigma},
-          ornstein_uhlenbeck_theta{ornstein_uhlenbeck_theta} {
+          ou_sigma{ou_sigma},
+          ou_theta{ou_theta} {
         brownian = log(population_size);
         brownian_min = log(population_size_min);
         normal_distrib = normal_distribution<double>(0.0, 1.0);
     }
 
     void update() {
-        ornstein_uhlenbeck += ornstein_uhlenbeck_sigma * normal_distrib(generator_pop_size) -
-                              ornstein_uhlenbeck_theta * ornstein_uhlenbeck;
+        ou += ou_sigma * normal_distrib(generator_pop_size) - ou_theta * ou;
         brownian += brownian_sigma * normal_distrib(generator_pop_size);
         if (brownian < brownian_min) { brownian = 2 * brownian_min - brownian; }
-        population_size = static_cast<u_long>(exp(ornstein_uhlenbeck + brownian));
+        population_size = static_cast<u_long>(exp(ou + brownian));
     }
     u_long get_population_size() const { return max(population_size, population_size_min); }
 };
@@ -226,7 +225,7 @@ class Population {
     GenomeStructure genome;
     FitnessModel &fitness_function;
     PopulationSizeProcess pop_size;
-    double fitness_optimum;
+    FitnessState fitness_state;
     double heritability{0};
 
     // Individuals composing the population
@@ -236,8 +235,10 @@ class Population {
     explicit Population(
         const GenomeStructure &genome, FitnessModel &f_model, const PopulationSizeProcess &pop_size)
         : genome(genome), fitness_function{f_model}, pop_size(pop_size) {
-        fitness_optimum = fitness_function.get_optimum();
+        fitness_state = fitness_function.get_state();
         parents.resize(pop_size.get_population_size());
+        selection_and_random_mating();
+        mutation();
     };
 
     void update(Population const &pop) {
@@ -245,8 +246,8 @@ class Population {
         genome = pop.genome;
         pop_size = pop.pop_size;
         parents = pop.parents;
-        fitness_optimum = pop.fitness_optimum;
-        fitness_function.set_optimum(fitness_optimum);
+        fitness_state = pop.fitness_state;
+        fitness_function.set_state(fitness_state);
     }
 
     bool check() const {
@@ -357,7 +358,7 @@ class Population {
                 timer.fixation += duration(timeNow() - t_start);
             }
         }
-        fitness_optimum = fitness_function.get_optimum();
+        fitness_state = fitness_function.get_state();
     };
 };
 

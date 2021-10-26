@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
     Population population(args_genome.get_model(), neutral_fitness, args_pop_size.get_model());
 
     double root_age{args.number_of_generations.getValue()};
-    Tree tree = args.newick_path.getValue().empty()
+    Tree tree = args.tree_path.getValue().empty()
                     ? Tree(args.number_of_lineages.getValue(), root_age)
-                    : Tree(args.newick_path.getValue());
+                    : Tree(args.tree_path.getValue());
     tree.set_root_age(root_age);
 
     Trace trace{};

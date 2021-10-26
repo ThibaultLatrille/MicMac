@@ -16,8 +16,8 @@ class OutputArgParse {
         "Number of generations from root to leaf", false, 1000, "u_long", cmd};
     TCLAP::ValueArg<u_long> number_of_lineages{
         "", "number_of_lineages", "Number of lineages", false, 2, "u_long", cmd};
-    TCLAP::ValueArg<std::string> newick_path{
-        "", "newick", "input newick tree path", false, "", "string", cmd};
+    TCLAP::ValueArg<std::string> tree_path{
+        "", "tree", "input tree path (newick or nhx format)", false, "", "string", cmd};
     TCLAP::ValueArg<u_long> burn_in{"", "burn_in",
         "Burn-in period in number of generations (before speciation).", false, 1000, "u_long", cmd};
     TCLAP::ValueArg<std::string> output_path{"o", "output", "output path", true, "", "string", cmd};

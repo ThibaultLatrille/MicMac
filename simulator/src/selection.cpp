@@ -7,18 +7,18 @@ int main(int argc, char *argv[]) {
     OutputArgParse args(cmd);
     GenomeStructureArgParse args_genome(cmd);
     PopulationSizeArgParse args_pop_size(cmd);
-    MovingOptimumArgParse args_moving_optimum(cmd);
+    OrnsteinUhlenbeckBiasArgParse args_fitness(cmd);
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
     generator_pop_size.seed(args.seed_pop_size.getValue());
-    MovingOptimumModel mo_fitness = args_moving_optimum.get_moving_optimum_model();
-    Population population(args_genome.get_model(), mo_fitness, args_pop_size.get_model());
+    OrnsteinUhlenbeckBiasModel fitness = args_fitness.get_model();
+    Population population(args_genome.get_model(), fitness, args_pop_size.get_model());
 
     double root_age{args.number_of_generations.getValue()};
-    Tree tree = args.newick_path.getValue().empty()
+    Tree tree = args.tree_path.getValue().empty()
                     ? Tree(args.number_of_lineages.getValue(), root_age)
-                    : Tree(args.newick_path.getValue());
+                    : Tree(args.tree_path.getValue());
     tree.set_root_age(root_age);
 
     Trace trace{};

@@ -12,8 +12,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 mpl.use('Agg')
-hist_filled = {'bins': 'auto', 'density': True, 'alpha': 0.3, 'histtype': 'stepfilled'}
-hist_step = {'bins': 'auto', 'density': True, 'histtype': 'step'}
+hist_filled = {'alpha': 0.3, 'histtype': 'stepfilled'}
+hist_step = {'histtype': 'step'}
 my_dpi = 128
 fontsize = 14
 fontsize_legend = 12
@@ -37,7 +37,7 @@ def get_node_names(root, target1, target2):
     return nodes
 
 
-def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title="", histy_logscale=False):
+def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title="", histy_log=False, loglog=False):
     color_models = colors(x)
     fig = plt.figure(figsize=(1920 / my_dpi, 880 / my_dpi), dpi=my_dpi)
     set_nb_points = set([len(nb) for nb in x.values()])
@@ -58,10 +58,12 @@ def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title="", his
 
     ax_histx.tick_params(axis="x", labelbottom=False)
     ax_histy.tick_params(axis="y", labelleft=False)
+    min_x = min([np.min(x_i) for x_i in x.values()])
     max_x = max([np.max(x_i) for x_i in x.values()])
-    max_y = max([np.max(x_i) for x_i in y.values()])
+    min_y = min([np.min(y_i) for y_i in y.values()])
+    max_y = max([np.max(y_i) for y_i in y.values()])
 
-    idf = np.linspace(0, max_x, 30)
+    idf = np.linspace(min_x, max_x, 30)
     ax.plot(idf, idf, '-', linewidth=0.5, color="black")
     for id_m, m in enumerate(x):
         ax.scatter(x[m], y[m], color=color_models[id_m], alpha=0.1)
@@ -71,20 +73,24 @@ def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title="", his
         reg = '{0} - slope of {1:.2g} ($r^2$={2:.2g})'.format(m.replace("_", " ").capitalize(), a, results.rsquared)
         ax.plot(idf, linear, '-', linestyle="--", label=reg, color=color_models[id_m])
 
-    ax_histx.hist(x.values(), color=color_models, **hist_filled)
-    ax_histx.hist(x.values(), color=color_models, **hist_step)
-    ax_histy.hist(y.values(), color=color_models, orientation='horizontal', **hist_filled)
-    ax_histy.hist(y.values(), color=color_models, orientation='horizontal', **hist_step)
-    if histy_logscale:
-        ax_histy.set_xscale("log")
+    bins_x = np.geomspace(min_x, max_x, 150) if loglog else "auto"
+    bins_y = np.geomspace(min_y, max_y, 150) if loglog else "auto"
+    ax_histx.hist(x.values(), bins=bins_x, color=color_models, **hist_filled)
+    ax_histx.hist(x.values(), bins=bins_x, color=color_models, **hist_step)
+    ax_histy.hist(y.values(), bins=bins_y, color=color_models, log=histy_log, orientation='horizontal', **hist_filled)
+    ax_histy.hist(y.values(), bins=bins_y, color=color_models, log=histy_log, orientation='horizontal', **hist_step)
     ax.set_xlabel(x_label, fontsize=fontsize)
     ax.set_ylabel(y_label, fontsize=fontsize)
-    ax.set_xlim((0, max_x * 1.05))
-    ax.set_ylim((0, max_y * 1.05))
+    if loglog:
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+    else:
+        ax.set_xlim((0.95 * min_x, max_x * 1.05))
+        ax.set_ylim((0.95 * min_y, max_y * 1.05))
     ax.legend(fontsize=fontsize_legend)
     plt.savefig(output, format="pdf")
     plt.savefig(output.replace(".pdf", ".png"), format="png")
-    plt.clf()
+    plt.close('all')
     print(output)
 
 
@@ -94,9 +100,11 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
     fig = plt.figure(figsize=(1920 / my_dpi, 880 / my_dpi), dpi=my_dpi)
     fig.suptitle("{0} genes".format(nbr_genes) + title)
     ax = fig.add_subplot(1, 1, 1)
-
-    hist, _, _ = ax.hist(x.values(), color=color_models, **hist_filled)
-    ax.hist(x.values(), color=color_models, **hist_step)
+    min_x = np.min([min(i) for i in x.values()])
+    max_x = np.max([max(i) for i in x.values()])
+    logbins = np.geomspace(min_x, max_x, 50)
+    hist, _, _ = ax.hist(x.values(), bins=logbins, color=color_models, **hist_filled)
+    hist, _, _ = ax.hist(x.values(), bins=logbins, color=color_models, **hist_step)
     max_y = 1.2 * max([max(h) for h in hist])
 
     for id_m, m in enumerate(x):
@@ -107,9 +115,10 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
         ax.plot((x_median, x_median), (0, max_y), linewidth=2, linestyle='--', color=color_models[id_m])
 
     ax.set_xlabel(x_label, fontsize=fontsize)
-    ax.set_ylabel("Density", fontsize=fontsize)
-    ax.set_xlim((0, 1.05 * max([np.max(x_i) for x_i in x.values()])))
+    ax.set_xlim((0.95 * min_x, 1.05 * max_x))
+    ax.set_xscale("log")
     ax.set_ylim((0, max_y))
+    ax.set_ylabel("Density", fontsize=fontsize)
     ax.legend(fontsize=fontsize_legend)
     plt.savefig(output, format="pdf")
     plt.savefig(output.replace(".pdf", ".png"), format="png")
@@ -128,7 +137,8 @@ if __name__ == '__main__':
     Vg, Vm, Vm_theo = {}, {}, {}
 
     models_path = {basename(p): p for p in glob(args.folder + "/*") if isdir(p)}
-    models = [i for i in ["moving_optimum", "directional", "stabilizing", "neutral"] if i in models_path]
+    model_prefs = {"moving_optimum": 0, "directional": 1, "stabilizing": 2, "neutral": 3}
+    models = list(sorted(models_path, key=lambda x: model_prefs[x] if x in model_prefs else -1))
 
     replicates = {m: glob(p + "/*.tsv") for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
@@ -203,16 +213,28 @@ if __name__ == '__main__':
 
     x_str = r"Variance within $\left( \frac{\bar{V_G}}{\bar{N_e}} t \right)$"
     y_str = r"Variance between (Var$[\bar{X}]$)"
+
     scatter_plot(Vg_scaled_pair, Vi, x_str, y_str, args.output, "pairs", nb_genes,
-                 title=' - Contemporary data', histy_logscale=True)
+                 title=' - Contemporary data', histy_log=True)
+    scatter_plot(Vg_scaled_pair, Vi, x_str, y_str, replace(".pdf", "_loglog.pdf"), "pairs", nb_genes,
+                 title=' - Contemporary data', loglog=True)
+
     scatter_plot(Vg_harm_pair, Vi, x_str, y_str, replace(".pdf", "_mean.pdf"), "pairs", nb_genes,
-                 title=' - Mean along ancestry', histy_logscale=True)
+                 title=' - Mean along ancestry', histy_log=True)
+    scatter_plot(Vg_harm_pair, Vi, x_str, y_str, replace(".pdf", "_loglog_mean.pdf"), "pairs", nb_genes,
+                 title=' - Mean along ancestry', loglog=True)
+
     scatter_plot(Vg_mean_pair, Vi, x_str, y_str, replace(".pdf", "_harm.pdf"), "pairs", nb_genes,
-                 title=' - Harmonic mean along ancestry', histy_logscale=True)
+                 title=' - Harmonic mean along ancestry', histy_log=True)
+
+    scatter_plot(Vg_mean_pair, Vi, x_str, y_str, replace(".pdf", "_loglog_harm.pdf"), "pairs", nb_genes,
+                 title=' - Harmonic mean along ancestry', loglog=True)
+
     scatter_plot(Vm, Vg, "$2 N_e V_M$", "$V_G$", replace(".pdf", "_Vg_Vm.pdf"), "species", nb_genes)
     scatter_plot(Vm_theo, Vg, "Expected $2 N_e V_M$", "$V_G$", replace(".pdf", "_Vg_Vme.pdf"), "species", nb_genes)
 
     x_str = r"Variance ratio $\left( \frac{Var[\bar{X}]}{\bar{V_G}} \frac{\bar{N_e}}{t} \right)$"
+
     hist_plot(ratio_Vi_Vg_scaled, x_str, args.output, nb_genes, ' - Contemporary data')
     hist_plot(ratio_Vi_Vg_mean, x_str, replace(".pdf", "_mean.pdf"), nb_genes, ' - Mean along ancestry')
     hist_plot(ratio_Vi_Vg_harm, x_str, replace(".pdf", "_harm.pdf"), nb_genes, ' - Harmonic mean along ancestry')

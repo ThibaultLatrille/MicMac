@@ -7,13 +7,8 @@ FOLDER = os.path.abspath('.') + "/"
 configfile: 'config.yaml'
 
 REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"], config["max_number_loci"], config["nb_genes"])]
-SIMULATOR_PARAMS = {k: "" for k in config["simulators"]}
-SIMULATOR_PARAMS["core"] = ""
-for simulator in SIMULATOR_PARAMS.keys():
-    if simulator not in config:
-        continue
-    for param, value in config[simulator].items():
-        SIMULATOR_PARAMS[simulator] += ' --{0} {1}'.format(param.lower(), value)
+SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k, v) for k, v in d.items() if k != "model"]) for s, d in config["simulators"].items()}
+SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k, v) for k, v in config["core"].items()])
 
 rule all:
     input:
@@ -21,16 +16,16 @@ rule all:
 
 rule run_simulations:
     input:
-        exec=ROOT + '/simulator/build/{simulator}',
-        newick=ROOT + '/simulator/' + config["newick"]
+        exec= lambda wildcards: ROOT + '/simulator/build/' + config["simulators"][wildcards.simulator]["model"],
+        tree=ROOT + '/simulator/' + config["tree"]
     output:
         file=FOLDER + "{simulator}/replicate_{scaling}.tsv",
         nhx=FOLDER + "{simulator}/replicate_{scaling}.tsv.nhx",
     params:
         folder= lambda wildcards: FOLDER + wildcards.simulator,
-        simulator= lambda wildcards: SIMULATOR_PARAMS["core"] + SIMULATOR_PARAMS[wildcards.simulator]
+        simulator= lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"], SIMULATOR_PARAMS[wildcards.simulator])
     shell:
-        'mkdir -p {params.folder} && {input.exec} --newick {input.newick} {params.simulator} --number_loci {wildcards.scaling} --output {output.file}'
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --number_loci {wildcards.scaling} --output {output.file}'
 
 rule plot_trajectory:
     input:
