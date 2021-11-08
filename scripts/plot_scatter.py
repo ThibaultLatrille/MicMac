@@ -73,8 +73,8 @@ def scatter_plot(x, y, x_label, y_label, output, scale, nbr_genes, title="", his
         reg = '{0} - slope of {1:.2g} ($r^2$={2:.2g})'.format(m.replace("_", " ").capitalize(), a, results.rsquared)
         ax.plot(idf, linear, '-', linestyle="--", label=reg, color=color_models[id_m])
 
-    bins_x = np.geomspace(min_x, max_x, 150) if loglog else "auto"
-    bins_y = np.geomspace(min_y, max_y, 150) if loglog else "auto"
+    bins_x = np.geomspace(max(1e-6, min_x), max_x, 150) if loglog else "auto"
+    bins_y = np.geomspace(max(1e-6, min_y), max_y, 150) if loglog else "auto"
     ax_histx.hist(x.values(), bins=bins_x, color=color_models, **hist_filled)
     ax_histx.hist(x.values(), bins=bins_x, color=color_models, **hist_step)
     ax_histy.hist(y.values(), bins=bins_y, color=color_models, log=histy_log, orientation='horizontal', **hist_filled)
@@ -100,7 +100,7 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
     fig = plt.figure(figsize=(1920 / my_dpi, 880 / my_dpi), dpi=my_dpi)
     fig.suptitle("{0} genes".format(nbr_genes) + title)
     ax = fig.add_subplot(1, 1, 1)
-    min_x = np.min([min(i) for i in x.values()])
+    min_x = max(1e-6, np.min([min(i) for i in x.values()]))
     max_x = np.max([max(i) for i in x.values()])
     logbins = np.geomspace(min_x, max_x, 50)
     hist, _, _ = ax.hist(x.values(), bins=logbins, color=color_models, **hist_filled)

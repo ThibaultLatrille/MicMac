@@ -1,6 +1,6 @@
 min_number_loci: 5000
-max_number_loci: 40000
-nb_genes: 250
+max_number_loci: 30000
+nb_genes: 2500
 tree: "trees/mammal_subtree.tre.annotated"
 simulators:
   neutral:
@@ -18,22 +18,22 @@ simulators:
     epistasis: 2.0
     bias_optimum: 0.0
     sigma_optimum: 1.0
-    theta_optimum: 0.5
+    theta_optimum: 0.02
   directional:
     model: "selection"
     peakness: 0.02
     epistasis: 2.0
     bias_optimum: 0.05
     sigma_optimum: 1.0
-    theta_optimum: 0.5
+    theta_optimum: 0.02
 core:
   variance_environment: 1.0
   mutation_mean_effect_size: 1.0
   mutation_rate_per_loci_per_generation: 1e-5
   population_size: 50
   population_size_min: 20
-  brownian_sigma: 0.02
-  noise_sigma: 0.1
+  brownian_sigma: 0.0
+  noise_sigma: 0.0
   noise_theta: 0.9
   number_of_generations: 1000
   number_of_lineages: 50
