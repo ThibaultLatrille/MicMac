@@ -1,3 +1,4 @@
+from snakemake.io import expand
 import numpy as np
 import os
 
@@ -20,7 +21,7 @@ rule run_simulations:
         tree=ROOT + '/simulator/' + config["tree"]
     output:
         file=FOLDER + "{simulator}/replicate_{scaling}.tsv",
-        nhx=FOLDER + "{simulator}/replicate_{scaling}.tsv.nhx",
+        nhx=FOLDER + "{simulator}/replicate_{scaling}.tsv.nhx"
     params:
         folder= lambda wildcards: FOLDER + wildcards.simulator,
         simulator= lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"], SIMULATOR_PARAMS[wildcards.simulator])
@@ -32,13 +33,13 @@ rule plot_trajectory:
         exp=FOLDER + "{simulator}/replicate_{scaling}.tsv",
         script=ROOT + '/scripts/plot_trajectory.py'
     output:
-        plot=FOLDER + "{simulator}/replicate_{scaling}.pdf",
+        plot=FOLDER + "{simulator}/replicate_{scaling}.pdf"
     shell:
         'python3 {input.script} --input {input.exp} --output {output.plot}'
 
 rule plot_scatter:
     input:
-        exp=expand(FOLDER + "{simulator}/replicate_{scaling}.pdf", scaling=REPLICATES, simulator=config["simulators"]),
+        exp=expand(FOLDER + "{simulator}/replicate_{scaling}.tsv", scaling=REPLICATES, simulator=config["simulators"]),
         script=ROOT + '/scripts/plot_scatter.py'
     output:
         plot=FOLDER + "scatter_plot.pdf"

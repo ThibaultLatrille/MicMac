@@ -6,7 +6,7 @@ from subprocess import run
 
 def create_experiment(config, screen, sbatch, nbr_cpu):
     experiment = config.replace(".yaml", "")
-    exp_path = os.getcwd() + '/Experiments/' + experiment
+    exp_path = os.getcwd() + '/experiments/' + experiment
 
     os.makedirs(exp_path, exist_ok=True)
     os.system('cp {0} {1}/config.yaml'.format(config, exp_path))

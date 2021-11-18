@@ -1,0 +1,253 @@
+\documentclass{article}
+\usepackage{pdfpages}    % To import the PDF document
+\usepackage{xcolor}
+\definecolor{BLUELINK}{HTML}{0645AD}
+\definecolor{DARKBLUELINK}{HTML}{0B0080}
+\definecolor{LIGHTBLUELINK}{HTML}{3366BB}
+\definecolor{PURPLELINK}{HTML}{663366}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[colorlinks=false ]{hyperref}
+% for linking between references, figures, TOC, etc in the pdf document
+\hypersetup{colorlinks,
+linkcolor=DARKBLUELINK,
+anchorcolor=DARKBLUELINK,
+citecolor=DARKBLUELINK,
+filecolor=DARKBLUELINK,
+menucolor=DARKBLUELINK,
+urlcolor=BLUELINK
+} % Color citation links in purple
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{naturalnames}{hyperref}
+
+\definecolor{RED}{HTML}{EB6231}
+\definecolor{YELLOW}{HTML}{E29D26}
+\definecolor{BLUE}{HTML}{5D80B4}
+\definecolor{LIGHTGREEN}{HTML}{6ABD9B}
+\definecolor{GREEN}{HTML}{8FB03E}
+\definecolor{PURPLE}{HTML}{BE1E2D}
+\definecolor{BROWN}{HTML}{A97C50}
+\definecolor{PINK}{HTML}{DA1C5C}
+
+\usepackage[margin=60pt]{geometry}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathtools}
+\usepackage{blkarray}
+\usepackage{lmodern}
+\usepackage{bm,bbold}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{listings, enumerate, enumitem}
+\lstset{%
+	backgroundcolor=\color{gray!25},
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible
+}
+\usepackage[export]{adjustbox}
+\usepackage{tabu}
+\tabulinesep=0.6mm
+\newcommand\cellwidth{\TX@col@width}
+\usepackage{hhline}
+\setlength{\arrayrulewidth}{1.2pt}
+\usepackage{multicol,multirow,array}
+\usepackage{etoolbox}
+\AtBeginEnvironment{tabu}{\footnotesize}
+\usepackage{booktabs}
+
+\usepackage{graphicx}
+\graphicspath{{artworks/}}
+\makeatletter
+\def\input@path{{artworks/}}
+\makeatother
+\pdfstringdefDisableCommands{%
+\renewcommand*{\bm}[1]{#1}%
+% any other necessary redefinitions
+}
+\usepackage{xfrac, nicefrac}
+\usepackage{lmodern}
+\usepackage{natbib}
+\pdfinclusioncopyfonts=1
+
+\newcommand{\UniDimArray}[1]{\bm{#1}}
+\newcommand{\BiDimArray}[1]{\bm{#1}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{\text{Var}}
+\DeclareMathOperator{\Cov}{\text{Cov}}
+\newcommand{\der}{\mathrm{d}}
+\newcommand{\angstrom}{\text{\normalfont\AA}}
+\newcommand{\e}{\text{e}}
+\newcommand{\Ne}{N_{\text{e}}}
+\newcommand{\dn}{d_N}
+\newcommand{\ds}{d_S}
+\newcommand{\dnds}{\dn / \ds}
+\newcommand{\pn}{\pi_N}
+\newcommand{\ps}{\pi_S}
+\newcommand{\pnps}{\pn / \ps}
+\newcommand{\proba}{\mathbb{P}}
+\newcommand{\pfix}{\proba_{\text{fix}}}
+\newcommand{\Pfix}{2 \Ne \proba_{\text{fix}}}
+
+\newcommand{\VarPhenotype}{V_{P}}
+\newcommand{\VarGenetic}{V_{G}}
+\newcommand{\MatrixGenetic}{\BiDimArray{G}}
+\newcommand{\VarMutation}{V_{M}}
+\newcommand{\StdSelection}{\sigma}
+\newcommand{\VarSelection}{\StdSelection^2}
+\newcommand{\MutationRate}{\mu}
+\newcommand{\NbrLoci}{L}
+\newcommand{\Trait}{X}
+
+\begin{document}
+
+\part*{Evolutionary quantitative genomics}
+\tableofcontents
+
+\section{Quantitative genetics theory}
+
+In this section, we seek to derive phenotypic and genetic variance as a function of mutation, selection and drift.
+First, the genetic variance ($\VarGenetic$) is related to the observed phenotypic variance ($\VarPhenotype$) through heredity:
+\begin{gather}
+    \VarGenetic =  h^2 \VarPhenotype \label{eq-heredity}.
+\end{gather}
+
+\subsection{Mutation-drift equilibrium}
+
+Mutation supply new variants in the population, while genetic random drift depletes standing variation in the population. At equilibrium between mutation and drift~\citep{lynch_mutation_1998}, the genetic variance is thus a function of the mutational variance ($\VarMutation$) and the effective number of individual in the population ($\Ne$):
+\begin{gather}
+    \VarGenetic =  2 \Ne \VarMutation \label{eq-var-genetic}.
+\end{gather}
+
+The mutational variance ($\VarMutation$) is the rate at which new mutations contributes to new mutations. As shown in \citet{lande_quantitative_1979, lande_sexual_1980}, $\VarMutation$ depends on the mutation rate per loci per generation ($\MutationRate$), the number of loci encoding the trait ($\NbrLoci$) and finally the random effect on the phenotype of a mutation ($a$):
+\begin{gather}
+    \VarMutation =  2 \NbrLoci \MutationRate \E \left[ a^2 \right] \label{eq-var-mutation}.
+\end{gather}
+
+\subsection{Mutation-selection-drift equilibrium}
+
+Selection, whether positive or negative, depletes standing variation in the population and reduces to genetic variance. Hence, at equilibrium between mutation, selection and drift, the observed genetic variance is lower than the theoretical neutral variance:
+\begin{align}
+    \VarGenetic & < 2 \Ne \VarMutation \\
+    \iff \VarGenetic & < 4 \Ne \NbrLoci \MutationRate \E \left[ a^2 \right]
+\end{align}
+
+Under the House of cards model of stabilizing selection~\citep{kingman_simple_1978}, the trait's fitness is normally distributed around an optimal value ($\theta$) and with standard deviation $\StdSelection_S$. Moreover, the trait is encoded by a few loci with large effects and the genetic variance at equilibrium between mutation, selection and drift is: 
+\begin{gather}
+    \VarGenetic = 2 \NbrLoci \MutationRate \VarSelection_S \label{eq-mutsel-HC}.
+\end{gather}
+
+Alternatively, under the Gaussian model of stabilizing selection~\citep{lande_natural_1976}, the trait's fitness is also normally distributed around an optimal value ($\theta$) and with standard deviation $\StdSelection_S$. However, the trait is encoded by a large number of loci traits with small effect and the genetic variance at equilibrium is: 
+\begin{gather}
+    \VarGenetic = \sqrt{2 \NbrLoci \VarMutation \VarSelection_S} \label{eq-mutsel-G}.
+\end{gather}
+
+The boundary between the two models is given by \citet{turelli_heritable_1984} as:
+\begin{align}
+    20 \MutationRate \VarSelection_S &< \E \left[ a^2 \right] \text{ for the House of card model}, \\
+    20 \MutationRate \VarSelection_S &> \E \left[ a^2 \right] \text{ for the geometric model}.
+\end{align}
+
+\section{Quantitative traits}
+
+By definition, quantitative trait is an observable can be measured for an organisms, for example genome size~\citep{alfsnes_genome_2017}.
+
+\subsection{Life history traits}
+
+Life history traits are a subset of quantitative traits related to the age and stage-specific patterns and timing of events that make up an organism's life such as such as age at maturity, fecundity, life expectancy, height, weight, and so on. Life history traits are often suspected to be under selection and encoded by many loci.
+
+\subsection{Genetic architecture of quantitative traits}
+Due to recent advances in Genome Wide Association Studies (GWAS), the availability of  datasets in human (\textit{e.g.} UK Biobank) allows to dissect the genetic underpinning of quantitative traits such as Body Mass Index (BMI) or disease related susceptibility.
+For example by relating observable summary statistics (phenotypic distribution, allelic frequencies, variance per site) to parameters of the genetic architecture (pleiotropy, distribution of selection coefficients, effect size), as in \citet{simons_population_2018}.
+Overall, as reviewed from GWAS evidences in \citet{sella_thinking_2019}, most quantitative traits are polygenic (many loci associated to a given trait), pleiotropic (many traits associated to a given loci), additive and under stabilizing selection in humans.
+
+\subsection{Gene expression}
+
+In transcriptomic dataset, the expression level of each gene can be seen a quantitative trait.
+First, $\VarGenetic$ can be estimated from the standing variation inside natural populations. 
+Second, $\VarMutation$ can be  estimated from mutation accumulation experiments in laboratory clonal lines.
+Third, $\NbrLoci$ can be  estimated from effect of gene knockout of expression level.
+Forth, $\MutationRate$ can be  estimated from the frequency of mutation altering expression level.
+Fifth, $\Ne$ can be estimated from standing genetic polymorphism ($\pi = 4 \Ne u$), by correcting for the mutation rate ($u$).
+Altogether, the evolutionary regime (neutral or selection) of gene expression can be tested across all genes, as suggested in \citet{fay_evaluating_2008}.
+
+In the yeast \textit{Saccharomyces cerevisiae}, the fruit fly \textit{Drosophila melanogaster} and the nematode \textit{Caenorhabditis elegans},  \citet{hodgins-davis_gene_2015} found that gene expression is under stabilizing selection, such that neutral evolution is ruled out for most genes.
+Moreover, the House of card model is preferred against the Gaussian model of stabilizing selection, also suggesting that gene expression is encoded by a few loci with large effects.
+
+Finally, mutation accumulation experiments with different population size have shown that $\VarMutation$ decreases with $\Ne$, suggesting that gene expression is under strong stabilizing selection~\citep{deiss_global_2021}.
+
+\section{Phylogenetic trait evolution}
+
+\subsection{Relationship between micro and macro evolution. }
+
+We denote $\Trait_i$ the quantitative trait $\Trait$ for species $i$.
+\citet{hansen_translating_1996} derived a relation between trait variation between species and the genetic variance of this trait as 
+\begin{gather}
+    \Cov \left( \Trait_i, \Trait_j \right) = \Cov \left( \E \left[ \Trait_i | \Trait_z \right ], \E \left[ \Trait_j | \Trait_z \right ] \right),  \label{eq-cov-traits}
+\end{gather}
+where $z$ is the ancestor between species $i$ an $j$.
+
+If the trait is neutral, evolving as a Brownian process, then $\E \left[ \Trait_i | \Trait_z \right ] = \Trait_z$ and equation \ref{eq-cov-traits} simplifies to:
+\begin{align}
+\Cov \left( \Trait_i, \Trait_j \right) &= \Var \left( \Trait_z \right),\\
+    &= \frac{\VarGenetic}{\Ne} t_{z}, \\
+    &=  2 t_{z} \VarMutation, \label{eq-cov-traits-neutral} \text{ from equation } \ref{eq-var-genetic},
+\end{align}
+where $t_{z}$ is the time between species $z$ an both $i$ an $j$.
+
+The relationship between trait variation between species and the mutational variance can be used as method to detect whether traits are evolving under a neutral model of evolution, similar to the use of synonymous ($\ds$) and non-synonymous ($\dn$) substitution rates in molecular evolution, as noted in \citet{fay_evaluating_2008}.
+
+\begin{table}[H]
+	\centering
+	\noindent\adjustbox{max width=\textwidth}{%
+		\begin{tabu}{|c||c|c|}
+			\hline
+			 & Coding sequences & Quantitative traits \\ \hline \hline
+			Adaptation or moving optimum & $\dnds > 1$ & $\Cov \left( \Trait_i, \Trait_j \right) > 2 t_{z} \VarMutation $ \\ \hline
+			Neutral regime of evolution & $\dnds = 1$ & $\Cov \left( \Trait_i, \Trait_j \right) = 2 t_{z} \VarMutation $ \\ \hline
+			Purifying or directional selection & $\dnds < 1$ & $\Cov \left( \Trait_i, \Trait_j \right) < 2 t_{z} \VarMutation $ \\ \hline
+		\end{tabu}}
+\end{table}
+
+If the trait is under directional selection, but the strength and direction of selection varies randomly from one generation to the next (variance $\VarSelection_D$), then the trait still follows a Brownian process model and equation \ref{eq-cov-traits} reduces to:
+\begin{align}
+\Cov \left( \Trait_i, \Trait_j \right) &= \Var \left( \Trait_z \right), \\
+    &= \left(\frac{\VarGenetic}{\Ne} + \VarGenetic \VarSelection_D \VarGenetic \right)  t_{z}. \label{eq-selection-vary-direct}
+\end{align}
+
+If the trait is under stabilizing selection, but the strength and direction of the optimum varies randomly from one generation to the next (variance $\VarSelection_{\theta}$), then the trait still follows a Brownian process model and equation \ref{eq-cov-traits} reduces to:
+\begin{align}
+\Cov \left( \Trait_i, \Trait_j \right) &= \VarSelection_{\theta} t_{z}. \label{eq-selection-vary-stabi}
+\end{align}
+
+Altogether, traits that are found to be under a long term Brownian process are not necessarily neutral.
+
+To read : \citet{arnold_adaptive_2001}
+\subsection{Trait evolution under a Brownian or Ornstein-Uhlenbeck process}
+
+Modelling $\Trait$ as a Brownian process allows theoretically to test for neutrality.
+In \citet{catalan_drift_2019}, gene expression is modelled either as a Brownian (supposedly neutral regime), or as a Brownian with a shift in the mean for one branch (supposedly directional selection), or as an Ornstein-Uhlenbeck process (supposedly stabilizing selection) or finally as an Ornstein-Uhlenbeck process with a shift in the optimal for one branch (supposedly directional selection). 
+The analysis on the transcriptome across different individuals and species concluded that 81\% of genes are under a neutral regime and 16\% under directional selection. 
+However, the alternative model of a varying directional (equation~ \ref{eq-selection-vary-direct}) or stabilizing selection (equation~ \ref{eq-selection-vary-stabi}) was not implemented, and thus can not be ruled out by this analysis.  
+
+\subsection{Variance evolution}
+
+The multidimensional generalization of $\VarGenetic$ to several traits is the of the genetic covariance matrix $\MatrixGenetic$.
+Stability of $\MatrixGenetic$, can be reformulated as whether $\MatrixGenetic (t) = \MatrixGenetic$, an assumption discussed in \citet{arnold_understanding_2008} and \citet{hohenlohe_mipod_2008}. Having a time dependent matrix is implemented in JIVE, a Bayesian hierarchical model developed by \citet{kostikova_bridging_2016} and implemented in BEAST by \citet{gaboriau_multi-platform_2020}.
+
+\section{Discussion \& perspectives}
+At the population level, gene expression is shown to be empirically under stabilizing selection. However at the phylogenetic scale, gene expression is under a neutral regime. Can we reconcile these observations?
+
+We can find the genes under adaptive regime (fluctuating optimal gene expression) at the phylogenetic scale and compare that to the genes under adaptation using $\dnds$ based methods. Do we find the same genes?
+\section{Appendix}
+
+\subsection{Definitions}
+
+We denote $\Trait_{i}$ the quantitative trait $\Trait$ for individual $i$.
+
+\begin{align}
+    \VarPhenotype = \sum_{i=1}^{\Ne} \Trait_{i}^2 - \left( \sum_{i=1}^{\Ne} \Trait_{i} \right)^2
+\end{align}
+
+\bibliographystyle{natbib}%%%%Bibliography style file
+\bibliography{references}
+
+\end{document}

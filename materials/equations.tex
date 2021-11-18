@@ -1,0 +1,94 @@
+\documentclass{article}
+
+\usepackage[margin=60pt]{geometry}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathtools}
+\usepackage{blkarray}
+\usepackage{lmodern}
+\usepackage{bm,bbold}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{bm}
+\usepackage{xfrac, nicefrac}
+\usepackage{lmodern}
+\usepackage{tabu}
+\usepackage{adjustbox}
+
+\newcommand{\UniDimArray}[1]{\bm{#1}}
+\newcommand{\BiDimArray}[1]{\bm{#1}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{\text{Var}}
+\DeclareMathOperator{\Cov}{\text{Cov}}
+\newcommand{\der}{\mathrm{d}}
+\newcommand{\angstrom}{\text{\normalfont\AA}}
+\newcommand{\e}{\text{e}}
+\newcommand{\Ne}{N}
+\newcommand{\dn}{d_\text{N}}
+\newcommand{\ds}{d_\text{S}}
+\newcommand{\dnds}{\frac{\dn}{\ds}}
+\newcommand{\pn}{\pi_\text{N}}
+\newcommand{\ps}{\pi_\text{S}}
+\newcommand{\pnps}{\pn / \ps}
+\newcommand{\proba}{\mathbb{P}}
+\newcommand{\pfix}{\proba_{\text{fix}}}
+\newcommand{\Pfix}{2 \Ne \proba_{\text{fix}}}
+
+\newcommand{\VarPhenotype}{V_{P}}
+\newcommand{\VarPhenotypej}{V_{P, j}}
+\newcommand{\VarGenetic}{V_{G}}
+\newcommand{\MatrixGenetic}{\BiDimArray{G}}
+\newcommand{\VarMutation}{V_{M}}
+\newcommand{\StdSelection}{\sigma}
+\newcommand{\VarSelection}{\StdSelection^2}
+\newcommand{\MutationRate}{\mu}
+\newcommand{\NbrLoci}{L}
+\newcommand{\Trait}{X}
+
+\begin{document}
+
+\begin{gather*}
+    \VarPhenotype = \sum_{i=1}^{\Ne} \Trait_{i}^2 - \left( \sum_{i=1}^{\Ne} \Trait_{i} \right)^2 \\
+    \overline{\Trait} = \sum_{i=1}^{\Ne} \Trait_{i} \\
+    \VarPhenotypej = \sum_{i=1}^{\Ne_{j}} \Trait_{i,j}^2 - \left( \sum_{i=1}^{\Ne_{j}} \Trait_{i,j} \right)^2 \\
+    \overline{\Trait}_{j} = \sum_{i=1}^{\Ne_{j}} \Trait_{i,j} \\
+    \Var \left[ \overline{\Trait}\right]_{j,k} = \overline{\Trait}_{j} \overline{\Trait}_{k} - \left( \frac{\overline{\Trait}_{j} + \overline{\Trait}_{k}}{2} \right)^2  \\
+    \frac{\Var \left[ \overline{\Trait}\right]_{j,k}}{t_{j,k}} = \frac{\overline{\Trait}_{j} \overline{\Trait}_{k} - \left( \frac{\overline{\Trait}_{j} + \overline{\Trait}_{k}}{2} \right)^2}{t_{j,k}}  \\
+    \frac{\Var \left[ \overline{\Trait}\right]}{t} = \sum_{\text{pairs }j, k}\frac{\Var \left[ \overline{\Trait }\right]_{j,k}}{t_{j,k}} \\
+    \frac{\VarPhenotype}{2 \Ne}  = \sum_{j} \frac{\VarPhenotypej}{2 \Ne _{j}} \\
+\end{gather*}
+
+\newpage
+
+\begin{align*}
+&\bullet \dn \text{ and } \ds \text{ are substitution rates of DNA (at the phylogenetic level).} \\
+&\bullet \mu \text{ is the mutation rate of DNA (at the population level).} \\
+&\bullet \omega \text{ is the probability of fixation for mutations (relative to neutral).}
+\end{align*}
+\vspace*{-0.5cm}
+\begin{align*}
+&\begin{dcases}
+	\dn = \omega \mu \text{ for non-synonymous substitutions}, \\
+	\ds =  \mu \text{ for synonymous substitutions}.
+\end{dcases} \\
+&\Longrightarrow
+\dnds = \frac{\omega \mu}{\mu} = \omega 
+\end{align*}
+\begin{align*}
+&\begin{dcases}
+	\frac{\Var \left[ \overline{\Trait}\right] }{t} ~ = \omega \frac{\VarPhenotype}{2 \Ne} \text{ for trait under selection}, \\
+	\frac{\Var \left[ \overline{\Trait}^0\right] }{t} = \frac{\VarPhenotype^0}{2 \Ne} \text{ for  neutral trait}.
+\end{dcases} \\
+&\Longrightarrow
+\frac{\Var \left[ \overline{\Trait}\right] / \VarPhenotype }{\Var \left[ \overline{\Trait}^0\right] / \VarPhenotype^0 } = \omega \frac{  t}{ 2 \Ne}\frac{ 2 \Ne }{ t} = \omega 
+\end{align*}
+\begin{table}[H]
+	\centering
+	\begin{tabu}{|c||c|c|}
+			\hline
+			& Coding sequences & Quantitative traits \\ \hline \hline
+			Adaptation or moving optimum & $\dnds > 1$ & $\frac{\Var \left[ \overline{\Trait}\right] / \VarPhenotype }{\Var \left[ \overline{\Trait}^0\right] / \VarPhenotype^0 } > 1  $ \\ \hline
+			Neutral regime of evolution & $\dnds = 1$ & $\frac{\Var \left[ \overline{\Trait}\right] / \VarPhenotype }{\Var \left[ \overline{\Trait}^0\right] / \VarPhenotype^0 } = 1 $ \\ \hline
+			Purifying or directional selection & $\dnds < 1$ & $\frac{\Var \left[ \overline{\Trait}\right] / \VarPhenotype }{\Var \left[ \overline{\Trait}^0\right] / \VarPhenotype^0 } < 1$ \\ \hline
+	\end{tabu}
+\end{table}
+
+\end{document}

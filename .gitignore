@@ -5,9 +5,24 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 *~
+data_simulated/experiments*
 cmake-build-debug
 build
 test
-data_simulated/experiments*
-.idea/
 .snakemake
+.idea/
+*.svg
+*.ai
+*.indd
+*.ctl
+*.png
+*.gz
+*.toc
+*.unmap
+*.aux
+*.log
+*.synctex.gz
+*.pdf
+*.out
+*.bbl
+*.blg
