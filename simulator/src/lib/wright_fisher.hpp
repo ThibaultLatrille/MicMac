@@ -11,6 +11,7 @@ struct TimeElapsed {
     double mutation{0.0};
     double selection{0.0};
     double fixation{0.0};
+    double summary_stats{0.0};
 };
 
 TimeElapsed timer;
@@ -230,6 +231,7 @@ class Population {
 
     // Individuals composing the population
     vector<Individual> parents{};
+    unsigned nbr_fixations{0};
 
     ~Population() = default;
     explicit Population(
@@ -248,6 +250,7 @@ class Population {
         parents = pop.parents;
         fitness_state = pop.fitness_state;
         fitness_function.set_state(fitness_state);
+        nbr_fixations = 0;
     }
 
     bool check() const {
@@ -277,8 +280,64 @@ class Population {
             y.push_back(children.back().phenotype);
         }
         heritability = slope(x, y);
-        parents = move(children);
+        parents = std::move(children);
     };
+
+    unordered_map<u_long, u_long> site_frequency_spectrum() const {
+        unordered_map<u_long, u_long> frequencies{};
+        for (Individual const &p : parents) {
+            for (pair<const u_long, bool> const &locus : p.loci) {
+                // check if the locus is in frequencies
+                if (frequencies.find(locus.first) == frequencies.end()) {
+                    frequencies[locus.first] = 1 + locus.second;
+                } else {
+                    frequencies[locus.first] += 1 + locus.second;
+                };
+            }
+        }
+        unordered_map<u_long, u_long> sfs{};
+        for (pair<const u_long, u_long> const &freq : frequencies) {
+            // check if the locus is in frequencies
+            if (frequencies.find(freq.second) == frequencies.end()) {
+                sfs[freq.second] = 1;
+            } else {
+                sfs[freq.second] += 1;
+            }
+        }
+        return sfs;
+    }
+
+    double theta(unordered_map<u_long, u_long> const &sfs, string const &method) const {
+        double tot_weight{0};
+        double tot_theta{0};
+        u_long n = pop_size.get_population_size() * 2;
+        assert(parents.size() * 2 == n);
+        for (u_long i{1}; i < n; i++) {
+            double epsilon = {0.0};
+            auto it = sfs.find(i);
+            if (it != sfs.end()) {
+                epsilon = static_cast<double>(it->second);
+                assert(epsilon > 0);
+            }
+            assert(epsilon <= genome.number_loci);
+
+            double weight{0.0};
+            if (method == "watterson") {
+                weight = 1.0 / static_cast<double>(i);
+            } else if (method == "tajima") {
+                weight = static_cast<double>(pop_size.get_population_size() * 2 - i);
+            } else if (method == "fay_wu") {
+                weight = static_cast<double>(i);
+            } else {
+                cerr << "Unknown method for theta: " << method << endl;
+                exit(1);
+            }
+            tot_weight += weight;
+            tot_theta += weight * static_cast<double>(i) * epsilon;
+        }
+        return tot_theta / (tot_weight * static_cast<double>(genome.number_loci));
+    }
+
 
     void fixation() {
         set<u_long> loci_tmp{};
@@ -295,6 +354,7 @@ class Population {
             if (loci_tmp.empty()) { break; }
         }
         for (auto const &fixation : loci_tmp) {
+            nbr_fixations++;
             genome.background_genotype += genome[fixation] * 2;
             genome[fixation] = -genome[fixation];
             for (auto &p : parents) { p.loci.erase(fixation); }
@@ -328,6 +388,7 @@ class Population {
             mutation();
             timer.mutation += duration(timeNow() - t_start);
 
+            t_start = timeNow();
             transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.phenotype; });
             var_mutational += variance(traits);
@@ -348,6 +409,12 @@ class Population {
                 [](Individual const &b) { return b.fitness; });
             trace.add("Fitness mean", mean(traits));
             trace.add("Fitness var", variance(traits));
+
+            auto sfs = site_frequency_spectrum();
+            trace.add("Theta Watterson", theta(sfs, "watterson"));
+            trace.add("Theta Tajima", theta(sfs, "tajima"));
+            trace.add("Theta Fay Wu", theta(sfs, "fay_wu"));
+            timer.summary_stats += duration(timeNow() - t_start);
 
             u_long pct = 25 * sample / nbr_generations;
             fitness_function.update();
@@ -402,7 +469,7 @@ class Process {
     }
 
     static void timer_count() {
-        double total_time = timer.mutation + timer.selection + timer.fixation;
+        double total_time = timer.mutation + timer.selection + timer.fixation + timer.summary_stats;
         cout << setprecision(3) << total_time / 1e9 << "s total time" << endl;
         cout << 100 * timer.mutation / total_time << "% of time spent in mutation ("
              << timer.mutation / 1e9 << "s)" << endl;
@@ -410,6 +477,8 @@ class Process {
              << timer.selection / 1e9 << "s)" << endl;
         cout << 100 * timer.fixation / total_time << "% of time spent in fixation ("
              << timer.fixation / 1e9 << "s)" << endl;
+        cout << 100 * timer.summary_stats / total_time << "% of time spent in fixation ("
+             << timer.summary_stats / 1e9 << "s)" << endl;
     }
 };
 

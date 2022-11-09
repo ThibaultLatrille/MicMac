@@ -1,9 +1,8 @@
-from snakemake.io import expand
 import numpy as np
 import os
 
 ROOT = os.path.abspath('../../..')
-FOLDER = os.path.abspath('.') + "/"
+FOLDER = os.path.abspath('.')
 
 configfile: 'config.yaml'
 
@@ -13,36 +12,36 @@ SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k, v) for k, v in config
 
 rule all:
     input:
-        expand(FOLDER + "scatter_plot.pdf")
+        expand(f"{FOLDER}/scatter_plot.pdf")
 
 rule run_simulations:
     input:
         exec= lambda wildcards: ROOT + '/simulator/build/' + config["simulators"][wildcards.simulator]["model"],
         tree=ROOT + '/simulator/' + config["tree"]
     output:
-        file=FOLDER + "{simulator}/replicate_{scaling}.tsv",
-        nhx=FOLDER + "{simulator}/replicate_{scaling}.tsv.nhx"
+        file=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv",
+        nhx=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv.nhx"
     params:
-        folder= lambda wildcards: FOLDER + wildcards.simulator,
+        folder= lambda wildcards: f"{FOLDER}/{wildcards.simulator}",
         simulator= lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"], SIMULATOR_PARAMS[wildcards.simulator])
     shell:
         'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --number_loci {wildcards.scaling} --output {output.file}'
 
 rule plot_trajectory:
     input:
-        exp=FOLDER + "{simulator}/replicate_{scaling}.tsv",
+        exp=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv",
         script=ROOT + '/scripts/plot_trajectory.py'
     output:
-        plot=FOLDER + "{simulator}/replicate_{scaling}.pdf"
+        plot=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.pdf"
     shell:
         'python3 {input.script} --input {input.exp} --output {output.plot}'
 
 rule plot_scatter:
     input:
-        exp=expand(FOLDER + "{simulator}/replicate_{scaling}.tsv", scaling=REPLICATES, simulator=config["simulators"]),
+        exp=expand(f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv", scaling=REPLICATES, simulator=config["simulators"]),
         script=ROOT + '/scripts/plot_scatter.py'
     output:
-        plot=FOLDER + "scatter_plot.pdf"
+        plot=f"{FOLDER}/scatter_plot.pdf"
     threads: len(config["simulators"])
     shell:
         'python3 {input.script} --folder {FOLDER} --output {output.plot}'
