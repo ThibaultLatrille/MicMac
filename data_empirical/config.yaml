@@ -1,0 +1,4 @@
+DOWNLOAD:
+  atlas.tar.gz: "ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/atlas-latest-data.tar.gz"
+  MMETSP.csv: "https://storage.googleapis.com/mmetspdata.appspot.com/maindatasig.csv"
+FTP_BGEE: "https://bgee.org/ftp/current/download/processed_expr_values/rna_seq/"

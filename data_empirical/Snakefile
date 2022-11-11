@@ -1,0 +1,39 @@
+configfile: 'config.yaml'
+from urllib.request import Request, urlopen
+from bs4 import BeautifulSoup
+
+
+def read_url(url):
+    url = url.replace(" ","%20")
+    req = Request(url)
+    a = urlopen(req).read()
+    soup = BeautifulSoup(a,'html.parser')
+    x = (soup.find_all('a'))
+    return [(url + i.extract().get_text()).replace(" ","%20") for i in x]
+
+
+url_list = read_url(config["FTP_BGEE"])
+ftp_dl = {}
+for species_url in url_list[6:]:
+    print(species_url)
+    for exp_url in read_url(species_url + "/")[7:]:
+        exp_file = exp_url.split('/')[-1]
+        ftp_dl[exp_file] = exp_url
+
+rule all:
+    input:
+        [f'dl.{filename}' for filename in config["DOWNLOAD"]],
+        [f'bgee/{filename}' for filename in ftp_dl.keys()]
+
+rule download:
+    priority: 50
+    output: 'dl.{filename}'
+    params: lambda wildcards: config["DOWNLOAD"][wildcards.filename]
+    shell:
+        "wget -c {params} -O {output}"
+
+rule download_ftp:
+    output: 'bgee/{filename}'
+    params: lambda wildcards: ftp_dl[wildcards.filename]
+    shell:
+        "wget -c {params} -O {output}"

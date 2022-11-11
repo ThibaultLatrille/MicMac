@@ -6,6 +6,9 @@
 
 *~
 data_simulated/experiments*
+data_empirical/Turtles
+data_empirical/MMETSP
+data_empirical/bgee
 cmake-build-debug
 build
 test
