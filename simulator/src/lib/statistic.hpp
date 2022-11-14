@@ -32,3 +32,19 @@ double slope(const std::vector<double> &x, const std::vector<double> &y) {
     const double a = (n * s_xy - s_x * s_y) / (n * s_xx - s_x * s_x);
     return a;
 }
+
+class Stat {
+  public:
+    double n{0};
+    double total{0};
+
+    Stat() = default;
+    ~Stat() = default;
+
+    void add(double const &x, double const &w = 1.0) {
+        total += x * w;
+        n += w;
+    }
+
+    double mean() const { return total / n; }
+};

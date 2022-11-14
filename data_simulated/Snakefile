@@ -12,25 +12,26 @@ SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k, v) for k, v in config
 
 rule all:
     input:
-        expand(f"{FOLDER}/scatter_plot.pdf")
+        expand(f"{FOLDER}/plot_scatter_stats.pdf")
 
 rule run_simulations:
     input:
-        exec= lambda wildcards: ROOT + '/simulator/build/' + config["simulators"][wildcards.simulator]["model"],
-        tree=ROOT + '/simulator/' + config["tree"]
+        exec= lambda wildcards: f'{ROOT}/simulator/build/{config["simulators"][wildcards.simulator]["model"]}',
+        tree=f'{ROOT}/simulator/{config["tree"]}'
     output:
-        file=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv",
-        nhx=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv.nhx"
+        tsv=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv.gz",
+        nhx=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.nhx.gz"
     params:
+        file=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}",
         folder= lambda wildcards: f"{FOLDER}/{wildcards.simulator}",
         simulator= lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"], SIMULATOR_PARAMS[wildcards.simulator])
     shell:
-        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --number_loci {wildcards.scaling} --output {output.file}'
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --number_loci {wildcards.scaling} --output {params.file} && gzip {params.file}.tsv  && gzip {params.file}.nhx'
 
 rule plot_trajectory:
     input:
-        exp=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv",
-        script=ROOT + '/scripts/plot_trajectory.py'
+        exp=rules.run_simulations.output.tsv,
+        script=f'{ROOT}/scripts/plot_trajectory.py'
     output:
         plot=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.pdf"
     shell:
@@ -38,10 +39,20 @@ rule plot_trajectory:
 
 rule plot_scatter:
     input:
-        exp=expand(f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv", scaling=REPLICATES, simulator=config["simulators"]),
-        script=ROOT + '/scripts/plot_scatter.py'
+        exp=expand(rules.run_simulations.output.tsv, scaling=REPLICATES, simulator=config["simulators"]),
+        script=f'{ROOT}/scripts/plot_scatter.py'
     output:
         plot=f"{FOLDER}/scatter_plot.pdf"
+    threads: len(config["simulators"])
+    shell:
+        'python3 {input.script} --folder {FOLDER} --output {output.plot}'
+
+rule plot_scatter_stats:
+    input:
+        exp=expand(rules.run_simulations.output.tsv, scaling=REPLICATES, simulator=config["simulators"]),
+        script=f'{ROOT}/scripts/plot_scatter_stats.py'
+    output:
+        plot=f"{FOLDER}/plot_scatter_stats.pdf"
     threads: len(config["simulators"])
     shell:
         'python3 {input.script} --folder {FOLDER} --output {output.plot}'

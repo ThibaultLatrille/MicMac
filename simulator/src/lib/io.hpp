@@ -64,7 +64,7 @@ class Trace {
 
     void write_tsv(std::string const &output_filename) {
         std::ofstream tsv_file;
-        tsv_file.open(output_filename);
+        tsv_file.open(output_filename + ".tsv");
         tsv_file << join(header, '\t') << std::endl;
         for (auto const &row : data) {
             assert(row.size() == header_to_index.size());

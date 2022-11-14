@@ -307,9 +307,8 @@ class Population {
         return sfs;
     }
 
-    double theta(unordered_map<u_long, u_long> const &sfs, string const &method) const {
-        double tot_weight{0};
-        double tot_theta{0};
+    tuple<double, double, double> theta(unordered_map<u_long, u_long> const &sfs) const {
+        Stat watterson{}, tajima{}, fay_wu{};
         u_long n = pop_size.get_population_size() * 2;
         assert(parents.size() * 2 == n);
         for (u_long i{1}; i < n; i++) {
@@ -320,22 +319,15 @@ class Population {
                 assert(epsilon > 0);
             }
             assert(epsilon <= genome.number_loci);
-
-            double weight{0.0};
-            if (method == "watterson") {
-                weight = 1.0 / static_cast<double>(i);
-            } else if (method == "tajima") {
-                weight = static_cast<double>(pop_size.get_population_size() * 2 - i);
-            } else if (method == "fay_wu") {
-                weight = static_cast<double>(i);
-            } else {
-                cerr << "Unknown method for theta: " << method << endl;
-                exit(1);
-            }
-            tot_weight += weight;
-            tot_theta += weight * static_cast<double>(i) * epsilon;
+            double x = static_cast<double>(i) * epsilon;
+            watterson.add(x, 1.0 / static_cast<double>(i));
+            tajima.add(x, static_cast<double>(pop_size.get_population_size() * 2 - i));
+            fay_wu.add(x, static_cast<double>(i));
         }
-        return tot_theta / (tot_weight * static_cast<double>(genome.number_loci));
+        double theta_watterson = watterson.mean() / static_cast<double>(genome.number_loci);
+        double theta_tajima = tajima.mean() / static_cast<double>(genome.number_loci);
+        double theta_fay_wu = fay_wu.mean() / static_cast<double>(genome.number_loci);
+        return {theta_watterson, theta_tajima, theta_fay_wu};
     }
 
 
@@ -362,6 +354,44 @@ class Population {
         assert(check());
     }
 
+    unordered_map<string, double> summary_states() {
+        unordered_map<string, double> stats{};
+
+        vector<double> traits(parents.size(), 0);
+        transform(parents.begin(), parents.end(), traits.begin(),
+            [](Individual const &b) { return b.phenotype; });
+        stats["Phenotype mean"] = mean(traits);
+        stats["Phenotype var"] = variance(traits);
+
+        transform(parents.begin(), parents.end(), traits.begin(),
+            [](Individual const &b) { return b.genotype; });
+        stats["Genotype mean"] = mean(traits);
+        stats["Genotype var"] = variance(traits);
+
+        transform(parents.begin(), parents.end(), traits.begin(),
+            [](Individual const &b) { return b.environment; });
+        stats["Environment var"] = variance(traits);
+
+        transform(parents.begin(), parents.end(), traits.begin(),
+            [](Individual const &b) { return b.fitness; });
+        stats["Fitness mean"] = mean(traits);
+        stats["Fitness var"] = variance(traits);
+        return stats;
+    }
+
+    void save_node(Tree &tree, Tree::NodeIndex node) {
+        auto stats = summary_states();
+        for (auto const &stat : stats) { tree.set_tag(node, stat.first, to_string(stat.second)); }
+        auto sfs = site_frequency_spectrum();
+        auto theta_tuple = theta(sfs);
+        tree.set_tag(node, "Theta Watterson", to_string(get<0>(theta_tuple)));
+        tree.set_tag(node, "Theta Tajima", to_string(get<1>(theta_tuple)));
+        tree.set_tag(node, "Theta Fay Wu", to_string(get<2>(theta_tuple)));
+        double q = nbr_fixations / static_cast<double>(genome.number_loci);
+        tree.set_tag(node, "Fixations", to_string(nbr_fixations));
+        tree.set_tag(node, "q", to_string(q));
+    }
+
     void run(u_long nbr_generations, Trace &trace) {
         cout << "Population " << name << " for " << nbr_generations << " generations." << endl;
         // Run under selection
@@ -375,45 +405,25 @@ class Population {
 
             TimeVar t_start = timeNow();
             selection_and_random_mating();
-            timer.selection += duration(timeNow() - t_start);
             trace.add("Heritability", heritability);
+            timer.selection += duration(timeNow() - t_start);
 
+            t_start = timeNow();
             trace.add("Mutational expected var", genome.expected_variance());
             vector<double> traits(parents.size(), 0);
             transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.phenotype; });
-
             double var_mutational = -variance(traits);
-            t_start = timeNow();
             mutation();
-            timer.mutation += duration(timeNow() - t_start);
-
-            t_start = timeNow();
             transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.phenotype; });
             var_mutational += variance(traits);
             trace.add("Mutational var", var_mutational);
-            trace.add("Phenotype mean", mean(traits));
-            trace.add("Phenotype var", variance(traits));
+            timer.mutation += duration(timeNow() - t_start);
 
-            transform(parents.begin(), parents.end(), traits.begin(),
-                [](Individual const &b) { return b.genotype; });
-            trace.add("Genotype mean", mean(traits));
-            trace.add("Genotype var", variance(traits));
-
-            transform(parents.begin(), parents.end(), traits.begin(),
-                [](Individual const &b) { return b.environment; });
-            trace.add("Environment var", variance(traits));
-
-            transform(parents.begin(), parents.end(), traits.begin(),
-                [](Individual const &b) { return b.fitness; });
-            trace.add("Fitness mean", mean(traits));
-            trace.add("Fitness var", variance(traits));
-
-            auto sfs = site_frequency_spectrum();
-            trace.add("Theta Watterson", theta(sfs, "watterson"));
-            trace.add("Theta Tajima", theta(sfs, "tajima"));
-            trace.add("Theta Fay Wu", theta(sfs, "fay_wu"));
+            t_start = timeNow();
+            auto stats = summary_states();
+            for (auto const &stat : stats) { trace.add(stat.first, stat.second); }
             timer.summary_stats += duration(timeNow() - t_start);
 
             u_long pct = 25 * sample / nbr_generations;
@@ -452,13 +462,13 @@ class Process {
 
         if (!tree.is_root(node)) {
             populations.at(node).run(static_cast<u_long>(tree.node_length(node)), trace);
-
             generations_computed += tree.node_length(node);
             cout << generations_computed << " generations computed in total ("
                  << static_cast<int>(100 * generations_computed / tree.total_length())
                  << "%) at node " << tree.node_name(node) << " ("
                  << static_cast<int>(100 * tree.node_length(node) / tree.total_length()) << "%)."
                  << endl;
+            populations.at(node).save_node(tree, node);
         }
 
         // Iterate through the direct children.
@@ -477,7 +487,7 @@ class Process {
              << timer.selection / 1e9 << "s)" << endl;
         cout << 100 * timer.fixation / total_time << "% of time spent in fixation ("
              << timer.fixation / 1e9 << "s)" << endl;
-        cout << 100 * timer.summary_stats / total_time << "% of time spent in fixation ("
+        cout << 100 * timer.summary_stats / total_time << "% of time spent in summary stats ("
              << timer.summary_stats / 1e9 << "s)" << endl;
     }
 };

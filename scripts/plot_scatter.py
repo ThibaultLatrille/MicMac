@@ -2,6 +2,7 @@ from os.path import basename, isdir
 import threading
 import argparse
 import itertools
+from gzip import open as gzopen
 from glob import glob
 import pandas as pd
 import numpy as np
@@ -124,22 +125,18 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
     print(output)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-f', '--folder', required=True, type=str, dest="folder", help="Input folder")
-    parser.add_argument('-o', '--output', required=True, type=str, dest="output", help="Output path")
-    args = parser.parse_args()
-
-    models_path = {basename(p): p for p in glob(args.folder + "/*") if isdir(p)}
+def main(folder, output):
+    models_path = {basename(p): p for p in glob(folder + "/*") if isdir(p)}
     model_prefs = {"moving_optimum": 0, "directional": 1, "stabilizing": 2, "neutral": 3}
     models = list(sorted(models_path, key=lambda x: model_prefs[x] if x in model_prefs else -1))
 
-    replicates = {m: glob(p + "/*.tsv") for m, p in models_path.items()}
+    replicates = {m: glob(f"{p}/*.tsv.gz") for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
 
-    rep_nhx = {m: set([open(f + ".nhx", 'r').read() for f in g]) for m, g in replicates.items()}
+    rep_nhx = {m: set([Tree(f.replace('.tsv.gz', '.nhx.gz')) for f in g]) for m, g in replicates.items()}
+    print(rep_nhx)
     nhx = set([t_set.pop() for m, t_set in rep_nhx.items() if len(t_set) == 1])
-    assert len(nhx) == 1
+    print(nhx)
     tree = Tree(nhx.pop(), format=3)
     nb_leaves = len(tree.get_leaf_names())
     nb_pairs = nb_leaves * (nb_leaves - 1) // 2
@@ -152,7 +149,6 @@ if __name__ == '__main__':
     Vi, Vg_pair = {}, {}
     for model, v in itertools.product(models, [Vi, Vg_pair]):
         v[model] = np.zeros((len(replicates[model]), nb_pairs))
-
 
     def threading_replicates(m):
         for f, filepath in enumerate(replicates[m]):
@@ -194,7 +190,7 @@ if __name__ == '__main__':
     for index, thread in enumerate(threads):
         thread.join()
 
-    replace = args.output.replace
+    replace = output.replace
 
     nb_genes = set([len(v) for v in Vg.values()]).pop()
     if "neutral" in models:
@@ -207,7 +203,7 @@ if __name__ == '__main__':
 
     x_str = r"Variance within $\left( \frac{V_P}{2N} \right)$"
     y_str = r"Variance between $\left( \frac{Var[\overline{X}]}{t} \right)$"
-    scatter_plot(Vg_scaled_pair, Vi_scaled, x_str, y_str, args.output, nb_genes,
+    scatter_plot(Vg_scaled_pair, Vi_scaled, x_str, y_str, output, nb_genes,
                  title=' - Contemporary data', histy_log=True)
     scatter_plot(Vg_scaled_pair, Vi_scaled, x_str, y_str, replace(".pdf", "_loglog.pdf"), nb_genes,
                  title=' - Contemporary data', loglog=True)
@@ -231,6 +227,14 @@ if __name__ == '__main__':
     ratio_Vi_Vg_scaled = {m: Vi_scaled[m] / Vg_scaled_pair[m] for m in models}
     ratio_Vi_Vg_mean = {m: Vi_scaled[m] / Vg_mean_pair[m] for m in models}
     ratio_Vi_Vg_harm = {m: Vi_scaled[m] / Vg_harm_pair[m] for m in models}
-    hist_plot(ratio_Vi_Vg_scaled, x_str, args.output, nb_genes, ' - Contemporary data')
+    hist_plot(ratio_Vi_Vg_scaled, x_str, output, nb_genes, ' - Contemporary data')
     hist_plot(ratio_Vi_Vg_mean, x_str, replace(".pdf", "_mean.pdf"), nb_genes, ' - Mean along ancestry')
     hist_plot(ratio_Vi_Vg_harm, x_str, replace(".pdf", "_harm.pdf"), nb_genes, ' - Harmonic mean along ancestry')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-f', '--folder', required=True, type=str, dest="folder", help="Input folder")
+    parser.add_argument('-o', '--output', required=True, type=str, dest="output", help="Output path")
+    args = parser.parse_args()
+    main(args.folder, args.output)

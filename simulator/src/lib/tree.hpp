@@ -121,8 +121,10 @@ class Tree {
         max_distance_ = root_age;
     };
 
-    void set_tag(NodeIndex node, const TagName& tag, const TagValue& value) {
-        tags_.at(node)[tag] = value;
+    void set_tag(NodeIndex node, TagName tag_name, const TagValue& value) {
+        // replace all spaces by underscores
+        std::replace(tag_name.begin(), tag_name.end(), ' ', '_');
+        tags_.at(node)[tag_name] = value;
     }
 
     std::string recursive_string(
