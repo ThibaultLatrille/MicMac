@@ -81,7 +81,9 @@ class GenomeStructureArgParse {
 
 class Individual {
   public:
-    map<u_long, bool> loci{};
+    // If the value of the map is false, the locus is heterozygous.
+    // If the value of the map is true, the locus is homozygous for the derived allele.
+    unordered_map<u_long, bool> loci{};
     double genotype{0.0};
     double environment{0.0};
     double phenotype{0.0};
@@ -101,6 +103,14 @@ class Individual {
         phenotype = genotype + environment;
         update_fitness(fitness_model);
     };
+
+    double heterozygosity(GenomeStructure const &genome) const {
+        u_long h{0};
+        for (auto const &locus : loci) {
+            if (!locus.second) { h++; }
+        }
+        return static_cast<double>(h) / static_cast<double>(genome.number_loci);
+    }
 
     double compute_genotype(GenomeStructure const &genome) const {
         double p = genome.background_genotype;
@@ -227,7 +237,7 @@ class Population {
     FitnessModel &fitness_function;
     PopulationSizeProcess pop_size;
     FitnessState fitness_state;
-    double heritability{0};
+    mutable double heritability{0};
 
     // Individuals composing the population
     vector<Individual> parents{};
@@ -263,10 +273,10 @@ class Population {
         for (auto &p : parents) { p.mutation(genome, fitness_function); }
     };
 
-    void selection_and_random_mating() {
+    vector<Individual> sampling_individuals(bool fitness) const {
         vector<double> fitness_vector(parents.size(), 0);
         transform(parents.begin(), parents.end(), fitness_vector.begin(),
-            [](Individual const &b) { return b.fitness; });
+            [&fitness](Individual const &b) { return (fitness ? b.fitness : 1.0); });
         discrete_distribution<u_long> parent_distrib(fitness_vector.begin(), fitness_vector.end());
 
         vector<double> x, y;
@@ -280,30 +290,20 @@ class Population {
             y.push_back(children.back().phenotype);
         }
         heritability = slope(x, y);
-        parents = std::move(children);
-    };
+        return children;
+    }
+
+    void selection_and_random_mating() { parents = sampling_individuals(true); };
 
     unordered_map<u_long, u_long> site_frequency_spectrum() const {
         unordered_map<u_long, u_long> frequencies{};
         for (Individual const &p : parents) {
             for (pair<const u_long, bool> const &locus : p.loci) {
-                // check if the locus is in frequencies
-                if (frequencies.find(locus.first) == frequencies.end()) {
-                    frequencies[locus.first] = 1 + locus.second;
-                } else {
-                    frequencies[locus.first] += 1 + locus.second;
-                };
+                frequencies[locus.first] += 1 + locus.second;
             }
         }
         unordered_map<u_long, u_long> sfs{};
-        for (pair<const u_long, u_long> const &freq : frequencies) {
-            // check if the locus is in frequencies
-            if (frequencies.find(freq.second) == frequencies.end()) {
-                sfs[freq.second] = 1;
-            } else {
-                sfs[freq.second] += 1;
-            }
-        }
+        for (pair<const u_long, u_long> const &freq : frequencies) { sfs[freq.second] += 1; }
         return sfs;
     }
 
@@ -318,11 +318,10 @@ class Population {
                 epsilon = static_cast<double>(it->second);
                 assert(epsilon > 0);
             }
-            assert(epsilon <= genome.number_loci);
-            double x = static_cast<double>(i) * epsilon;
-            watterson.add(x, 1.0 / static_cast<double>(i));
-            tajima.add(x, static_cast<double>(pop_size.get_population_size() * 2 - i));
-            fay_wu.add(x, static_cast<double>(i));
+            double theta = static_cast<double>(i) * epsilon;
+            watterson.add(theta, 1.0 / static_cast<double>(i));
+            tajima.add(theta, static_cast<double>(n - i));
+            fay_wu.add(theta, static_cast<double>(i));
         }
         double theta_watterson = watterson.mean() / static_cast<double>(genome.number_loci);
         double theta_tajima = tajima.mean() / static_cast<double>(genome.number_loci);
@@ -330,6 +329,12 @@ class Population {
         return {theta_watterson, theta_tajima, theta_fay_wu};
     }
 
+    double sampled_theta_pairwise() const {
+        double h{0.0};
+        auto kids = sampling_individuals(false);
+        for (auto const &individual : kids) { h += individual.heterozygosity(genome); }
+        return h / static_cast<double>(kids.size());
+    }
 
     void fixation() {
         set<u_long> loci_tmp{};
@@ -354,7 +359,7 @@ class Population {
         assert(check());
     }
 
-    unordered_map<string, double> summary_states() {
+    unordered_map<string, double> summary_states() const {
         unordered_map<string, double> stats{};
 
         vector<double> traits(parents.size(), 0);
@@ -380,16 +385,27 @@ class Population {
     }
 
     void save_node(Tree &tree, Tree::NodeIndex node) {
+        tree.set_tag(node, "Population size", to_string(pop_size.get_population_size()));
+        tree.set_tag(node, "Number of loci", to_string(genome.number_loci));
+        tree.set_tag(
+            node, "Mutational rate", to_string(genome.mutation_rate_per_loci_per_generation));
+        tree.set_tag(node, "Mutational var", to_string(genome.expected_variance()));
+        tree.set_tag(node, "Heritability", to_string(heritability));
         auto stats = summary_states();
         for (auto const &stat : stats) { tree.set_tag(node, stat.first, to_string(stat.second)); }
+
+        fixation();
         auto sfs = site_frequency_spectrum();
         auto theta_tuple = theta(sfs);
         tree.set_tag(node, "Theta Watterson", to_string(get<0>(theta_tuple)));
         tree.set_tag(node, "Theta Tajima", to_string(get<1>(theta_tuple)));
         tree.set_tag(node, "Theta Fay Wu", to_string(get<2>(theta_tuple)));
-        double q = nbr_fixations / static_cast<double>(genome.number_loci);
+        tree.set_tag(node, "Theta", to_string(sampled_theta_pairwise()));
+
+        double d = nbr_fixations / static_cast<double>(genome.number_loci);
         tree.set_tag(node, "Fixations", to_string(nbr_fixations));
-        tree.set_tag(node, "q", to_string(q));
+        tree.set_tag(node, "d", to_string(d));
+        tree.set_tag(node, "q", to_string(d / tree.node_length(node)));
     }
 
     void run(u_long nbr_generations, Trace &trace) {

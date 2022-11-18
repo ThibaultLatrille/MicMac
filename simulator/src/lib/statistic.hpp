@@ -47,4 +47,6 @@ class Stat {
     }
 
     double mean() const { return total / n; }
+
+    double sampled_mean() const { return total / (n - 1); }
 };

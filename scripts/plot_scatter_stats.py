@@ -2,6 +2,7 @@ import argparse
 import itertools
 from glob import glob
 from gzip import open as gzopen
+from collections import defaultdict
 from os.path import basename, isdir
 import numpy as np
 from ete3 import Tree
@@ -54,7 +55,7 @@ def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=
         a = results.params[0]
         linear = a * idf
         reg = '{0} - slope of {1:.2g} ($r^2$={2:.2g})'.format(m.replace("_", " ").capitalize(), a, results.rsquared)
-        ax.plot(idf, linear, '-', linestyle="--", label=reg, color=color_models[id_m])
+        ax.plot(idf, linear, linestyle="--", label=reg, color=color_models[id_m])
 
     bins_x = np.geomspace(max(1e-6, min_x), max_x, 100) if loglog else 100
     bins_y = np.geomspace(max(1e-6, min_y), max_y, 100) if loglog else 100
@@ -85,37 +86,61 @@ def main(folder, output):
     replicates = {m: glob(p + "/*.nhx.gz") for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
 
-    var_within = {m: [] for m in models}
-    var_between = {m: [] for m in models}
+    var_dict = defaultdict(lambda: defaultdict(list))
     for m in models:
         for f, filepath in enumerate(replicates[m]):
             newick = gzopen(filepath).read().decode()
             tree = Tree(newick, format=1)
-            rep_var_between = []
+            combinations, weights = defaultdict(list), defaultdict(list)
             for i, j in itertools.combinations(tree.get_leaves(), 2):
                 means = [float(getattr(n, "Phenotype_mean")) for n in [i, j]]
                 var_x = np.var(means, ddof=1)
 
                 ancestor = tree.get_common_ancestor(i, j)
-                q = 0.0
+                if not ancestor.is_root():
+                    continue
+                d = 0.0
                 for n in [i, j]:
                     current = n
                     while current != ancestor:
-                        q += float(getattr(n, "q"))
+                        d += float(getattr(n, "d"))
                         current = current.up
-                rep_var_between.append(var_x / q)
-            var_between[m].append(np.mean(rep_var_between))
-
-            rep_var_within = []
+                combinations['between'].append(var_x / (2.0 * d))
+                weights['d'].append(d)
+                weights['1/d'].append(1.0 / d)
             for n in tree.get_leaves():
-                rep_var_within.append(float(getattr(n, "Phenotype_var")) / float(getattr(n, "Theta_Watterson")))
-            var_within[m].append(np.mean(rep_var_within))
+                vp = float(getattr(n, "Phenotype_var"))
+                combinations['within_tajima'].append(vp / float(getattr(n, "Theta_Tajima")))
+                combinations['within_watterson'].append(vp / float(getattr(n, "Theta_Watterson")))
+                combinations["within_fay_wu"].append(vp / float(getattr(n, "Theta_Fay_Wu")))
+                combinations["within_sampled"].append(vp / float(getattr(n, "Theta")))
+                r = float(getattr(n, "Mutational_var")) / (2 * float(getattr(n, "Mutational_rate")))
+                combinations["mutational"].append(r)
 
-    nb_genes = set([len(v) for v in var_within.values()]).pop()
-    x_str = r"Variance within $\left( \frac{V_P}{\pi} \right)$"
-    y_str = r"Variance between $\left( \frac{Var[\overline{X}]}{q} \right)$"
-    scatter_plot(var_within, var_between, x_str, y_str, output, nb_genes,
-                 title=' - Contemporary data', histy_log=True)
+            for k, v in combinations.items():
+                var_dict[k][m].append(np.mean(v))
+            var_dict['between_d'][m].append(np.average(combinations['between'], weights=weights['d']))
+            var_dict['between_1/d'][m].append(np.average(combinations['between'], weights=weights['1/d']))
+    nb_genes = set([len(v) for v in var_dict["between"].values()]).pop()
+    mut_str = r"Variance mutational $\left( \frac{V_M}{2u} \right)$"
+    within_str = r"Variance within $\left( \frac{V_P}{\theta} \right)$"
+    between_str = r"Variance between $\left( \frac{V_B}{2d} \right)$"
+    scatter_plot(var_dict["within_sampled"], var_dict["between"], within_str, between_str,
+                 output, nb_genes, title=' - Sample theta', histy_log=True)
+    scatter_plot(var_dict["within_sampled"], var_dict["between_d"], within_str, between_str,
+                 output.replace(".pdf", "_d.pdf"), nb_genes, title=' - w=q', histy_log=True)
+    scatter_plot(var_dict["within_sampled"], var_dict["between_1/d"], within_str, between_str,
+                 output.replace(".pdf", "_d-1.pdf"), nb_genes, title=' - w=1/d', histy_log=True)
+    scatter_plot(var_dict["within_tajima"], var_dict["between"], within_str, between_str,
+                 output.replace(".pdf", "_tajima.pdf"), nb_genes, title=' - Tajima', histy_log=True)
+    scatter_plot(var_dict["within_watterson"], var_dict["between"], within_str, between_str,
+                 output.replace(".pdf", "_watterson.pdf"), nb_genes, title=' - Watterson', histy_log=True)
+    scatter_plot(var_dict["within_fay_wu"], var_dict["between"], within_str, between_str,
+                 output.replace(".pdf", "_fay_Wu.pdf"), nb_genes, title=' - Fay Wu', histy_log=True)
+    scatter_plot(var_dict["mutational"], var_dict["within_sampled"], mut_str, within_str,
+                 output.replace(".pdf", "_mut_within.pdf"), nb_genes, title=' - Vm versus Vp', histy_log=True)
+    scatter_plot(var_dict["mutational"], var_dict["between"], mut_str, between_str,
+                 output.replace(".pdf", "_mut_between.pdf"), nb_genes, title=' - Vm versus Vd', histy_log=True)
 
 
 if __name__ == '__main__':

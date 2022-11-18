@@ -12,7 +12,8 @@ SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k, v) for k, v in config
 
 rule all:
     input:
-        expand(f"{FOLDER}/plot_scatter_stats.pdf")
+        f"{FOLDER}/plot_scatter_stats.pdf",
+        f"{FOLDER}/plot_scatter.pdf",
 
 rule run_simulations:
     input:
@@ -42,7 +43,7 @@ rule plot_scatter:
         exp=expand(rules.run_simulations.output.tsv, scaling=REPLICATES, simulator=config["simulators"]),
         script=f'{ROOT}/scripts/plot_scatter.py'
     output:
-        plot=f"{FOLDER}/scatter_plot.pdf"
+        plot=f"{FOLDER}/plot_scatter.pdf"
     threads: len(config["simulators"])
     shell:
         'python3 {input.script} --folder {FOLDER} --output {output.plot}'

@@ -70,7 +70,7 @@ def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=
         a = results.params[0]
         linear = a * idf
         reg = '{0} - slope of {1:.2g} ($r^2$={2:.2g})'.format(m.replace("_", " ").capitalize(), a, results.rsquared)
-        ax.plot(idf, linear, '-', linestyle="--", label=reg, color=color_models[id_m])
+        ax.plot(idf, linear, linestyle="--", label=reg, color=color_models[id_m])
 
     bins_x = np.geomspace(max(1e-6, min_x), max_x, 100) if loglog else 100
     bins_y = np.geomspace(max(1e-6, min_y), max_y, 100) if loglog else 100
@@ -104,7 +104,7 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
     logbins = np.geomspace(min_x, max_x, 100)
     hist, _, _ = ax.hist(x.values(), bins=logbins, color=color_models, **hist_filled)
     hist, _, _ = ax.hist(x.values(), bins=logbins, color=color_models, **hist_step)
-    max_y = 1.2 * max([max(h) for h in hist])
+    max_y = 1.2 * (max([max(h) for h in hist]) if len(x) > 1 else max(hist))
 
     for id_m, m in enumerate(x):
         x_mean = np.mean(x[m])
@@ -133,13 +133,17 @@ def main(folder, output):
     replicates = {m: glob(f"{p}/*.tsv.gz") for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
 
-    rep_nhx = {m: set([Tree(f.replace('.tsv.gz', '.nhx.gz')) for f in g]) for m, g in replicates.items()}
-    print(rep_nhx)
-    nhx = set([t_set.pop() for m, t_set in rep_nhx.items() if len(t_set) == 1])
-    print(nhx)
-    tree = Tree(nhx.pop(), format=3)
+    rep_nhx = {m: [Tree(gzopen(f.replace('.tsv.gz', '.nhx.gz')).read().decode(), format=1) for f in g] for m, g in
+               replicates.items()}
+    # Get first tree to get the number of genes
+    for m, g in rep_nhx.items():
+        assert len(set(["-".join(sorted(t.get_leaf_names())) for t in g])) == 1
+        assert len(set([t.get_distance(t.get_tree_root()) for t in g])) == 1
+
+    tree = rep_nhx[models[0]][0]
     nb_leaves = len(tree.get_leaf_names())
     nb_pairs = nb_leaves * (nb_leaves - 1) // 2
+    print(f"Number of leaves: {nb_leaves}")
     distances = {(i, j): tree.get_distance(i, j) for i, j in itertools.combinations(sorted(tree.get_leaf_names()), 2)}
 
     Vg, Vm, Vm_theo, Vi_scaled, Vg_scaled_pair, Vg_mean_pair, Vg_harm_pair = {}, {}, {}, {}, {}, {}, {}
@@ -154,7 +158,11 @@ def main(folder, output):
         for f, filepath in enumerate(replicates[m]):
             print(filepath)
             gr = {k: gb for k, gb in pd.read_csv(filepath, sep="\t").groupby("Lineage")}
+            print(f"Number of group: {len(gr)}")
+            print(' '.join(sorted(gr.keys())))
             gr_leaves = {k: gb for k, gb in gr.items() if k in tree.get_leaf_names()}
+            print(f"Number of leaves group: {len(gr_leaves)}")
+            print(' '.join(sorted(gr_leaves.keys())))
             gr_extant = {k: gb[gb["Generation"] == max(gb["Generation"])] for k, gb in gr_leaves.items()}
             gr_last_gens = {k: gb[gb["Generation"] > (max(gb["Generation"]) - 50)] for k, gb in gr_leaves.items()}
 
@@ -193,7 +201,8 @@ def main(folder, output):
     replace = output.replace
 
     nb_genes = set([len(v) for v in Vg.values()]).pop()
-    if "neutral" in models:
+    non_neutral_models = [m for m in models if m != "neutral"]
+    if "neutral" in models and len(non_neutral_models) > 0:
         ratio_Vi_Vg_neutral = {}
         for model in [m for m in models if m != "neutral"]:
             r = (Vi[model] * Vg_pair["neutral"]) / (Vg_pair[model] * Vi["neutral"])
