@@ -52,8 +52,8 @@
     \overline{\Trait}_{j} = \sum_{i=1}^{\Ne_{j}} \Trait_{i,j} \\
     \Var \left[ \overline{\Trait}\right]_{j,k} = \overline{\Trait}_{j} \overline{\Trait}_{k} - \left( \frac{\overline{\Trait}_{j} + \overline{\Trait}_{k}}{2} \right)^2  \\
     \frac{\Var \left[ \overline{\Trait}\right]_{j,k}}{t_{j,k}} = \frac{\overline{\Trait}_{j} \overline{\Trait}_{k} - \left( \frac{\overline{\Trait}_{j} + \overline{\Trait}_{k}}{2} \right)^2}{t_{j,k}}  \\
-    \frac{\Var \left[ \overline{\Trait}\right]}{t} = \sum_{\text{pairs }j, k}\frac{\Var \left[ \overline{\Trait }\right]_{j,k}}{t_{j,k}} \\
-    \frac{\VarPhenotype}{2 \Ne}  = \sum_{j} \frac{\VarPhenotypej}{2 \Ne _{j}} \\
+    \frac{\Var \left[ \overline{\Trait}\right]}{t} = \frac{2}{n(n-1)}\sum_{j= 1}^{n} \sum_{k = j + 1}^{n} \frac{\Var \left[ \overline{\Trait }\right]_{j,k}}{t_{j,k}} \\
+    \frac{\VarPhenotype}{2 \Ne}  = \frac{1}{n} \sum_{j=1}^{n} \frac{\VarPhenotypej}{2 \Ne _{j}} \\
 \end{gather*}
 
 \newpage
@@ -91,4 +91,16 @@
 	\end{tabu}
 \end{table}
 
+\newpage
+\begin{itemize}
+	\item $\overline{\Trait}_{j}$ is the mean phenotype in species $j$.
+	\item $\Var \left[ \overline{\Trait}\right]_{j,k}$ is variance in mean phenotype between species $j$ and $k$.
+	\item $\VarPhenotypej$ is the phenotypic variance inside species $j$.
+	\item $d_{j,k}$ is the synonymous divergence between species $j$ and $k$.
+	\item $\pi_{j}$ is the synonymous polymorphism inside species $j$.
+\end{itemize}
+
+\begin{equation}
+	\left< \frac{ \Var \left[ \overline{\Trait}\right]_{j,k} }{ d_{j,k} } \right>_{j,k} = \left< \frac{ \VarPhenotypej }{ \pi_{j} }  \right>_{j}
+\end{equation}
 \end{document}
