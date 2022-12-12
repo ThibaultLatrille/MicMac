@@ -1,59 +1,105 @@
-import numpy as np
 import os
+import numpy as np
 
 ROOT = os.path.abspath('../../..')
 FOLDER = os.path.abspath('.')
 
 configfile: 'config.yaml'
 
-REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"], config["max_number_loci"], config["nb_genes"])]
-SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k, v) for k, v in d.items() if k != "model"]) for s, d in config["simulators"].items()}
-SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k, v) for k, v in config["core"].items()])
+OUTPUT_TSV = "OUTPUT_TSV" in config and config["OUTPUT_TSV"]
+REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"],config["max_number_loci"],config["nb_genes"])]
+SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() if k != "model"]) for s, d in
+                    config["simulators"].items()}
+SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
+
+output_pdf = [f"{FOLDER}/inference_stats.tsv.gz"]
+if OUTPUT_TSV:
+    output_pdf += [f"{FOLDER}/dataframe_stats.pdf"]
 
 rule all:
-    input:
-        f"{FOLDER}/plot_scatter_stats.pdf",
-        f"{FOLDER}/plot_scatter.pdf",
+    input: output_pdf
+
+def simulator_output(wildcards):
+    return f"{FOLDER}/{wildcards.simulator}/replicate_{wildcards.scaling}"
 
 rule run_simulations:
     input:
-        exec= lambda wildcards: f'{ROOT}/simulator/build/{config["simulators"][wildcards.simulator]["model"]}',
-        tree=f'{ROOT}/simulator/{config["tree"]}'
+        exec=lambda wildcards: f"{ROOT}/simulator/build/{config['simulators'][wildcards.simulator]['model']}",
+        tree=f"{ROOT}/simulator/{config['tree']}"
     output:
-        tsv=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tsv.gz",
         nhx=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.nhx.gz"
     params:
-        file=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}",
-        folder= lambda wildcards: f"{FOLDER}/{wildcards.simulator}",
-        simulator= lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"], SIMULATOR_PARAMS[wildcards.simulator])
+        file=lambda wildcards: simulator_output(wildcards),
+        output_tsv=lambda wildcards: f"--output_tsv && gzip {simulator_output(wildcards)}.tsv" if OUTPUT_TSV else '',
+        folder=lambda wildcards: f"{FOLDER}/{wildcards.simulator}",
+        simulator=lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"],SIMULATOR_PARAMS[wildcards.simulator])
     shell:
-        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --number_loci {wildcards.scaling} --output {params.file} && gzip {params.file}.tsv  && gzip {params.file}.nhx'
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --number_loci {wildcards.scaling} --output {params.file} && gzip {params.file}.nhx'
 
-rule plot_trajectory:
-    input:
-        exp=rules.run_simulations.output.tsv,
-        script=f'{ROOT}/scripts/plot_trajectory.py'
-    output:
-        plot=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.pdf"
-    shell:
-        'python3 {input.script} --input {input.exp} --output {output.plot}'
 
-rule plot_scatter:
+rule tree_stats:
     input:
-        exp=expand(rules.run_simulations.output.tsv, scaling=REPLICATES, simulator=config["simulators"]),
-        script=f'{ROOT}/scripts/plot_scatter.py'
+        exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,simulator=config["simulators"]),
+        script=f"{ROOT}/scripts/plot_scatter_stats.py"
     output:
-        plot=f"{FOLDER}/plot_scatter.pdf"
-    threads: len(config["simulators"])
+        tsv=f"{FOLDER}/tree_stats.tsv.gz"
     shell:
-        'python3 {input.script} --folder {FOLDER} --output {output.plot}'
+        'python3 {input.script} --folder {FOLDER} --output {output.tsv}'
 
-rule plot_scatter_stats:
+rule dataframe_stats:
     input:
-        exp=expand(rules.run_simulations.output.tsv, scaling=REPLICATES, simulator=config["simulators"]),
-        script=f'{ROOT}/scripts/plot_scatter_stats.py'
+        exp=expand(rules.run_simulations.output.nhx, scaling=REPLICATES, simulator=config["simulators"]),
+        script=f"{ROOT}/scripts/plot_scatter.py"
     output:
-        plot=f"{FOLDER}/plot_scatter_stats.pdf"
-    threads: len(config["simulators"])
+        tsv=f"{FOLDER}/dataframe_stats.pdf"
+    threads: workflow.cores
     shell:
-        'python3 {input.script} --folder {FOLDER} --output {output.plot}'
+        'python3 {input.script} --folder {FOLDER} --output {output.tsv}'
+
+rule pre_processed_traits:
+    input:
+        script=f"{ROOT}/scripts/pre_processed_traits.py",
+        nhx=rules.run_simulations.output.nhx
+    output:
+        tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tree",
+        traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.traits.tsv",
+        fossils=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.fossils.tsv"
+    shell:
+        'python3 {input.script} --input {input.nhx} --tree {output.tree} --traits {output.traits} --fossils {output.fossils}'
+
+def chain_name(wildcards):
+    return f"{FOLDER}/{wildcards.simulator}/inference_{wildcards.scaling}"
+
+rule run_inference:
+    input:
+        exec=f"{ROOT}/utils/BayesCode/bin/nodetraits",
+        tree=rules.pre_processed_traits.output.tree,
+        traits=rules.pre_processed_traits.output.traits,
+        fossils=rules.pre_processed_traits.output.fossils
+    output:
+        run=f"{FOLDER}/{{simulator}}/inference_{{scaling}}.run",
+    params:
+        chain=lambda wildcards: chain_name(wildcards),
+    shell:
+        '{input.exec} -u 100 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain}'
+
+rule read_inference:
+    input:
+        exec=f"{ROOT}/utils/BayesCode/bin/readnodetraits",
+        chain=rules.run_inference.output.run
+    output:
+        cov=f"{FOLDER}/{{simulator}}/inference_{{scaling}}.cov"
+    params:
+        chain=lambda wildcards: chain_name(wildcards),
+    shell:
+        '{input.exec} --burnin 50 --until 100 --cov {params.chain}'
+
+rule inference_stats:
+    input:
+        script=f"{ROOT}/scripts/plot_inference.py",
+        tsv=rules.tree_stats.output.tsv,
+        cov=expand(rules.read_inference.output.cov,scaling=REPLICATES,simulator=config["simulators"])
+    output:
+        plot=f"{FOLDER}/inference_stats.tsv.gz"
+    shell:
+        'python3 {input.script} --tsv {input.tsv} --folder {FOLDER} --output {output.plot}'

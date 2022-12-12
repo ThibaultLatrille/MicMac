@@ -21,6 +21,8 @@ class OutputArgParse {
     TCLAP::ValueArg<u_long> burn_in{"", "burn_in",
         "Burn-in period in number of generations (before speciation).", false, 1000, "u_long", cmd};
     TCLAP::ValueArg<std::string> output_path{"o", "output", "output path", true, "", "string", cmd};
+    TCLAP::SwitchArg ouput_tsv{
+        "", "ouput_tsv", "Output also as a tsv file (per generation)", cmd, false};
     TCLAP::ValueArg<u_long> seed{
         "", "seed", "Random number generator seed", false, 0, "u_long", cmd};
     TCLAP::ValueArg<u_long> seed_pop_size{"", "seed_pop_size",

@@ -34,19 +34,32 @@ double slope(const std::vector<double> &x, const std::vector<double> &y) {
 }
 
 class Stat {
-  public:
+  private:
+    double arithm{0};
+    double harm{0};
+    double ln_geom{1.0};
     double n{0};
-    double total{0};
 
+  public:
     Stat() = default;
     ~Stat() = default;
 
-    void add(double const &x, double const &w = 1.0) {
-        total += x * w;
-        n += w;
+    void reset() {
+        arithm = 0;
+        harm = 0;
+        ln_geom = 0.0;
+        n = 0;
     }
 
-    double mean() const { return total / n; }
+    void add(double const &x, double const &w = 1.0) {
+        n += w;
+        arithm += x * w;
+        harm += w / x;
+        ln_geom += w * log(x);
+    }
 
-    double sampled_mean() const { return total / (n - 1); }
+    double mean() const { return arithm / n; }
+    double sampled_mean() const { return arithm / (n - 1); }
+    double harmonic_mean() const { return n / harm; }
+    double geometric_mean() const { return exp(ln_geom / n); }
 };

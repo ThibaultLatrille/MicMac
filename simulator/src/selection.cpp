@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
                     : Tree(args.tree_path.getValue());
     tree.set_root_age(root_age);
 
-    Trace trace{};
+    Trace trace(args.ouput_tsv.getValue());
     population.run(args.burn_in.getValue(), trace);
     Process process(tree, population, trace);
     trace.write_tsv(args.output_path.getValue());

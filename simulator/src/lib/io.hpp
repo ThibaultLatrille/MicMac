@@ -28,6 +28,7 @@ std::string d_to_string(double val) {
 
 class Trace {
   private:
+    bool save_trace{true};
     std::unordered_map<std::string, std::size_t> header_to_index;
     std::unordered_map<std::string, std::size_t> header_to_count;
     std::size_t nb_row{0};
@@ -36,9 +37,10 @@ class Trace {
     std::vector<std::vector<std::string>> data;
 
   public:
-    Trace() : header_to_index{}, header_to_count{}, data{} {}
+    explicit Trace(bool save_trace) : save_trace{save_trace}, header_to_index{}, header_to_count{}, data{} {}
 
     void add(std::string const &key, std::string const &val) {
+        if (!save_trace) { return; }
         if (header_to_index.count(key) == 0) {
             header.push_back(key);
             header_to_count[key] = 0;
@@ -63,6 +65,7 @@ class Trace {
     void add(std::string const &key, double val) { add(key, d_to_string(val)); }
 
     void write_tsv(std::string const &output_filename) {
+        if (!save_trace) { return; }
         std::ofstream tsv_file;
         tsv_file.open(output_filename + ".tsv");
         tsv_file << join(header, '\t') << std::endl;

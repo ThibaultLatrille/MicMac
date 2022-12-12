@@ -242,6 +242,7 @@ class Population {
     // Individuals composing the population
     vector<Individual> parents{};
     unsigned nbr_fixations{0};
+    unordered_map<string, Stat> stat_map{};
 
     ~Population() = default;
     explicit Population(
@@ -261,6 +262,7 @@ class Population {
         fitness_state = pop.fitness_state;
         fitness_function.set_state(fitness_state);
         nbr_fixations = 0;
+        for (auto &stat : stat_map) { stat.second.reset(); }
     }
 
     bool check() const {
@@ -389,8 +391,15 @@ class Population {
         tree.set_tag(node, "Number of loci", to_string(genome.number_loci));
         tree.set_tag(
             node, "Mutational rate", to_string(genome.mutation_rate_per_loci_per_generation));
-        tree.set_tag(node, "Mutational var", to_string(genome.expected_variance()));
+        tree.set_tag(node, "Expected Mutational var", to_string(genome.expected_variance()));
         tree.set_tag(node, "Heritability", to_string(heritability));
+        for (auto const &stat : stat_map) {
+            tree.set_tag(node, "BranchMean_" + stat.first, to_string(stat.second.mean()));
+            tree.set_tag(
+                node, "BranchGeometricMean_" + stat.first, to_string(stat.second.geometric_mean()));
+            tree.set_tag(
+                node, "BranchHarmonicMean_" + stat.first, to_string(stat.second.harmonic_mean()));
+        }
         auto stats = summary_states();
         for (auto const &stat : stats) { tree.set_tag(node, stat.first, to_string(stat.second)); }
 
@@ -418,14 +427,14 @@ class Population {
             trace.add("Lineage", name);
             trace.add("Generation", elapsed);
             trace.add("Population size", pop_size.get_population_size());
+            stat_map["Population size"].add(static_cast<double>(pop_size.get_population_size()));
 
             TimeVar t_start = timeNow();
             selection_and_random_mating();
-            trace.add("Heritability", heritability);
+            stat_map["Heritability"].add(heritability);
             timer.selection += duration(timeNow() - t_start);
 
             t_start = timeNow();
-            trace.add("Mutational expected var", genome.expected_variance());
             vector<double> traits(parents.size(), 0);
             transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.phenotype; });
@@ -434,12 +443,15 @@ class Population {
             transform(parents.begin(), parents.end(), traits.begin(),
                 [](Individual const &b) { return b.phenotype; });
             var_mutational += variance(traits);
-            trace.add("Mutational var", var_mutational);
+            stat_map["Mutational Var"].add(var_mutational);
             timer.mutation += duration(timeNow() - t_start);
 
             t_start = timeNow();
             auto stats = summary_states();
-            for (auto const &stat : stats) { trace.add(stat.first, stat.second); }
+            for (auto const &stat : stats) {
+                stat_map[stat.first].add(stat.second);
+                trace.add(stat.first, stat.second);
+            }
             timer.summary_stats += duration(timeNow() - t_start);
 
             u_long pct = 25 * sample / nbr_generations;

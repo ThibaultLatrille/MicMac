@@ -9,7 +9,10 @@ data_simulated/experiments*
 data_empirical/Turtles
 data_empirical/MMETSP
 data_empirical/bgee
+Legacy.*
+/utils/
 cmake-build-debug
+__pycache__
 build
 test
 .snakemake

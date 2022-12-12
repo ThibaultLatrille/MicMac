@@ -1,15 +1,6 @@
-from os.path import basename
-import matplotlib as mpl
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 import argparse
-
-mpl.use('Agg')
-
-my_dpi = 256
-fontsize = 14
-fontsize_legend = 12
+import pandas as pd
+from libraries import *
 
 
 def plot_trajectory(ax, x, y, mean=False):
