@@ -1,37 +1,37 @@
 import argparse
 from collections import defaultdict
-from gzip import open as gzopen
-import numpy as np
 import pandas as pd
-from ete3 import Tree
+from libraries import open_tree
 
 
-def main(input_path, tree_path, traits_path, fossils_path):
-    newick = gzopen(input_path).read().decode()
-    tree = Tree(newick, format=1)
-
-    # Write the topology to a newick file
-    tree.write(outfile=tree_path, format=6)
+def main(input_path, input_neutral_path, tree_path, traits_path, fossils_path):
+    tree = open_tree(input_path, format=1)
 
     dico_traits = defaultdict(list)
     for n in tree.get_leaves():
         dico_traits["TaxonName"].append(n.name)
-        pheno_mean = float(getattr(n, "Phenotype_mean"))
-        dico_traits["Phenotype_mean"].append(pheno_mean if pheno_mean != 0.0 else "NaN")
+        # pheno_mean = float(getattr(n, "Phenotype_mean"))
+        # dico_traits["Phenotype_mean"].append(pheno_mean if pheno_mean != 0.0 else "NaN")
         geno_mean = float(getattr(n, "Genotype_mean"))
-        dico_traits["Genotype_mean"].append(geno_mean if geno_mean != 0.0 else "NaN")
+        dico_traits["Genotype_mean"].append(geno_mean)
+
     df_traits = pd.DataFrame(dico_traits)
     df_traits.to_csv(traits_path, sep=("\t" if fossils_path.endswith(".tsv") else ","), index=False)
 
     dico_fossils = defaultdict(list)
-    for n in tree.traverse():
+    neutral_tree = open_tree(input_neutral_path, format=1)
+    assert neutral_tree.get_leaf_names() == tree.get_leaf_names()
+    for n in neutral_tree.traverse():
         n.dist = 0. if n.is_root() else float(getattr(n, "d"))
 
-    assert tree.is_root()
-    farthest, eccentricity = tree.get_farthest_leaf()
-    for n in tree.traverse():
+    # Write the topology to a newick file
+    neutral_tree.write(outfile=tree_path, format=3)
+
+    assert neutral_tree.is_root()
+    farthest, eccentricity = neutral_tree.get_farthest_leaf()
+    for n in neutral_tree.traverse():
         dico_fossils["NodeName"].append(n.name)
-        age_from_root = n.get_distance(tree)
+        age_from_root = n.get_distance(neutral_tree)
         age = max(eccentricity - age_from_root, 0.0)
         if n.is_root():
             assert age == eccentricity
@@ -45,8 +45,9 @@ def main(input_path, tree_path, traits_path, fossils_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--input", help="Input tree file", required=True)
+    parser.add_argument("--neutral", help="Input neutral tree file", required=True)
     parser.add_argument("--tree", help="Output tree file", required=True)
     parser.add_argument("--traits", help="Output traits file", required=True)
     parser.add_argument("--fossils", help="Output fossils file", required=True)
     args = parser.parse_args()
-    main(args.input, args.tree, args.traits, args.fossils)
+    main(args.input, args.neutral, args.tree, args.traits, args.fossils)

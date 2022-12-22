@@ -2,6 +2,8 @@ min_number_loci: 5000
 max_number_loci: 30000
 nb_genes: 1000
 tree: "trees/star.tre"
+output_tsv: false
+bayes_inference: false
 simulators:
   neutral:
     model: "neutral"

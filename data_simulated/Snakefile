@@ -6,13 +6,15 @@ FOLDER = os.path.abspath('.')
 
 configfile: 'config.yaml'
 
-OUTPUT_TSV = "OUTPUT_TSV" in config and config["OUTPUT_TSV"]
+OUTPUT_TSV = "output_tsv" in config and config["output_tsv"]
 REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"],config["max_number_loci"],config["nb_genes"])]
 SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() if k != "model"]) for s, d in
                     config["simulators"].items()}
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
-
-output_pdf = [f"{FOLDER}/inference_stats.tsv.gz"]
+if 'bayes_inference' in config and config['bayes_inference']:
+    output_pdf = [f"{FOLDER}/inference_stats.tsv.gz"]
+else:
+    output_pdf = [f"{FOLDER}/tree_stats.tsv.gz"]
 if OUTPUT_TSV:
     output_pdf += [f"{FOLDER}/dataframe_stats.pdf"]
 
@@ -59,13 +61,14 @@ rule dataframe_stats:
 rule pre_processed_traits:
     input:
         script=f"{ROOT}/scripts/pre_processed_traits.py",
-        nhx=rules.run_simulations.output.nhx
+        nhx=rules.run_simulations.output.nhx,
+        neutral=expand(rules.run_simulations.output.nhx, scaling=REPLICATES[1], simulator='neutral')
     output:
         tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tree",
         traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.traits.tsv",
         fossils=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.fossils.tsv"
     shell:
-        'python3 {input.script} --input {input.nhx} --tree {output.tree} --traits {output.traits} --fossils {output.fossils}'
+        'python3 {input.script} --input {input.nhx} --neutral {input.neutral} --tree {output.tree} --traits {output.traits} --fossils {output.fossils}'
 
 def chain_name(wildcards):
     return f"{FOLDER}/{wildcards.simulator}/inference_{wildcards.scaling}"
@@ -81,7 +84,7 @@ rule run_inference:
     params:
         chain=lambda wildcards: chain_name(wildcards),
     shell:
-        '{input.exec} -u 100 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain}'
+        '{input.exec} -u 200 --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain}'
 
 rule read_inference:
     input:
@@ -92,7 +95,7 @@ rule read_inference:
     params:
         chain=lambda wildcards: chain_name(wildcards),
     shell:
-        '{input.exec} --burnin 50 --until 100 --cov {params.chain}'
+        '{input.exec} --burnin 100 --until 100 --cov {params.chain}'
 
 rule inference_stats:
     input:

@@ -44,7 +44,9 @@ def open_covar_file(covar_file):
             if line.strip() == "":
                 break
             matrix[row] = [float(x.strip()) for x in line.strip().split(" ") if x.strip() != ""]
-            assert matrix[row][row] >= 0
+            if matrix[row][row] < 0:
+                matrix[row][row] = 0
+                exit(1)
             assert len(matrix[row]) == len(header)
             row += 1
     return header, matrix
@@ -70,24 +72,39 @@ def main(folder, tsv_path, output):
     replicates = {m: glob(p + "/*.cov") for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
 
-    header_var_dict = defaultdict(lambda: defaultdict(list))
+    header_var_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
     for m in models:
         for f, filepath in enumerate(replicates[m]):
             rep = os.path.basename(filepath).replace(".cov", "").split("_")[-1]
             header, matrix = open_covar_file(filepath)
             for i, h in enumerate(header):
-                sigma_phy = matrix[i][i]
+                sigma_phy = matrix[i][i] / 4
                 sigma_pop = dict_tree[("within_sampled", m, rep)]
+                sigma_mut = dict_tree[("mutational", m, rep)]
                 assert sigma_phy >= 0
                 assert sigma_pop >= 0
-                header_var_dict[h][m].append(sigma_phy / sigma_pop)
+                assert sigma_mut >= 0
+                header_var_dict[h]["phy"][m].append(sigma_phy)
+                header_var_dict[h]["pop"][m].append(sigma_pop)
+                header_var_dict[h]["mut"][m].append(sigma_mut)
+                header_var_dict[h]["phy_pop"][m].append(sigma_phy / sigma_pop)
+                header_var_dict[h]["phy_mut"][m].append(sigma_phy / sigma_mut)
 
     df = pd.DataFrame(header_var_dict)
     df.to_csv(output, sep="\t", index=False)
     for h, var_dict in header_var_dict.items():
-        nb_genes = set([len(v) for v in var_dict.values()]).pop()
-        hist_plot(var_dict, "$\\frac{\\sigma}{V_P / \\Theta}$", output.replace(".tsv.gz", f".{h}.pdf"), nb_genes,
-                  'Var inter divided by Var intra')
+        nb_genes = set([len(v) for v in var_dict["phy_pop"].values()]).pop()
+        hist_plot(var_dict["phy_pop"], "$\\frac{\\sigma_{phy}^2}{\\sigma_{pop}^2}$",
+                  output.replace(".tsv.gz", f".{h}.pdf"), nb_genes, 'Var inter divided by Var intra')
+
+        scatter_plot(var_dict["mut"], var_dict["phy"], "mut", "phy",
+                     output.replace(".tsv.gz", f".mutphy.{h}.pdf"), nb_genes, title=' - Vm versus Vd', histy_log=True)
+
+        scatter_plot(var_dict["mut"], var_dict["pop"], "mut", "pop",
+                     output.replace(".tsv.gz", f".mutpop.{h}.pdf"), nb_genes, title=' - Vm versus Vg', histy_log=True)
+
+        scatter_plot(var_dict["pop"], var_dict["phy"], "pop", "phy",
+                     output.replace(".tsv.gz", f".popphy.{h}.pdf"), nb_genes, title=' - Vg versus Vd', histy_log=True)
 
 
 if __name__ == '__main__':

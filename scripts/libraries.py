@@ -1,4 +1,7 @@
+import itertools
+from gzip import open as gzopen
 import numpy as np
+from ete3 import Tree
 import statsmodels.api as sm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -27,6 +30,46 @@ def get_node_names(root, target1, target2):
             nodes.append(current.name)
             current = current.up
     return nodes
+
+
+def open_tree(tree_path, format=1):
+    newick = gzopen(tree_path).read().decode()
+    return Tree(newick, format=format)
+
+
+def brownian_fitting(tree: Tree, neutral_tree: Tree, trait="Genotype_mean", dist="d"):
+    leaves = tree.get_leaves()
+    n = len(leaves)
+    C = np.zeros((n, n))
+    x = np.zeros(n)
+    for i, leaf in enumerate(leaves):
+        x[i] = float(getattr(leaf, trait))
+
+    for node, node_neutral in zip(tree.traverse("preorder"), neutral_tree.traverse("preorder")):
+        assert node.name == node_neutral.name
+        if node.is_root():
+            node.t = 0
+        else:
+            node.t = float(getattr(node_neutral, dist)) + node.up.t
+
+    for i, j in itertools.product(range(n), range(n)):
+        if i == j:
+            C[i, j] = leaves[i].t
+        elif i < j:
+            ancestor = leaves[i].get_common_ancestor(leaves[j])
+            C[i, j] = ancestor.t
+            C[j, i] = ancestor.t
+
+    invC = np.linalg.inv(C)
+    ones = np.ones(n)
+    v = np.dot(ones.T, invC)
+    z = float(np.dot(v, x)) / float(np.dot(v, ones))
+    assert np.isfinite(z)
+
+    d = (x - z * ones)
+    var = np.dot(d.T, np.dot(invC, d)) / (n - 1)
+    assert var > 0
+    return z, var
 
 
 def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=False, loglog=False):

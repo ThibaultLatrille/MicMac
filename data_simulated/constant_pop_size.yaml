@@ -1,7 +1,9 @@
 min_number_loci: 5000
 max_number_loci: 30000
-nb_genes: 30
-tree: "trees/mammal_subtree.tre.annotated"
+nb_genes: 1000
+tree: "trees/mammal.tre.annotated"
+output_tsv: false
+bayes_inference: false
 simulators:
   neutral:
     model: "neutral"
