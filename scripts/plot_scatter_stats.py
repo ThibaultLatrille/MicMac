@@ -47,9 +47,13 @@ def main(folder, output):
     # to break out the lists into columns
     df.to_csv(output, sep="\t", index=False)
     nb_genes = set([len(v) for v in var_dict["between"].values()]).pop()
+    x_str = r"Neutrality index $\left( \frac{\sigma^2_{Phy}}{\sigma^2_{Pop}} \right)$"
+    ratio_scaled = {m: np.array(var_dict["between"][m]) / np.array(var_dict["within_sampled"][m]) for m in models}
+    hist_plot(ratio_scaled, x_str, output.replace(".tsv.gz", ".hist.pdf"), nb_genes)
+
     mut_str = r"Variance mutational $\left( \frac{V_M}{2u} \right)$"
     within_str = r"Variance within $\left( \frac{V_G}{\theta} \right)$"
-    between_str = r"Variance between $\left( \frac{V_B}{4d} \right)$"
+    between_str = r"Variance between $\left( \frac{Var[\overline{X}_t]}{4d} \right)$"
     scatter_plot(var_dict["within_sampled"], var_dict["between"], within_str, between_str,
                  output.replace(".tsv.gz", "-H.pdf"), nb_genes, title=' - Sample theta', histy_log=True)
     scatter_plot(var_dict["within_tajima"], var_dict["between"], within_str, between_str,

@@ -1,0 +1,120 @@
+%TC:ignore
+\documentclass{article}
+\usepackage{caption}
+\usepackage{xcolor, colortbl}
+\definecolor{BLUELINK}{HTML}{0645AD}
+\definecolor{DARKBLUELINK}{HTML}{0B0080}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[colorlinks=false]{hyperref}
+\hypersetup{colorlinks,
+    linkcolor=DARKBLUELINK,
+    anchorcolor=DARKBLUELINK,
+    citecolor=DARKBLUELINK,
+    filecolor=DARKBLUELINK,
+    menucolor=DARKBLUELINK,
+    urlcolor=BLUELINK
+}
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{naturalnames}{hyperref}
+
+\usepackage[backend=biber,eprint=false,isbn=false,url=false,intitle=true,style=nature,date=year]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage[margin=50pt]{geometry}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathtools}
+\usepackage{lmodern}
+\usepackage{bm,bbold}
+\usepackage{verbatim}
+\usepackage{float}
+\usepackage{listings, enumerate, enumitem}
+\usepackage[export]{adjustbox}
+\usepackage{tabu}
+\usepackage{longtable}
+\tabulinesep=0.6mm
+\newcommand\cellwidth{\TX@col@width}
+\usepackage{hhline}
+\setlength{\arrayrulewidth}{1.2pt}
+\usepackage{multicol,multirow,array}
+\usepackage{etoolbox}
+\AtBeginEnvironment{tabu}{\footnotesize}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\pdfinclusioncopyfonts=1
+
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+
+\input{notations.tex}
+
+\title{Detection of selection for a quantitative traits through the scaled mutational variance at the phylogenetic and population-genetic level}
+
+\author{
+    \large
+    \textbf{T. {Latrille}$^{1}$, T. {Gaboriau}$^{1}$, N. {Salamin}$^{1}$}\\
+    \normalsize
+    $^{1}$Université de Lausanne, Lausanne, Switzerland\\
+    \texttt{\href{mailto:thibault.latrille@ens-lyon.org}{thibault.latrille@ens-lyon.org}} \\
+}
+
+
+\date{}
+
+\begin{document}
+    \maketitle
+    \part*{Supplementary materials}
+    \tableofcontents
+    \clearpage
+
+    \section{Theoretical derivation}
+    \subsection{Definitions}
+
+    We denote $\Trait_{i}$ the quantitative trait $\Trait$ for individual $\species$.
+
+    \begin{align}
+        \VarPhenotype = \sum_{i=1}^{\Ne} \Trait_{i}^2 - \left( \sum_{i=1}^{\Ne} \Trait_{i} \right)^2
+    \end{align}
+
+    \subsection{Mutation-selection-drift equilibrium}
+
+    Selection, whether positive or negative, depletes standing variation in the population and reduces to genetic variance.
+    Hence, at equilibrium between mutation, selection and drift, the observed genetic variance is lower than the theoretical neutral variance:
+    \begin{align}
+        \VarGenetic & < 2 \Ne \VarMutation \\
+        \iff \VarGenetic & < 4 \Ne \NbrLoci \MutationRate \E \left[ a^2 \right]
+    \end{align}
+
+    Under the House of cards model of stabilizing selection\cite{kingman_simple_1978}, the trait's fitness is normally distributed around an optimal value ($\theta$) and with standard deviation $\StdSelection_S$.
+    Moreover, the trait is encoded by a few loci with large effects and the genetic variance at equilibrium between mutation, selection and drift is:
+    \begin{gather}
+        \VarGenetic = 2 \NbrLoci \MutationRate \VarSelection_S \label{eq-mutsel-HC}.
+    \end{gather}
+
+    Alternatively, under the Gaussian model of stabilizing selection\cite{lande_natural_1976}, the trait's fitness is also normally distributed around an optimal value ($\theta$) and with standard deviation $\StdSelection_S$.
+    However, the trait is encoded by a large number of loci traits with small effect and the genetic variance at equilibrium is:
+    \begin{gather}
+        \VarGenetic = \sqrt{2 \NbrLoci \VarMutation \VarSelection_S} \label{eq-mutsel-G}.
+    \end{gather}
+
+    The boundary between the two models is given by \textcite{turelli_heritable_1984} as:
+    \begin{align}
+        20 \MutationRate \VarSelection_S &< \E \left[ a^2 \right] \text{ for the House of card model}, \\
+        20 \MutationRate \VarSelection_S &> \E \left[ a^2 \right] \text{ for the geometric model}.
+    \end{align}
+
+    \subsection{Selection at the phylogenetic scale}
+    If the trait is under directional selection, but the strength and direction of selection varies randomly from one generation to the next (variance $\VarSelection_D$), then the trait still follows a Brownian process:
+    \begin{align}
+        \VarPhy &= \Var \left( \Trait_z \right), \\
+        &= \left(\frac{\VarGenetic}{\Ne} + \VarGenetic \VarSelection_D \VarGenetic \right) t. \label{eq-selection-vary-direct}
+    \end{align}
+
+    If the trait is under stabilizing selection, but the strength and direction of the optimum varies randomly from one generation to the next (variance $\VarSelection_{\theta}$), then the trait still follows a Brownian process:
+    \begin{align}
+        \VarPhy &= \VarSelection_{\theta} t. \label{eq-selection-vary-stabi}
+    \end{align}
+
+    Altogether, traits that are found to be under a long term Brownian process are not necessarily neutral.
+
+    \printbibliography
+
+\end{document}

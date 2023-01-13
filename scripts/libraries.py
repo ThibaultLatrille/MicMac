@@ -121,6 +121,7 @@ def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=
         ax.set_xlim((0.95 * min_x, max_x * 1.05))
         ax.set_ylim((0.95 * min_y, max_y * 1.05))
     ax.legend(fontsize=fontsize_legend)
+    plt.tight_layout()
     plt.savefig(output, format="pdf")
     plt.savefig(output.replace(".pdf", ".png"), format="png")
     plt.close('all')
@@ -143,10 +144,8 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
 
     for id_m, m in enumerate(x):
         x_mean = np.mean(x[m])
-        x_median = np.median(x[m])
         ax.plot((x_mean, x_mean), (0, max_y), linewidth=3, color=color_models[id_m],
-                label=(m.replace("_", " ").capitalize() + ' (mean {0:.2g}; median {1:.2g})'.format(x_mean, x_median)))
-        ax.plot((x_median, x_median), (0, max_y), linewidth=2, linestyle='--', color=color_models[id_m])
+                label=(m.replace("_", " ").capitalize() + ' (mean {0:.2g})'.format(x_mean)))
 
     ax.set_xlabel(x_label, fontsize=fontsize)
     ax.set_xlim((0.95 * min_x, 1.05 * max_x))
@@ -154,6 +153,7 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
     ax.set_ylim((0, max_y))
     ax.set_ylabel("Density", fontsize=fontsize)
     ax.legend(fontsize=fontsize_legend)
+    plt.tight_layout()
     plt.savefig(output, format="pdf")
     plt.savefig(output.replace(".pdf", ".png"), format="png")
     plt.clf()
