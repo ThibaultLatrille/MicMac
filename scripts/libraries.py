@@ -131,7 +131,7 @@ def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=
 def hist_plot(x, x_label, output, nbr_genes, title=""):
     output = output.replace("scatter_plot", "histogram")
     color_models = colors(x)
-    fig = plt.figure(figsize=(1920 / my_dpi, 880 / my_dpi), dpi=my_dpi)
+    fig = plt.figure(figsize=(1920 / my_dpi, 480 / my_dpi), dpi=my_dpi)
     fig.suptitle("{0} genes".format(nbr_genes) + title)
     ax = fig.add_subplot(1, 1, 1)
     x = {k: [i for i in v if np.isfinite(i)] for k, v in x.items()}
