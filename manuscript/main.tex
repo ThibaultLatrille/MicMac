@@ -40,7 +40,7 @@ urlcolor=BLUELINK
 
 \input{notations.tex}
 
-\title{A neutrality index for quantitative traits}
+\title{A neutrality index for quantitative traits from within and between variations leveraging sequences evolution}
 
 \author{
 \large
@@ -59,7 +59,7 @@ $^{1}$Université de Lausanne, Lausanne, Switzerland\\
 \begin{abstract}
     To determine whether a trait is neutrally evolving or under selection, methods have been developed both at the population and at the phylogenetic scale.
     At the population scale, methods do not integrate the changes over long evolutionary time.
-    Conversely, at the phylogenetic scale, current methods discard the variance in traits between individuals, leaving out valuable information.
+    Conversely, at the phylogenetic scale, current methods usually discards the variance in traits between individuals, leaving out valuable information.
     The main goal of this project is to combine within-species and between-species variation of quantitative traits to determine the evolutionary regime of a trait.
     We define a neutrality index for a quantitative trait, leveraging both data at the population and phylogenetic scale.
     Moreover, this index leverages sequence divergence and polymorphism to normalize the variation of trait between and within species.
@@ -73,19 +73,37 @@ $^{1}$Université de Lausanne, Lausanne, Switzerland\\
 % Research Article (7500 words)
 \section{Introduction}\label{sec:introduction}
 
-From the standing variation both within and between a wide range of species, distinguishing adaptive changes driven by positive selection from neutral evolution is critical for understanding the evolution of trait evolution.
-At the population level, Genome Wide Association Studies (GWAS) in humans have revealed that traits are polygenic (many loci associated to a given trait), pleiotropic (many traits associated to a given loci), additive and under stabilizing selection\cite{simons_population_2018, sella_thinking_2019}.
-At the phylogenetic scale, between different populations, the evolutionary regime for a quantitative trait can also be tested.
-Typically, the trait mean (across individuals of the same population) is modelled as a Brownian process, allowing theoretically to test for neutrality.
-Alternatively, a deviation from the Brownian process is interpreted as selection\cite{catalan_drift_2019}.
-
-At the frontier between phylogenetics and population genetics, studies comparing between species variation have acknowledged the importance of within species variation\cite{whitehead_variation_2006, fay_evaluating_2008}.
-However, within species variation is used to describe technical errors, or the ratio of between to within variation is estimated for many traits, and is finally compared to the average over all traits to seek deviation from this average\cite{rohlfs_modeling_2014, rohlfs_phylogenetic_2015}.
-Determining the evolutionary regime of a quantitative trait through articulation of the variance between and within populations is a promising line of research\cite{kostikova_bridging_2016, gaboriau_multiplatform_2020}.
-Altogether, there is a push toward integrating within and between species variation into a unified framework.
-In this study, we propose a neutrality index for a quantitative trait, leveraging data within and between species, normalizing the trait evolution by its genetic polymorphism and divergence.
+Determining whether a particular trait is neutrally evolving or under a particular regime of selection has been a long-standing goal in evolutionary biology.
+Fundamentally, distinguishing neutral evolution from selection requires to determine which model of evolution is supported from the observed variation of traits and sequences.
+This variation of traits can be observed at different scales, at the individual level across different development stages, at the population level across different individuals, at the species level across different populations, and finally at the phylogenetic level across different species.
+All these scales requires different assumptions and methodology, and the endeavor to determine the mode of selection for a given trait has thus incorporated theories, methods and developments across different fields of evolutionary biology such as quantitative-genetics, population-genetics, phylogenetics and comparative genomics\cite{lynch_genetics_1998, walsh_evolution_2018}.
+At the population level across individuals, Genome Wide Association Studies (GWAS) in humans have revealed that traits are mostly polygenic (many loci associated to a given trait), pleiotropic (many traits associated to a given loci), additive and mainly under stabilizing selection\cite{simons_population_2018, sella_thinking_2019}.
+At the species level, by contrasting variation within and between different populations, studies have shown that stabilizing selection is largely dominant in the evolution of expression of genes\cite{whitehead_neutral_2006, gilad_natural_2006, gilad_expression_2006}.
+However, dominant mode of selection acting on gene expression is still controversial and neutral evolution is still debated\cite{signor_evolution_2018, price_detecting_2022}.
+For a given population, by contrasting to the divergence to a close species, studies have confirms that changes in gene expression accumulate linearly differences with time from divergence\cite{khaitovich_neutral_2004}.
 % This relationship had been proposed to describe the evolutionary regime of a trait for a pair of species\cite{lande_genetic_1980, turelli_heritable_1984}.
 % However, it has not yet been generalized for any number of species related by their phylogenetic tree.
+% However, this divergence in the level of expression stabilizes over a long distance: the difference between human and chicken (having diverged 300 million years) is similar to that between human and opossum (160 million years).
+% This observation suggests that the conservation of essential functions of organs could define a limit for the divergence of transcriptomes.
+
+% Phylogenetics (mean trait evolution)
+At the phylogenetic scale, by determining how much the mean trait value (taken as average across different individual for a given species) is changing across different species, the mode of selection for a quantitative trait can also be tested while accounting for the underlying relationships between species\cite{felsenstein_phylogenies_1985}.
+Typically, the mean trait value is modelled as a Brownian process, allowing theoretically to test for neutrality\cite{hansen_translating_1996, harmon_phylogenetic_2018}.
+Alternatively, a deviation from the Brownian process, typically an Ornstein-Uhlenbeck process is interpreted as a signature of stabilizing selection\cite{catalan_drift_2019}.
+However, studies have shown that comparative approaches are subject to different biases\cite{harmon_phylogenetic_2018}.
+First, a better fit for a Brownian process at the phylogenetic scale is not necessarily a proof of the neutral model.
+Indeed, a trait under selection for which the optimal trait is evolving as a Brownian process will not deviate from a Brownian process\cite{hansen_translating_1996}.
+Secondly and contrarily, even under a neutral trait the Ornstein-Uhlenbeck process might sometimes be statistically preferred over a Brownian process due to sampling   artifacts\cite{silvestro_measurement_2015, cooper_cautionary_2016, price_detecting_2022}.
+
+% At the frontier Phylogenetics/Population-genetics
+At the frontier between phylogenetics and population genetics, comparative methods at the phylogenetic scale have acknowledged the importance to model within species variation on top of changes in mean trait value\cite{fay_evaluating_2008, kostikova_bridging_2016, gaboriau_multiplatform_2020}.
+However, within species variation is used to describe technical errors, or the ratio of between to within variation is estimated for many traits, and is finally compared to the average over all traits to seek deviation from this average\cite{rohlfs_modeling_2014, rohlfs_phylogenetic_2015}.
+Altogether, there is a push toward integrating within and between species variation into a unified framework.
+Determining the evolutionary regime of a quantitative trait through articulation of the variance between and within populations is the goal is this study, while setting threshold for neutral, stabilizing and diversifying selection.
+In this study, we propose a neutrality index for a quantitative trait, leveraging data within and between species, normalizing the trait evolution with both genetic polymorphism within species and divergence between species.
+In other words, our statistical test does to seeks to find traits with extremal values in comparison to a pool of traits.
+Instead, our procedure can be applied to a single trait, without prior knowledge, estimating a statistic called $\RatePhy / \RatePop$.
+Technically, $\RatePhy / \RatePop$ is estimated either as a maximum likelihood point estimate, or as mean posterior from a Bayesian implementation also giving access to the posterior credible interval allowing to test for a departure from a neutrally evolving trait.
 
 \section{Materials and Methods}\label{sec:materials-and-methods}
 \subsection{Neutrality index for a quantitative trait}\label{subsec:neutrality-index-for-a-quantitative-trait}
@@ -280,8 +298,6 @@ Analogously to the \textcite{mcdonald_adaptative_1991} test devised for protein-
 Altogether, our neutrality index for a quantitative trait leverages the data for any number of species, and takes advantage of the signal over the whole phylogeny, while at the same time taking into account phylogenetic inertia and addressing the non-independence between species (see fig.~\ref{fig:methods}).
 This statistic can be obtained as a maximum likelihood estimate, from eq.~\ref{eq:estimated-rate-pop} and~\ref{eq:estimated-rate-phy}.
 
-
-
 \subsection{Results against simulations}
 
 The inference framework was first tested on independently simulated datasets.
@@ -306,22 +322,14 @@ Thus, the tree topology and the branch lengths were chosen based on a tree estim
 % Consequences of our neutrality index
 % Use case for gene expression level
  Distinguishing adaptive changes driven by positive selection from neutral divergence resulting from mutation and genetic drift is critical for understanding the evolution of a quantitative trait.
- At the population scale, other tests of neutrality for a quantitative trait have been developed, by leveraging mutation accumulation experiments.
- In the yeast \textit{Saccharomyces cerevisiae}, the fruit fly \textit{Drosophila melanogaster} and in the nematode \textit{Caenorhabditis elegans}, gene expression level has been shown to under stabilizing selection, such that neutral evolution of expression level is ruled out for most genes\cite{hodgins-davis_gene_2015}.
-Finally, mutation accumulation experiments with different population size have also shown that gene expression is under strong stabilizing selection\cite{deiss_global_2021}.
-Altogether, at the population level, gene expression has been shown to be empirically under stabilizing selection.
-
-At the phylogenetic scale, other tests of neutrality for a quantitative trait have been developed, modelling the underlying process generating the change in mean trait value across different species at the phylogenetic scale\cite{fay_evaluating_2008}.
+At the phylogenetic scale, tests of neutrality for a quantitative trait have been developed, modelling the underlying process generating the change in mean trait value across different species at the phylogenetic scale\cite{fay_evaluating_2008}.
 These models are seeking deviation from a Brownian process\cite{catalan_drift_2019}, or from an Ornstein–Uhlenbeck process accounting for within-species variation\cite{rohlfs_phylogenetic_2015}.
-However, deviation from a Brownian process at the phylogenetic scale, does not mean that the
-trait is not under selection.
-Indeed, a trait under selection for which the optimal trait is evolving as a Brownian process will not deviate from a Brownian process\cite{hansen_translating_1996}.
 For example, the analysis on the transcriptome across different individuals and species concluded that the expression level of 81\% of genes are under a neutral regime and 16\% under directional selection\cite{catalan_drift_2019}.
 However, the alternative model of a varying directional or stabilizing selection was not implemented, and thus can not be ruled out by this analysis.
-We argue that our diversity index, by leveraging trait variation at different scale and normalizing by divergence and polymorphism, we can set a threshold for neutrality and thus is able to make the difference between a trait evolving neutrally as a Brownian process or a trait under selection where the optimal is moving as a Brownian.
+Our diversity index, by leveraging trait variation at different scale and normalizing by divergence and polymorphism, we can set a threshold for neutrality and thus is able to make the difference between a trait evolving neutrally as a Brownian process or a trait under selection where the optimal is moving as a Brownian.
 To do so, our neutrality index leverage sequence divergence and polymorphism, as well as the heritability of traits.
-We argue that this is the main novelty of this study, being able to use sequence divergence and polymorphism to normalize the variation of trait between and within species.
-We showed, that by doing so, our test is not sensitive to the assumption that population sizes ($\Ne$) and mutation rates ($\MutationRate$) are constant across the phylogeny.
+We argue that the main novelty of this study is being able to use sequence divergence and polymorphism to normalize the variation of trait between and within species.
+By doing so, our test is not sensitive to the assumption that population sizes ($\Ne$) and mutation rates ($\MutationRate$) are constant across the phylogeny, not requiring to estimate divergence time\cite{litsios_effects_2012}.
 Instead, the normalization by sequence divergence and polymorphism automatically absorbs these changes\cite{seo_estimating_2004}.
 We argue that the main drawback of our method is that the heritability ($h^2$) of a trait is required if one has access only to the phenotypic variance ($\VarPhenotype$) and not the genetic variance ($\VarGenetic$), which is empirically hard to measure for any trait.
 
