@@ -21,8 +21,18 @@ if OUTPUT_TSV:
 rule all:
     input: output_pdf
 
+
 def simulator_output(wildcards):
     return f"{FOLDER}/{wildcards.simulator}/replicate_{wildcards.scaling}"
+
+
+def variance_env(nbr_loci, a, mut_rate, pop_size, h2):
+    vG = 4 * float(a)**2 * float(nbr_loci) * float(mut_rate) * int(pop_size)
+    h2 = float(h2)
+    assert vG > 0
+    assert 0 <= h2 <= 1
+    return vG * (1 - h2) / h2
+
 
 rule run_simulations:
     input:
@@ -34,9 +44,12 @@ rule run_simulations:
         file=lambda wildcards: simulator_output(wildcards),
         output_tsv=lambda wildcards: f"--output_tsv && gzip {simulator_output(wildcards)}.tsv" if OUTPUT_TSV else '',
         folder=lambda wildcards: f"{FOLDER}/{wildcards.simulator}",
-        simulator=lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"],SIMULATOR_PARAMS[wildcards.simulator])
+        simulator=lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"],SIMULATOR_PARAMS[wildcards.simulator]),
+        ve=lambda wildcards: variance_env(nbr_loci=wildcards.scaling,a=config["core"]["mutation_mean_effect_size"],
+            mut_rate=config["core"]["mutation_rate_per_loci_per_generation"],pop_size=config["core"]["population_size"],
+            h2=config["heritability"])
     shell:
-        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --number_loci {wildcards.scaling} --output {params.file} && gzip {params.file}.nhx'
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --output {params.file} && gzip {params.file}.nhx'
 
 
 rule tree_stats:
@@ -50,7 +63,7 @@ rule tree_stats:
 
 rule dataframe_stats:
     input:
-        exp=expand(rules.run_simulations.output.nhx, scaling=REPLICATES, simulator=config["simulators"]),
+        exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,simulator=config["simulators"]),
         script=f"{ROOT}/scripts/plot_scatter.py"
     output:
         tsv=f"{FOLDER}/dataframe_stats.pdf"
@@ -62,7 +75,7 @@ rule pre_processed_traits:
     input:
         script=f"{ROOT}/scripts/pre_processed_traits.py",
         nhx=rules.run_simulations.output.nhx,
-        neutral=expand(rules.run_simulations.output.nhx, scaling=REPLICATES[1], simulator='neutral')
+        neutral=expand(rules.run_simulations.output.nhx,scaling=REPLICATES[1],simulator='neutral')
     output:
         tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tree",
         traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.traits.tsv",
@@ -70,8 +83,10 @@ rule pre_processed_traits:
     shell:
         'python3 {input.script} --input {input.nhx} --neutral {input.neutral} --tree {output.tree} --traits {output.traits} --fossils {output.fossils}'
 
+
 def chain_name(wildcards):
     return f"{FOLDER}/{wildcards.simulator}/inference_{wildcards.scaling}"
+
 
 rule run_inference:
     input:
