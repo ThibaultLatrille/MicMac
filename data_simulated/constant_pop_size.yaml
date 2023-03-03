@@ -3,7 +3,9 @@ max_number_loci: 30000
 nb_genes: 1000
 tree: "trees/mammal.tre.annotated"
 output_tsv: false
-bayes_inference: false
+bayes_inference: true
+bayes_burn_in: 200
+bayes_until: 500
 simulators:
   neutral:
     model: "neutral"

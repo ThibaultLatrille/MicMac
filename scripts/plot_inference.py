@@ -52,7 +52,12 @@ def open_covar_file(covar_file):
     return header, matrix
 
 
-def main(folder, tsv_path, output):
+def open_trace_file(trace_file, burn_in):
+    df = pd.read_csv(trace_file, sep="\t")
+    return df["Cov_0_0"].values[burn_in:] / 4
+
+
+def main(folder, tsv_path, burn_in, output):
     # Read the tsv file with multiindex columns
     df = pd.read_csv(tsv_path, sep="\t", header=None)
     df.columns = pd.MultiIndex.from_arrays([df.iloc[0], df.iloc[1]])
@@ -69,42 +74,45 @@ def main(folder, tsv_path, output):
     model_prefs = {"moving_optimum": 0, "directional": 1, "stabilizing": 2, "neutral": 3}
     models = list(sorted(models_path, key=lambda x: model_prefs[x] if x in model_prefs else -1))
 
-    replicates = {m: glob(p + "/*.cov") for m, p in models_path.items()}
+    replicates = {m: glob(p + "/*.trace.gz") for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
 
-    header_var_dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    var_dict = defaultdict(lambda: defaultdict(list))
     for m in models:
         for f, filepath in enumerate(replicates[m]):
-            rep = os.path.basename(filepath).replace(".cov", "").split("_")[-1]
-            header, matrix = open_covar_file(filepath)
-            for i, h in enumerate(header):
-                sigma_phy = matrix[i][i] / 4
-                sigma_pop = dict_tree[("within_sampled", m, rep)]
-                sigma_mut = dict_tree[("mutational", m, rep)]
-                assert sigma_phy >= 0
-                assert sigma_pop >= 0
-                assert sigma_mut >= 0
-                header_var_dict[h]["phy"][m].append(sigma_phy)
-                header_var_dict[h]["pop"][m].append(sigma_pop)
-                header_var_dict[h]["mut"][m].append(sigma_mut)
-                header_var_dict[h]["phy_pop"][m].append(sigma_phy / sigma_pop)
-                header_var_dict[h]["phy_mut"][m].append(sigma_phy / sigma_mut)
+            rep = os.path.basename(filepath).replace(".trace.gz", "").split("_")[-1]
+            sigma_phy_array = open_trace_file(filepath, burn_in=burn_in)
+            sigma_phy = np.mean(sigma_phy_array)
+            sigma_pop = dict_tree[("within_sampled", m, rep)]
+            sigma_mut = dict_tree[("mutational", m, rep)]
+            assert sigma_phy >= 0
+            assert sigma_pop >= 0
+            assert sigma_mut >= 0
+            var_dict["phy"][m].append(sigma_phy)
+            var_dict["pop"][m].append(sigma_pop)
+            var_dict["mut"][m].append(sigma_mut)
+            var_dict["phy_pop"][m].append(sigma_phy / sigma_pop)
+            var_dict["phy_pop_pv"][m].append(np.mean(sigma_phy_array > sigma_pop))
+            var_dict["phy_mut"][m].append(sigma_phy / sigma_mut)
 
-    df = pd.DataFrame(header_var_dict)
+    df = pd.DataFrame(var_dict)
     df.to_csv(output, sep="\t", index=False)
-    for h, var_dict in header_var_dict.items():
-        nb_genes = set([len(v) for v in var_dict["phy_pop"].values()]).pop()
-        hist_plot(var_dict["phy_pop"], "$\\frac{\\sigma_{phy}^2}{\\sigma_{pop}^2}$",
-                  output.replace(".tsv.gz", f".{h}.pdf"), nb_genes, 'Var inter divided by Var intra')
+    nb_genes = set([len(v) for v in var_dict["phy_pop"].values()]).pop()
+    rename = lambda x: output.replace(".tsv.gz", x)
+    hist_plot(var_dict["phy_pop"], "$\\frac{\\sigma_{phy}^2}{\\sigma_{pop}^2}$", rename(".pdf"), nb_genes,
+              'Var inter divided by Var intra')
 
-        scatter_plot(var_dict["mut"], var_dict["phy"], "mut", "phy",
-                     output.replace(".tsv.gz", f".mutphy.{h}.pdf"), nb_genes, title=' - Vm versus Vd', histy_log=True)
+    hist_plot(var_dict["phy_pop_pv"], "$P ( \\sigma_{phy}^2 > \\sigma_{pop}^2 )$", rename(".pvalues.pdf"), nb_genes,
+              'Var inter divided by Var intra', xscale="linear")
 
-        scatter_plot(var_dict["mut"], var_dict["pop"], "mut", "pop",
-                     output.replace(".tsv.gz", f".mutpop.{h}.pdf"), nb_genes, title=' - Vm versus Vg', histy_log=True)
+    scatter_plot(var_dict["mut"], var_dict["phy"], "mut", "phy", rename(".mutphy.pdf"), nb_genes,
+                 title=' - Vm versus Vd', histy_log=True)
 
-        scatter_plot(var_dict["pop"], var_dict["phy"], "pop", "phy",
-                     output.replace(".tsv.gz", f".popphy.{h}.pdf"), nb_genes, title=' - Vg versus Vd', histy_log=True)
+    scatter_plot(var_dict["mut"], var_dict["pop"], "mut", "pop", rename(".mutpop.pdf"), nb_genes,
+                 title=' - Vm versus Vg', histy_log=True)
+
+    scatter_plot(var_dict["pop"], var_dict["phy"], "pop", "phy", rename(".popphy.pdf"), nb_genes,
+                 title=' - Vg versus Vd', histy_log=True)
 
 
 if __name__ == '__main__':
@@ -112,5 +120,6 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--tsv', required=True, type=str, dest="tsv", help="Input tsv file")
     parser.add_argument('-f', '--folder', required=True, type=str, dest="folder", help="Input folder")
     parser.add_argument('-o', '--output', required=True, type=str, dest="output", help="Output path")
+    parser.add_argument('-b', '--burn_in', required=False, type=int, dest="burn_in", default=100, help="Burn in")
     args = parser.parse_args()
-    main(args.folder, args.tsv, args.output)
+    main(args.folder, args.tsv, args.burn_in, args.output)

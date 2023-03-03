@@ -98,26 +98,18 @@ rule run_inference:
         run=f"{FOLDER}/{{simulator}}/inference_{{scaling}}.run",
     params:
         chain=lambda wildcards: chain_name(wildcards),
+        until=f"-u {config['bayes_until']}"
     shell:
-        '{input.exec} -u 200 --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain}'
-
-rule read_inference:
-    input:
-        exec=f"{ROOT}/utils/BayesCode/bin/readnodetraits",
-        chain=rules.run_inference.output.run
-    output:
-        cov=f"{FOLDER}/{{simulator}}/inference_{{scaling}}.cov"
-    params:
-        chain=lambda wildcards: chain_name(wildcards),
-    shell:
-        '{input.exec} --burnin 100 --until 100 --cov {params.chain}'
+        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain} && gzip {params.chain}.chain && gzip {params.chain}.trace'
 
 rule inference_stats:
     input:
         script=f"{ROOT}/scripts/plot_inference.py",
         tsv=rules.tree_stats.output.tsv,
-        cov=expand(rules.read_inference.output.cov,scaling=REPLICATES,simulator=config["simulators"])
+        cov=expand(rules.run_inference.output.run,scaling=REPLICATES,simulator=config["simulators"])
     output:
-        plot=f"{FOLDER}/inference_stats.tsv.gz"
+        plot=f"{FOLDER}/inference_stats.tsv.gz",
+    params:
+        burn_in=f"--burn_in {config['bayes_burn_in']}"
     shell:
-        'python3 {input.script} --tsv {input.tsv} --folder {FOLDER} --output {output.plot}'
+        'python3 {input.script} {params.burn_in} --tsv {input.tsv} --folder {FOLDER} --output {output.plot}'

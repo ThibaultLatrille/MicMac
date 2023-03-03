@@ -10,8 +10,8 @@ def main(input_path, input_neutral_path, tree_path, traits_path, fossils_path):
     dico_traits = defaultdict(list)
     for n in tree.get_leaves():
         dico_traits["TaxonName"].append(n.name)
-        # pheno_mean = float(getattr(n, "Phenotype_mean"))
-        # dico_traits["Phenotype_mean"].append(pheno_mean if pheno_mean != 0.0 else "NaN")
+        pheno_mean = float(getattr(n, "Phenotype_mean"))
+        dico_traits["Phenotype_mean"].append(pheno_mean if pheno_mean != 0.0 else "NaN")
         geno_mean = float(getattr(n, "Genotype_mean"))
         dico_traits["Genotype_mean"].append(geno_mean)
 

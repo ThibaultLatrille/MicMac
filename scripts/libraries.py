@@ -128,7 +128,7 @@ def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=
     print(output)
 
 
-def hist_plot(x, x_label, output, nbr_genes, title=""):
+def hist_plot(x, x_label, output, nbr_genes, title="", xscale="log"):
     output = output.replace("scatter_plot", "histogram")
     color_models = colors(x)
     fig = plt.figure(figsize=(1920 / my_dpi, 480 / my_dpi), dpi=my_dpi)
@@ -137,9 +137,13 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
     x = {k: [i for i in v if np.isfinite(i)] for k, v in x.items()}
     min_x = max(1e-6, np.min([min(i) for i in x.values()]))
     max_x = np.max([max(i) for i in x.values()])
-    logbins = np.geomspace(min_x, max_x, 100)
-    hist, _, _ = ax.hist(x.values(), bins=logbins, color=color_models, **hist_filled)
-    hist, _, _ = ax.hist(x.values(), bins=logbins, color=color_models, **hist_step)
+    if xscale == "log":
+        bins = np.geomspace(min_x, max_x, 100)
+    else:
+        min_x = np.min([min(i) for i in x.values()])
+        bins = np.linspace(min_x, max_x, 100)
+    hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_filled)
+    hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_step)
     max_y = 1.2 * (max([max(h) for h in hist]) if len(x) > 1 else max(hist))
 
     for id_m, m in enumerate(x):
@@ -148,8 +152,9 @@ def hist_plot(x, x_label, output, nbr_genes, title=""):
                 label=(m.replace("_", " ").capitalize() + ' (mean {0:.2g})'.format(x_mean)))
 
     ax.set_xlabel(x_label, fontsize=fontsize)
-    ax.set_xlim((0.95 * min_x, 1.05 * max_x))
-    ax.set_xscale("log")
+    if xscale == "log":
+        ax.set_xlim((0.95 * min_x, 1.05 * max_x))
+        ax.set_xscale("log")
     ax.set_ylim((0, max_y))
     ax.set_ylabel("Density", fontsize=fontsize)
     ax.legend(fontsize=fontsize_legend)

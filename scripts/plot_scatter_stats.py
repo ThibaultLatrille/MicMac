@@ -26,7 +26,7 @@ def main(folder, output):
             combinations = defaultdict(list)
 
             for n, n_neutral in zip(tree.get_leaves(), neutral_tree.get_leaves()):
-                vg = float(getattr(n, "Genotype_var"))
+                vg = float(getattr(n, "Phenotype_var")) * float(getattr(n, "Heritability"))
                 combinations['within_tajima'].append(vg / float(getattr(n_neutral, "Theta_Tajima")))
                 combinations['within_watterson'].append(vg / float(getattr(n_neutral, "Theta_Watterson")))
                 combinations["within_fay_wu"].append(vg / float(getattr(n_neutral, "Theta_Fay_Wu")))
