@@ -25,7 +25,14 @@ def main(input_path, input_neutral_path, tree_path, traits_path, fossils_path):
         n.dist = 0. if n.is_root() else float(getattr(n, "d"))
 
     # Add polytomies if branch length are 0
-    neutral_tree.prune([n.name for n in neutral_tree.traverse() if (n.dist != 0.0 or n.is_root())])
+    remove_nodes = set([n for n in neutral_tree.traverse() if (n.dist == 0.0 and not n.is_root())])
+    for n in remove_nodes:
+        n.delete()
+    assert len(set([n for n in neutral_tree.traverse()]).intersection(remove_nodes)) == 0
+    for n in neutral_tree.traverse():
+        if n.is_root():
+            continue
+        assert n.dist > 0.0
     # Write the topology to a newick file
     neutral_tree.write(outfile=tree_path, format=3)
 
