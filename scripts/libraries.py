@@ -141,20 +141,24 @@ def hist_plot(x, x_label, output, nbr_genes, title="", xscale="log"):
         bins = np.geomspace(min_x, max_x, 100)
     else:
         min_x = np.min([min(i) for i in x.values()])
-        bins = np.linspace(min_x, max_x, 100)
+        bins = np.linspace(min_x, max_x, 1000)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_filled)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_step)
     max_y = 1.2 * (max([max(h) for h in hist]) if len(x) > 1 else max(hist))
 
-    for id_m, m in enumerate(x):
-        x_mean = np.mean(x[m])
-        ax.plot((x_mean, x_mean), (0, max_y), linewidth=3, color=color_models[id_m],
-                label=(m.replace("_", " ").capitalize() + ' (mean {0:.2g})'.format(x_mean)))
+    if xscale == "log":
+        for id_m, m in enumerate(x):
+            x_mean = np.mean(x[m])
+            ax.plot((x_mean, x_mean), (0, max_y), linewidth=3, color=color_models[id_m],
+                    label=f'{m.replace("_", " ").capitalize()} (mean {x_mean:.2g})')
 
     ax.set_xlabel(x_label, fontsize=fontsize)
     if xscale == "log":
         ax.set_xlim((0.95 * min_x, 1.05 * max_x))
         ax.set_xscale("log")
+    else:
+        ax.set_xlim((-0.01, 1.01))
+        ax.set_yscale("log")
     ax.set_ylim((0, max_y))
     ax.set_ylabel("Density", fontsize=fontsize)
     ax.legend(fontsize=fontsize_legend)

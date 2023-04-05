@@ -1,9 +1,9 @@
 min_number_loci: 5000
-max_number_loci: 30000
-nb_genes: 1000
+max_number_loci: 5000
+nb_genes: 1
 min_seed: 0
-max_seed: 0
-nb_seeds: 1
+max_seed: 98745641
+nb_seeds: 1000
 tree: "trees/mammal.tre.annotated"
 output_tsv: false
 bayes_inference: true

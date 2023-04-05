@@ -8,6 +8,7 @@ configfile: 'config.yaml'
 
 OUTPUT_TSV = "output_tsv" in config and config["output_tsv"]
 REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"],config["max_number_loci"],config["nb_genes"])]
+SEEDS = [int(i) for i in np.linspace(config["min_seed"],config["max_seed"],config["nb_seeds"])]
 SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() if k != "model"]) for s, d in
                     config["simulators"].items()}
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
@@ -23,7 +24,7 @@ rule all:
 
 
 def simulator_output(wildcards):
-    return f"{FOLDER}/{wildcards.simulator}/replicate_{wildcards.scaling}"
+    return f"{FOLDER}/{wildcards.simulator}/replicate_{wildcards.scaling}_seed{wildcards.seed}"
 
 
 def variance_env(nbr_loci, a, mut_rate, pop_size, h2):
@@ -39,7 +40,7 @@ rule run_simulations:
         exec=lambda wildcards: f"{ROOT}/simulator/build/{config['simulators'][wildcards.simulator]['model']}",
         tree=f"{ROOT}/simulator/{config['tree']}"
     output:
-        nhx=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.nhx.gz"
+        nhx=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.nhx.gz"
     params:
         file=lambda wildcards: simulator_output(wildcards),
         output_tsv=lambda wildcards: f"--output_tsv && gzip {simulator_output(wildcards)}.tsv" if OUTPUT_TSV else '',
@@ -49,12 +50,12 @@ rule run_simulations:
             mut_rate=config["core"]["mutation_rate_per_loci_per_generation"],pop_size=config["core"]["population_size"],
             h2=config["heritability"])
     shell:
-        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --output {params.file} && gzip {params.file}.nhx'
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --seed {wildcards.seed} --output {params.file} && gzip {params.file}.nhx'
 
 
 rule tree_stats:
     input:
-        exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,simulator=config["simulators"]),
+        exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"]),
         script=f"{ROOT}/scripts/plot_scatter_stats.py"
     output:
         tsv=f"{FOLDER}/tree_stats.tsv.gz"
@@ -63,7 +64,7 @@ rule tree_stats:
 
 rule dataframe_stats:
     input:
-        exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,simulator=config["simulators"]),
+        exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"]),
         script=f"{ROOT}/scripts/plot_scatter.py"
     output:
         tsv=f"{FOLDER}/dataframe_stats.pdf"
@@ -75,17 +76,17 @@ rule pre_processed_traits:
     input:
         script=f"{ROOT}/scripts/pre_processed_traits.py",
         nhx=rules.run_simulations.output.nhx,
-        neutral=expand(rules.run_simulations.output.nhx,scaling=REPLICATES[1],simulator='neutral')
+        neutral=expand(rules.run_simulations.output.nhx,scaling=REPLICATES[0],seed=SEEDS[0],simulator='neutral')
     output:
-        tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.tree",
-        traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.traits.tsv",
-        fossils=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}.fossils.tsv"
+        tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.tree",
+        traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.traits.tsv",
+        fossils=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.fossils.tsv"
     shell:
         'python3 {input.script} --input {input.nhx} --neutral {input.neutral} --tree {output.tree} --traits {output.traits} --fossils {output.fossils}'
 
 
 def chain_name(wildcards):
-    return f"{FOLDER}/{wildcards.simulator}/inference_{wildcards.scaling}"
+    return f"{FOLDER}/{wildcards.simulator}/inference_{wildcards.scaling}_seed{wildcards.seed}"
 
 
 rule run_inference:
@@ -95,18 +96,18 @@ rule run_inference:
         traits=rules.pre_processed_traits.output.traits,
         fossils=rules.pre_processed_traits.output.fossils
     output:
-        run=f"{FOLDER}/{{simulator}}/inference_{{scaling}}.run",
+        run=f"{FOLDER}/{{simulator}}/inference_{{scaling}}_seed{{seed}}.run",
     params:
         chain=lambda wildcards: chain_name(wildcards),
         until=f"-u {config['bayes_until']}"
     shell:
-        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain} && gzip {params.chain}.chain && gzip {params.chain}.trace'
+        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
 
 rule inference_stats:
     input:
         script=f"{ROOT}/scripts/plot_inference.py",
         tsv=rules.tree_stats.output.tsv,
-        cov=expand(rules.run_inference.output.run,scaling=REPLICATES,simulator=config["simulators"])
+        cov=expand(rules.run_inference.output.run,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
     output:
         plot=f"{FOLDER}/inference_stats.tsv.gz",
     params:

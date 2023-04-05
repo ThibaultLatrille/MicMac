@@ -83,11 +83,11 @@ def main(folder, tsv_path, burn_in, output):
             rep = os.path.basename(filepath).replace(".trace.gz", "").split("_")[-1]
             sigma_phy_array = open_trace_file(filepath, burn_in=burn_in)
             sigma_phy = np.mean(sigma_phy_array)
-            sigma_pop = dict_tree[("within_sampled", m, rep)]
+            sigma_pop = abs(dict_tree[("within_sampled", m, rep)])
             sigma_mut = dict_tree[("mutational", m, rep)]
-            assert sigma_phy >= 0
-            assert sigma_pop >= 0
-            assert sigma_mut >= 0
+            assert sigma_phy > 0
+            assert sigma_pop > 0
+            assert sigma_mut > 0
             var_dict["phy"][m].append(sigma_phy)
             var_dict["pop"][m].append(sigma_pop)
             var_dict["mut"][m].append(sigma_mut)
