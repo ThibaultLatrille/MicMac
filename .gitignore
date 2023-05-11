@@ -6,9 +6,7 @@
 
 *~
 data_simulated/experiments*
-data_empirical/Turtles
-data_empirical/MMETSP
-data_empirical/bgee
+data_empirical/data_processed
 Legacy.*
 /utils/
 cmake-build-debug

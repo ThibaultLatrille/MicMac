@@ -6,18 +6,14 @@ FOLDER = os.path.abspath('.')
 
 configfile: 'config.yaml'
 
-OUTPUT_TSV = "output_tsv" in config and config["output_tsv"]
 REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"],config["max_number_loci"],config["nb_genes"])]
 SEEDS = [int(i) for i in np.linspace(config["min_seed"],config["max_seed"],config["nb_seeds"])]
 SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() if k != "model"]) for s, d in
                     config["simulators"].items()}
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
+output_pdf = [f"{FOLDER}/tree_stats.tsv.gz"]
 if 'bayes_inference' in config and config['bayes_inference']:
-    output_pdf = [f"{FOLDER}/inference_stats.tsv.gz"]
-else:
-    output_pdf = [f"{FOLDER}/tree_stats.tsv.gz"]
-if OUTPUT_TSV:
-    output_pdf += [f"{FOLDER}/dataframe_stats.pdf"]
+    output_pdf.append(f"{FOLDER}/inference_stats.tsv.gz")
 
 rule all:
     input: output_pdf
@@ -28,7 +24,7 @@ def simulator_output(wildcards):
 
 
 def variance_env(nbr_loci, a, mut_rate, pop_size, h2):
-    vG = 4 * float(a)**2 * float(nbr_loci) * float(mut_rate) * int(pop_size)
+    vG = 4 * float(a) ** 2 * float(nbr_loci) * float(mut_rate) * int(pop_size)
     h2 = float(h2)
     assert vG > 0
     assert 0 <= h2 <= 1
@@ -56,33 +52,23 @@ rule run_simulations:
 rule tree_stats:
     input:
         exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"]),
-        script=f"{ROOT}/scripts/plot_scatter_stats.py"
+        script=f"{ROOT}/scripts/plot_simulations_ML.py"
     output:
         tsv=f"{FOLDER}/tree_stats.tsv.gz"
     shell:
         'python3 {input.script} --folder {FOLDER} --output {output.tsv}'
 
-rule dataframe_stats:
-    input:
-        exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"]),
-        script=f"{ROOT}/scripts/plot_scatter.py"
-    output:
-        tsv=f"{FOLDER}/dataframe_stats.pdf"
-    threads: workflow.cores
-    shell:
-        'python3 {input.script} --folder {FOLDER} --output {output.tsv}'
 
 rule pre_processed_traits:
     input:
-        script=f"{ROOT}/scripts/pre_processed_traits.py",
+        script=f"{ROOT}/scripts/pre_processed_traits_simulations.py",
         nhx=rules.run_simulations.output.nhx,
         neutral=expand(rules.run_simulations.output.nhx,scaling=REPLICATES[0],seed=SEEDS[0],simulator='neutral')
     output:
         tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.tree",
-        traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.traits.tsv",
-        fossils=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.fossils.tsv"
+        traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.traits.tsv"
     shell:
-        'python3 {input.script} --input {input.nhx} --neutral {input.neutral} --tree {output.tree} --traits {output.traits} --fossils {output.fossils}'
+        'python3 {input.script} --input {input.nhx} --neutral {input.neutral} --tree {output.tree} --traits {output.traits}'
 
 
 def chain_name(wildcards):
@@ -93,19 +79,18 @@ rule run_inference:
     input:
         exec=f"{ROOT}/utils/BayesCode/bin/nodetraits",
         tree=rules.pre_processed_traits.output.tree,
-        traits=rules.pre_processed_traits.output.traits,
-        fossils=rules.pre_processed_traits.output.fossils
+        traits=rules.pre_processed_traits.output.traits
     output:
         run=f"{FOLDER}/{{simulator}}/inference_{{scaling}}_seed{{seed}}.run",
     params:
         chain=lambda wildcards: chain_name(wildcards),
         until=f"-u {config['bayes_until']}"
     shell:
-        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} --fossils {input.fossils} {params.chain} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
+        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} {params.chain} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
 
 rule inference_stats:
     input:
-        script=f"{ROOT}/scripts/plot_inference.py",
+        script=f"{ROOT}/scripts/plot_simulations_bayesian.py",
         tsv=rules.tree_stats.output.tsv,
         cov=expand(rules.run_inference.output.run,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
     output:

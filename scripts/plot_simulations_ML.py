@@ -1,10 +1,12 @@
 import os
 import argparse
+import numpy as np
 import pandas as pd
 from glob import glob
 from collections import defaultdict
 from os.path import basename, isdir
-from libraries import *
+from neutrality_index import brownian_fitting, open_tree
+from libraries import hist_plot, scatter_plot
 
 
 def main(folder, output):
@@ -23,23 +25,26 @@ def main(folder, output):
         for f, filepath in enumerate(replicates[m]):
             tree = open_tree(filepath)
             assert tree.get_leaf_names() == neutral_tree.get_leaf_names()
-            combinations = defaultdict(list)
+            for node, node_neutral in zip(tree.traverse("preorder"), neutral_tree.traverse("preorder")):
+                assert node.name == node_neutral.name
+                node.dist = float(getattr(node_neutral, "d"))
 
+            leaves_value = defaultdict(list)
             for n, n_neutral in zip(tree.get_leaves(), neutral_tree.get_leaves()):
-                vg = float(getattr(n, "Phenotype_var")) * float(getattr(n, "Heritability"))
-                combinations['within_tajima'].append(vg / float(getattr(n_neutral, "Theta_Tajima")))
-                combinations['within_watterson'].append(vg / float(getattr(n_neutral, "Theta_Watterson")))
-                combinations["within_fay_wu"].append(vg / float(getattr(n_neutral, "Theta_Fay_Wu")))
-                combinations["within_sampled"].append(vg / float(getattr(n_neutral, "Theta")))
+                vg = float(getattr(n, "Phenotype_var")) * abs(float(getattr(n, "Heritability")))
+                leaves_value['within_tajima'].append(vg / float(getattr(n_neutral, "Theta_Tajima")))
+                leaves_value['within_watterson'].append(vg / float(getattr(n_neutral, "Theta_Watterson")))
+                leaves_value["within_fay_wu"].append(vg / float(getattr(n_neutral, "Theta_Fay_Wu")))
+                leaves_value["within_sampled"].append(vg / float(getattr(n_neutral, "Theta")))
                 r = float(getattr(n, "Expected_Mutational_var")) / (2 * float(getattr(n_neutral, "Mutational_rate")))
-                combinations["mutational"].append(r)
+                leaves_value["mutational"].append(r)
 
             var_dict['replicate'][m].append(os.path.basename(filepath).replace(".nhx.gz", "").split('_')[-1])
-            for k, v in combinations.items():
+            for k, v in leaves_value.items():
                 var_dict[k][m].append(np.mean(v))
 
-            z, var_between = brownian_fitting(tree, neutral_tree, trait="Genotype_mean", dist="d")
-            var_dict['between'][m].append(var_between / 4)
+            z, var_between = brownian_fitting(tree, trait="Phenotype_mean")
+            var_dict['between'][m].append(var_between)
     # Output the dictionary as a dataframe
 
     dict_of_df = {k: pd.DataFrame(v) for k, v in var_dict.items()}

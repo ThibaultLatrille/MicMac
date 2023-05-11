@@ -5,7 +5,6 @@ min_seed: 0
 max_seed: 98745641
 nb_seeds: 1000
 tree: "trees/mammal.tre.annotated"
-output_tsv: false
 bayes_inference: true
 bayes_burn_in: 200
 bayes_until: 500

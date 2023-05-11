@@ -1,39 +1,97 @@
-configfile: 'config.yaml'
-from urllib.request import Request, urlopen
-from bs4 import BeautifulSoup
+import os
 
-
-def read_url(url):
-    url = url.replace(" ","%20")
-    req = Request(url)
-    a = urlopen(req).read()
-    soup = BeautifulSoup(a,'html.parser')
-    x = (soup.find_all('a'))
-    return [(url + i.extract().get_text()).replace(" ","%20") for i in x]
-
-
-url_list = read_url(config["FTP_BGEE"])
-ftp_dl = {}
-for species_url in url_list[6:]:
-    print(species_url)
-    for exp_url in read_url(species_url + "/")[7:]:
-        exp_file = exp_url.split('/')[-1]
-        ftp_dl[exp_file] = exp_url
+ROOT = os.path.abspath('..')
+FOLDER = os.path.abspath('.')
 
 rule all:
+    input: f"{FOLDER}/results/merge.tsv"
+
+
+def data_dS(dataset, empirical=True):
+    if empirical:
+        dico_dS = {"E": "Edempdnds.dsom.tre", "Zoo": "Zoo739_empiricaldnds.dsom.tre"}
+    else:
+        dico_dS = {"E": "Ed708genebrdnds.dsom.tre", "Zoo": "Zoo739_sub1to5_genebranchdnds.dsom.tre"}
+    return dico_dS[dataset]
+
+
+def data_pS(dataset):
+    dico_pS = {"E": "EdtableTHV_158sp", "Zoo": "ZootableTHV_180Zoonomia_8traits_7287genes_withgc3andHzoo"}
+    return dico_pS[dataset]
+
+
+rule pre_processed_traits:
     input:
-        [f'dl.{filename}' for filename in config["DOWNLOAD"]],
-        [f'bgee/{filename}' for filename in ftp_dl.keys()]
-
-rule download:
-    priority: 50
-    output: 'dl.{filename}'
-    params: lambda wildcards: config["DOWNLOAD"][wildcards.filename]
+        script=f"{ROOT}/scripts/pre_processed_traits_mammals.py",
+        input_dS=lambda wildcards: f"{FOLDER}/data/{data_dS(wildcards.dataset,empirical=False)}",
+        input_pS=lambda wildcards: f"{FOLDER}/data/{data_pS(wildcards.dataset)}",
+        input_traits=f"{FOLDER}/data/Tsuboi_etal_NEE_mammal.csv",
+    output:
+        tree=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.tree",
+        traits=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.traits.tsv",
+        variance_pop=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.variance_pop.tsv"
+    params:
+        phenotype=lambda wildcards: f"--log_transform {wildcards.logT} --sex {wildcards.sex}"
+    log:
+        stdout=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.preprocessed.log"
     shell:
-        "wget -c {params} -O {output}"
+        'python3 {input.script} {params.phenotype} --input_dS {input.input_dS} --input_pS {input.input_pS}'
+        ' --input_traits {input.input_traits} --output_tree {output.tree} --output_traits {output.traits}'
+        ' --output_variance_pop {output.variance_pop} > {log.stdout}'
 
-rule download_ftp:
-    output: 'bgee/{filename}'
-    params: lambda wildcards: ftp_dl[wildcards.filename]
+rule neutrality_index:
+    input:
+        script=f"{ROOT}/scripts/neutrality_index.py",
+        tree=rules.pre_processed_traits.output.tree,
+        traits=rules.pre_processed_traits.output.traits,
+        variance_pop=rules.pre_processed_traits.output.variance_pop
+    output:
+        tsv=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}.tsv"
+    log:
+        stdout=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}.processed.log"
     shell:
-        "wget -c {params} -O {output}"
+        'python3 {input.script} --tree {input.tree} --traits {input.traits} --variance_pop {input.variance_pop}'
+        ' --output {output.tsv} > {log.stdout}'
+
+
+rule run_inference:
+    input:
+        exec=f"{ROOT}/utils/BayesCode/bin/nodetraits",
+        traits=rules.pre_processed_traits.output.traits,
+        tree=rules.pre_processed_traits.output.tree
+    output:
+        run=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}.run",
+    params:
+        chain=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}",
+        until=f"-u 500"
+    log:
+        stdout=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}.log"
+    shell:
+        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} {params.chain}'
+        ' > {log.stdout} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
+
+rule read_trace:
+    input:
+        script=f"{ROOT}/scripts/read_trace.py",
+        inference=rules.run_inference.output.run,
+        variance_pop=rules.pre_processed_traits.output.variance_pop
+    output:
+        tsv=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.tsv",
+    params:
+        burn_in=f"--burn_in 300",
+        infer=lambda w: f"{FOLDER}/data_processed/inference/{w.dataset}_{w.sex}_{w.logT}.trace.gz"
+    log:
+        stdout=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.trace.log"
+    shell:
+        'python3 {input.script} {params.burn_in} --inference {params.infer} --variance_pop {input.variance_pop}'
+        ' --output {output.tsv} > {log.stdout}'
+
+rule merge_tsv:
+    input:
+        script=f"{ROOT}/scripts/merge_results_mammals.py",
+        tsv_Bayes=expand(rules.read_trace.output.tsv,dataset=["E", "Zoo"],sex=["m", "f"],logT=[True, False]),
+        tsv_ML=expand(rules.neutrality_index.output.tsv,dataset=["E", "Zoo"],sex=["m", "f"],logT=[True, False])
+    output:
+        tsv=f"{FOLDER}/results/merge.tsv",
+    shell:
+        'python3 {input.script} --tsv_ML {input.tsv_ML} --tsv_Bayes {input.tsv_Bayes} --output {output.tsv}'

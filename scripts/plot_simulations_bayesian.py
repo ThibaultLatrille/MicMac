@@ -1,10 +1,11 @@
 import os
 import argparse
 from glob import glob
+import numpy as np
 import pandas as pd
 from collections import defaultdict
 from os.path import basename, isdir
-from libraries import *
+from libraries import hist_plot, scatter_plot
 
 
 def open_covar_file(covar_file):
@@ -54,7 +55,7 @@ def open_covar_file(covar_file):
 
 def open_trace_file(trace_file, burn_in):
     df = pd.read_csv(trace_file, sep="\t")
-    return df["Cov_0_0"].values[burn_in:] / 4
+    return df["Var_Phenotype"].values[burn_in:] / 4
 
 
 def main(folder, tsv_path, burn_in, output):
