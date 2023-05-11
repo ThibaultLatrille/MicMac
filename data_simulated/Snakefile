@@ -11,9 +11,9 @@ SEEDS = [int(i) for i in np.linspace(config["min_seed"],config["max_seed"],confi
 SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() if k != "model"]) for s, d in
                     config["simulators"].items()}
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
-output_pdf = [f"{FOLDER}/tree_stats.tsv.gz"]
+output_pdf = [f"{FOLDER}/inference_ML.tsv.gz"]
 if 'bayes_inference' in config and config['bayes_inference']:
-    output_pdf.append(f"{FOLDER}/inference_stats.tsv.gz")
+    output_pdf.append(f"{FOLDER}/inference_bayesian.tsv.gz")
 
 rule all:
     input: output_pdf
@@ -39,7 +39,6 @@ rule run_simulations:
         nhx=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.nhx.gz"
     params:
         file=lambda wildcards: simulator_output(wildcards),
-        output_tsv=lambda wildcards: f"--output_tsv && gzip {simulator_output(wildcards)}.tsv" if OUTPUT_TSV else '',
         folder=lambda wildcards: f"{FOLDER}/{wildcards.simulator}",
         simulator=lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"],SIMULATOR_PARAMS[wildcards.simulator]),
         ve=lambda wildcards: variance_env(nbr_loci=wildcards.scaling,a=config["core"]["mutation_mean_effect_size"],
@@ -49,12 +48,12 @@ rule run_simulations:
         'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --seed {wildcards.seed} --output {params.file} && gzip {params.file}.nhx'
 
 
-rule tree_stats:
+rule plot_simulations_ML:
     input:
         exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"]),
         script=f"{ROOT}/scripts/plot_simulations_ML.py"
     output:
-        tsv=f"{FOLDER}/tree_stats.tsv.gz"
+        tsv=f"{FOLDER}/inference_ML.tsv.gz"
     shell:
         'python3 {input.script} --folder {FOLDER} --output {output.tsv}'
 
@@ -88,13 +87,13 @@ rule run_inference:
     shell:
         '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} {params.chain} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
 
-rule inference_stats:
+rule plot_simulations_bayesian:
     input:
         script=f"{ROOT}/scripts/plot_simulations_bayesian.py",
-        tsv=rules.tree_stats.output.tsv,
+        tsv=rules.plot_simulations_ML.output.tsv,
         cov=expand(rules.run_inference.output.run,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
     output:
-        plot=f"{FOLDER}/inference_stats.tsv.gz",
+        plot=f"{FOLDER}/inference_bayesian.tsv.gz",
     params:
         burn_in=f"--burn_in {config['bayes_burn_in']}"
     shell:
