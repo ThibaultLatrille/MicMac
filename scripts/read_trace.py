@@ -30,7 +30,6 @@ def main(inference_path: str, variance_pop_path: str, burn_in: int, output_path:
     output_dict = defaultdict(list)
     for trait, trait_trace in traces_dict.items():
         variance_phy = np.mean(trait_trace) / 4
-        assert variance_phy > 0
 
         assert f"{trait}_variance" in var_pop_df.columns
         notna = np.isfinite(var_pop_df[f"{trait}_variance"])

@@ -17,18 +17,21 @@ def open_tree(tree_path: str, format_ete3: int = 1) -> Tree:
 
 
 def prune_tree(input_tree: Tree, list_taxa: list = None) -> Tree:
-    # Prune tree
     tree = input_tree.copy()
+
+    # Prune tree
     if list_taxa is not None:
         tree.prune(list_taxa)
+        assert len(tree.get_leaves()) == len(list_taxa), f"Pruning failed: {len(tree.get_leaves())} != {len(list_taxa)}"
+
     # Add polytomies if branch length are 0
     remove_nodes = set([n for n in tree.traverse() if (n.dist == 0.0 and not n.is_root())])
     for n in remove_nodes:
         n.delete()
-    assert len(set([n for n in tree.traverse()]).intersection(remove_nodes)) == 0
+    assert len(set([n for n in tree.traverse()]).intersection(remove_nodes)) == 0, "Some polytomies could not be removed"
     for n in tree.traverse():
         if not n.is_root():
-            assert n.dist > 0.0
+            assert n.dist > 0.0, f"Branch length is 0.0 for node {n.name}"
     return tree
 
 
