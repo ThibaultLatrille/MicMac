@@ -55,7 +55,7 @@ def open_covar_file(covar_file):
 
 def open_trace_file(trace_file, burn_in):
     df = pd.read_csv(trace_file, sep="\t")
-    return df["Var_Phenotype"].values[burn_in:] / 4
+    return df["Var_Phenotype"].values[burn_in:] / 4.0
 
 
 def main(folder, tsv_path, burn_in, output):
@@ -82,19 +82,19 @@ def main(folder, tsv_path, burn_in, output):
     for m in models:
         for f, filepath in enumerate(replicates[m]):
             rep = os.path.basename(filepath).replace(".trace.gz", "").split("_")[-1]
-            sigma_phy_array = open_trace_file(filepath, burn_in=burn_in)
-            sigma_phy = np.mean(sigma_phy_array)
-            sigma_pop = abs(dict_tree[("within_sampled", m, rep)])
-            sigma_mut = dict_tree[("mutational", m, rep)]
-            assert sigma_phy > 0
-            assert sigma_pop > 0
-            assert sigma_mut > 0
-            var_dict["phy"][m].append(sigma_phy)
-            var_dict["pop"][m].append(sigma_pop)
-            var_dict["mut"][m].append(sigma_mut)
-            var_dict["phy_pop"][m].append(sigma_phy / sigma_pop)
-            var_dict["phy_pop_pv"][m].append(np.mean(sigma_phy_array > sigma_pop))
-            var_dict["phy_mut"][m].append(sigma_phy / sigma_mut)
+            var_phy_trace = open_trace_file(filepath, burn_in=burn_in)
+            var_phy = np.mean(var_phy_trace)
+            var_pop = abs(dict_tree[("within_sampled", m, rep)])
+            var_mut = dict_tree[("mutational", m, rep)]
+            assert var_phy > 0
+            assert var_pop > 0
+            assert var_mut > 0
+            var_dict["phy"][m].append(var_phy)
+            var_dict["pop"][m].append(var_pop)
+            var_dict["mut"][m].append(var_mut)
+            var_dict["phy_pop"][m].append(var_phy / var_pop)
+            var_dict["phy_pop_pv"][m].append(np.mean(var_phy_trace > var_pop))
+            var_dict["phy_mut"][m].append(var_phy / var_mut)
 
     df = pd.DataFrame(var_dict)
     df.to_csv(output, sep="\t", index=False)

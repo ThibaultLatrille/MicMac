@@ -21,7 +21,7 @@ def prune_tree(input_tree: Tree, list_taxa: list = None) -> Tree:
 
     # Prune tree
     if list_taxa is not None:
-        tree.prune(list_taxa)
+        tree.prune(list_taxa, preserve_branch_length=True)
         assert len(tree.get_leaves()) == len(list_taxa), f"Pruning failed: {len(tree.get_leaves())} != {len(list_taxa)}"
 
     # Add polytomies if branch length are 0
@@ -82,6 +82,8 @@ def main(input_traits: str, input_tree: str, input_variance_pop: str, output_tsv
 
     # Open tree, branch length should be in substitution per site
     tree = open_tree(input_tree)
+    total_tree_length = sum([n.dist for n in tree.traverse() if not n.is_root()])
+    print(f"The total tree length is {total_tree_length} substitutions per site")
     set_taxa = set(tree.get_leaf_names())
 
     # Open mean trait file

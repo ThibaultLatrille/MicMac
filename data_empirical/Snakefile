@@ -23,7 +23,7 @@ def data_pS(dataset):
 rule pre_processed_traits:
     input:
         script=f"{ROOT}/scripts/pre_processed_traits_mammals.py",
-        input_dS=lambda wildcards: f"{FOLDER}/data/{data_dS(wildcards.dataset,empirical=False)}",
+        input_dS=lambda wildcards: f"{FOLDER}/data/{data_dS(wildcards.dataset,empirical=True)}",
         input_pS=lambda wildcards: f"{FOLDER}/data/{data_pS(wildcards.dataset)}",
         input_traits=f"{FOLDER}/data/Tsuboi_etal_NEE_mammal.csv",
     output:

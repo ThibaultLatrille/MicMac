@@ -33,8 +33,6 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
         assert os.path.exists(path), f"Path {path} does not exist"
     for path in [path_output_tree, path_output_traits, path_output_variance_pop]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-    # density of brain tissue is 1.036 g/ml
-    density_brain_tissue = 1.036
 
     tree = open_tree(path_input_dS, format_ete3=1)
     tree = rename_tree(tree)
@@ -61,23 +59,34 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
     pS_df = pS_df[np.isfinite(pS_df[pS_col]) & (pS_df[pS_col] > 0)]
     print(f"The pS dataframe has {len(pS_df)} rows after filtering taxon name and available pS.")
 
-
     df_traits = pd.read_csv(path_input_traits)
     assert "Genus_Species" in df_traits.columns
-    print(f"The trait dataframe has {len(df_traits)} rows before filtering taxon name.")
+    print(f"The trait dataframe has {len(df_traits)} rows before filtering taxa.")
     df_traits = df_traits[df_traits["Genus_Species"].isin(set_taxa_names)]
-    print(f"The trait dataframe has {len(df_traits)} rows after filtering taxon name in the tree.")
-    # Keep only the male or the female
-    df_traits = df_traits[df_traits["Sex"] == sex]
-    print(f"The trait dataframe has {len(df_traits)} rows after keeping {'male' if sex == 'm' else 'female'}.")
+    print(f"The trait dataframe has {len(df_traits)} rows after filtering taxa also in the tree.")
+    if sex in ["m", "f"]:
+        # Keep only the male or the female
+        df_traits = df_traits[df_traits["Sex"] == sex]
+        print(f"The trait dataframe has {len(df_traits)} rows after keeping {'male' if sex == 'm' else 'female'}s.")
+    else:
+        print("Keeping all individuals (males and females).")
     # Keep only the adult
     df_traits = df_traits[df_traits["Age Class"] == "Adult"]
-    print(f"The trait dataframe has {len(df_traits)} rows after filtering out not adult.")
+    print(f"The trait dataframe has {len(df_traits)} rows after keeping adults.")
+
+    # Convert the brain volume in brain mass
+    # density of brain tissue is 1.036 g/ml
+    bm, bv = "Brain mass (g)", "Brain Volume (ml)"
+    density_brain_tissue = 1.036
+    df_traits[bm] = df_traits.apply(lambda r: r[bm] if np.isfinite(r[bm]) else r[bv] * density_brain_tissue, axis=1)
+    ss_brain, ss_body = "Sample size (Brain)", "Sample size (Body)"
+    df_traits[ss_body] = df_traits.apply(lambda r: r[ss_body] if np.isfinite(r[ss_body]) else r[ss_brain], axis=1)
     df_traits.to_csv(path_output_traits.replace("traits.tsv", "dataframe.tsv"), sep="\t", index=False)
+
+    # Filter the tree and create dictionaries for variance and mean of traits
     set_taxa_names = set_taxa_names.intersection(set(df_traits["Genus_Species"]))
     print(f"The intersection of the tree and trait dataframe has {len(set_taxa_names)} taxa.")
-
-    tree.prune(set_taxa_names)
+    tree = prune_tree(tree, list(set_taxa_names))
     assert len(tree.get_leaves()) == len(set_taxa_names)
     dico_variance_pop, dico_traits = defaultdict(list), defaultdict(list)
     for taxa_name in set_taxa_names:
@@ -91,11 +100,11 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
         dico_variance_pop[f"pS"].append(pS)
         dico_traits["TaxonName"].append(taxa_name)
 
-    df_traits["Ratio of brain mass to body mass"] = df_traits["Brain mass (g)"] / df_traits["Body mass (g)"]
-    for trait in ["Body mass (g)", "Brain Volume (ml)", "Brain mass (g)", "Ratio of brain mass to body mass"]:
+    for trait in ["Body mass (g)", "Brain mass (g)"]:
         trait_name = trait.replace(" ", "_").replace("(", "").replace(")", "")
         print(f"\nPhenotype considered is {trait}")
-        trait_df = df_traits[np.isfinite(df_traits[trait])].copy()
+        trait_df = df_traits.copy()
+        trait_df = trait_df[np.isfinite(trait_df[trait])]
         print(f"The trait dataframe has {len(trait_df)} rows after filtering not finite values.")
         if log_transform:
             # Log transform the trait
@@ -103,28 +112,28 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
             print(f"The trait is log transformed.")
 
         # Filter out the species with a unique row in the trait dataframe
-        var_df = trait_df[trait_df["Sample size (Brain)"] == 1].copy()
+        var_df = trait_df.copy()
+        var_df = var_df[var_df["Sample size (Brain)"] == 1]
         print(f"The trait dataframe has {len(var_df)} rows after filtering for Nsize != 1.")
-        var_df = var_df.groupby("Genus_Species").filter(lambda x: len(x) > 1)
-        print(f"The trait dataframe has {len(var_df)} individuals after filtering out species with no variance.")
-        dico_count = {k: len(v) for k, v in var_df.groupby("Genus_Species")}
-        print(f"The number of individuals per species is {dico_count}")
+        var_grouped = {k: v for k, v in var_df.groupby("Genus_Species") if len(v) > 1}
+        print(f"The trait dataframe has {len(var_grouped)} taxa after keeping taxon with more than 1 individuals.")
         for taxa_name in set_taxa_names:
-            if taxa_name in dico_count:
-                phenotype_var = np.var(var_df[var_df["Genus_Species"] == taxa_name][trait], ddof=1)
+            if taxa_name in var_grouped:
+                phenotype_var = np.var(var_grouped[taxa_name][trait], ddof=1)
             else:
                 phenotype_var = np.nan
             dico_variance_pop[f"{trait_name}_variance"].append(phenotype_var)
         assert len(set_taxa_names) == len(dico_variance_pop[f"{trait_name}_variance"])
-        print(f"{len(dico_count)} species with variance computed.")
+        print(f"{len(var_grouped)} species with variance computed.")
 
+        mean_df = trait_df.copy()
+        mean_grouped = {k: v for k, v in mean_df.groupby("Genus_Species")}
         for taxa_name in set_taxa_names:
-            filtered = trait_df[trait_df["Genus_Species"] == taxa_name]
-            filtered = filtered[np.isfinite(filtered[trait])]
-            if len(filtered) == 0:
-                phenotype_mean = np.nan
+            if taxa_name in mean_grouped:
+                filtered = mean_grouped[taxa_name]
+                phenotype_mean = np.average(filtered[trait], weights=filtered["Sample size (Body)"])
             else:
-                phenotype_mean = np.average(filtered[trait], weights=filtered["Sample size (Brain)"])
+                phenotype_mean = np.nan
             dico_traits[f"{trait_name}_mean"].append(phenotype_mean)
         print(f"{sum(np.isfinite(dico_traits[f'{trait_name}_mean']))} species with mean computed.")
 
@@ -143,10 +152,12 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
 
     # Prune the tree and write it
     set_taxa_names = set(df_traits["TaxonName"])
-    prune_tree(tree, list(set_taxa_names))
+    tree = prune_tree(tree, list(set_taxa_names))
     for taxa in df_variance_pop["TaxonName"]:
         assert taxa in set_taxa_names, f"{taxa} not in the tree"
     print(f"The final tree has {len(tree.get_leaves())} taxa.")
+    tree_length = sum([node.dist for node in tree.traverse()])
+    print(f"The tree length is {tree_length}.")
     tree.write(outfile=path_output_tree, format=3)
 
 
@@ -162,6 +173,5 @@ if __name__ == '__main__':
     parser.add_argument('--sex', help="Sex (m or f)", default="m", type=str, required=False)
     args = parser.parse_args()
     args.log_transform = args.log_transform.lower() == "true"
-    assert args.sex in ["m", "f"]
     main(args.input_traits, args.input_pS, args.input_dS, args.output_tree, args.output_traits,
          args.output_variance_pop, args.log_transform, args.sex)

@@ -22,7 +22,7 @@ def main(tsv_ML_list: str, tsv_Bayes_list: str, output: str):
     df_out = pd.concat(list_df)
     # Sort by trait, dataset, sex, logT and then method
     df_out = df_out.sort_values(by=["trait", "dataset", "sex", "logT", "method"])
-    df_out.to_csv(output, sep="\t", index=False)
+    df_out.to_csv(output, sep="\t", index=False, float_format="%.3f")
 
 
 if __name__ == '__main__':
