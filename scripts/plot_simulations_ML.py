@@ -27,7 +27,10 @@ def main(folder, output):
             assert tree.get_leaf_names() == neutral_tree.get_leaf_names()
             for node, node_neutral in zip(tree.traverse("preorder"), neutral_tree.traverse("preorder")):
                 assert node.name == node_neutral.name
-                node.dist = float(getattr(node_neutral, "d"))
+                if node.is_root():
+                    node.dist = 0
+                else:
+                    node.dist = float(getattr(node_neutral, "d"))
 
             leaves_value = defaultdict(list)
             for n, n_neutral in zip(tree.get_leaves(), neutral_tree.get_leaves()):

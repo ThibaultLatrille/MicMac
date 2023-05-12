@@ -55,7 +55,7 @@ def open_covar_file(covar_file):
 
 def open_trace_file(trace_file, burn_in):
     df = pd.read_csv(trace_file, sep="\t")
-    return df["Var_Phenotype"].values[burn_in:] / 4.0
+    return df["Var_Phenotype_mean"].values[burn_in:] / 4.0
 
 
 def main(folder, tsv_path, burn_in, output):

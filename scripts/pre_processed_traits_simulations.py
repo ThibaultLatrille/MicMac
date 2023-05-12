@@ -4,7 +4,7 @@ import pandas as pd
 from neutrality_index import open_tree, prune_tree
 
 
-def main(input_path, input_neutral_path, tree_path, traits_path, fossils_path):
+def main(input_path, input_neutral_path, tree_path, traits_path):
     tree = open_tree(input_path, format_ete3=1)
 
     dico_traits = defaultdict(list)
@@ -16,7 +16,7 @@ def main(input_path, input_neutral_path, tree_path, traits_path, fossils_path):
         dico_traits["Genotype_mean"].append(geno_mean)
 
     df_traits = pd.DataFrame(dico_traits)
-    df_traits.to_csv(traits_path, sep=("\t" if fossils_path.endswith(".tsv") else ","), index=False)
+    df_traits.to_csv(traits_path, sep=("\t" if traits_path.endswith(".tsv") else ","), index=False)
 
     neutral_tree = open_tree(input_neutral_path, format_ete3=1)
     assert neutral_tree.get_leaf_names() == tree.get_leaf_names()
@@ -35,4 +35,4 @@ if __name__ == '__main__':
     parser.add_argument("--tree", help="Output tree file", required=True)
     parser.add_argument("--traits", help="Output traits file", required=True)
     args = parser.parse_args()
-    main(args.input, args.neutral, args.tree, args.traits, args.fossils)
+    main(args.input, args.neutral, args.tree, args.traits)
