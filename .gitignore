@@ -7,6 +7,7 @@
 *~
 data_simulated/experiments*
 data_empirical/data_processed
+data_empirical/data/science.*
 Legacy.*
 /utils/
 cmake-build-debug

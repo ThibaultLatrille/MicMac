@@ -40,7 +40,7 @@ urlcolor=BLUELINK
 
 \input{notations.tex}
 
-\title{A neutrality index for quantitative traits from within and between variations leveraging sequences evolution}
+\title{Testing for neutrality of a trait from within and between species variations}
 
 \author{
 \large
@@ -64,7 +64,7 @@ $^{1}$Université de Lausanne, Lausanne, Switzerland\\
     We define a neutrality index for a quantitative trait, leveraging both data at the population and phylogenetic scale.
     Moreover, this index leverages sequence divergence and polymorphism to normalize the variation of trait between and within species.
     Our neutrality index equals to one for a neutral trait, suggesting that traits for which this relationship is not verified are putatively under a selective regime.
-    If our neutrality index is lower than one for traits putatively under stabilizing selection, and conversely greater than one fors trait putatively under diversifying selection.
+    If our neutrality index is lower than one for traits putatively under stabilizing selection, and conversely greater than one for trait putatively under diversifying selection.
     Finally, we show that our test is not sensitive to the assumption that population sizes and mutation rates are constant across the phylogeny, and automatically adjust for it.
 \end{abstract}
 
@@ -95,7 +95,7 @@ Alternatively, a deviation from the Brownian process, typically an Ornstein-Uhle
 However, studies have shown that comparative approaches are subject to different biases\cite{harmon_phylogenetic_2018}.
 First, a better fit for a Brownian process at the phylogenetic scale is not necessarily a proof of the neutral model.
 Indeed, a trait under selection for which the optimal trait value is evolving as a Brownian process will not deviate from a Brownian process, and thus be wrongly classified as neutral\cite{hansen_translating_1996}.
-Secondly and contrarily, even under a neutral trait, the Ornstein-Uhlenbeck process might sometimes be statistically preferred over a Brownian process due to sampling   artifacts\cite{silvestro_measurement_2015, cooper_cautionary_2016, price_detecting_2022}.
+Secondly and contrarily, even under a neutral trait, the Ornstein-Uhlenbeck process might sometimes be statistically preferred over a Brownian process due to sampling artifacts\cite{silvestro_measurement_2015, cooper_cautionary_2016, price_detecting_2022}.
 Indeed, in such framework, the variation within species is discarded, where the mean trait value is taken either as the trait for a single individual in the species or as the average trait across several individuals.
 Altogether, the classical comparative framework allows tests for neutrality at the phylogenetic scale but discards the variance in traits between individuals, leaving out valuable information.
 
@@ -110,9 +110,9 @@ Importantly, our neutrality index also leverages sequence divergence and polymor
 \subsection{Neutrality index for a quantitative trait}\label{subsec:neutrality-index-for-a-quantitative-trait}
 \subsubsection{Mutation-drift equilibrium for a trait}
 
-For a given trait, its genetic architecture is defined by the number of loci encoding the trait ($\NbrLoci$) and the random effect on the random of a mutation ($a$).
+For a given trait, its genetic architecture is defined by the number of loci encoding the trait ($\NbrLoci$) and the random effect of a mutation on the trait ($a$).
 New mutations are thus generating variance for such a trait.
-We define the expected effect of a mutation on the variance of a trait as $\RateMut$, given as:
+We define the expected effect of mutations on the variance of a trait as $\RateMut$, given as:
 \begin{gather}
     \RateMut \defEqual \NbrLoci \Multiply \E \left[ a^2 \right]. \label{eq:rate-mut}
 \end{gather}

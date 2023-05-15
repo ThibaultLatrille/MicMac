@@ -10,7 +10,10 @@ from neutrality_index import open_tree, prune_tree
 def rename_tree(tree: Tree) -> Tree:
     for node in tree.traverse("levelorder"):
         if node.is_leaf():
-            node.name = "_".join(node.name.replace("_E", "").split("_")[:-1])
+            if node.name.endswith("_E"):
+                node.name = "_".join(node.name.replace("_E", "").split("_")[:-1])
+            else:
+                node.name = node.name.replace(" ", "_")
     return tree
 
 
@@ -38,26 +41,32 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
     tree = rename_tree(tree)
     set_taxa_names = set(tree.get_leaf_names())
     print(f"The tree has {len(set_taxa_names)} leaves")
+
+    # Open the pS/hererozygosity file
     read_pS = open(path_input_pS, "r").readlines()
     if read_pS[0].strip() == "#TRAITS":
         columns = read_pS[1].strip().split(" ")
         n_taxa = int(columns[0])
         n_traits = int(columns[1])
-        columns = ["specie"] + columns[2:]
+        columns = ["species"] + columns[2:]
         assert len(columns) == n_traits + 1
         pS_df = pd.read_csv(path_input_pS, sep=" ", skiprows=2, names=columns)
         # Replace -1 by NaN
         pS_df = pS_df.replace(-1, np.nan)
         # Remove "_E" from the specie name
-        pS_df["specie"] = pS_df["specie"].apply(lambda x: x.replace("_E", ""))
+        pS_df["species"] = pS_df["species"].apply(lambda x: x.replace("_E", ""))
         assert len(pS_df) == n_taxa
     else:
         pS_df = pd.read_csv(path_input_pS, sep=",")
+
+    # Remove all spaces in the specie name
+    pS_df["species"] = pS_df["species"].apply(lambda x: x.replace(" ", "_"))
     print(f"The pS dataframe has {len(pS_df)} rows before filtering.")
-    pS_df = pS_df[pS_df["specie"].isin(set_taxa_names)]
-    pS_col = "pS" if "pS" in pS_df.columns else "pS_uniq"
+    pS_df = pS_df[pS_df["species"].isin(set_taxa_names)]
+    pS_col = "pS" if "pS" in pS_df.columns else "heterozygosity"
     pS_df = pS_df[np.isfinite(pS_df[pS_col]) & (pS_df[pS_col] > 0)]
     print(f"The pS dataframe has {len(pS_df)} rows after filtering taxon name and available pS.")
+    assert len(pS_df) >= 5, "Not enough species with pS. Exiting."
 
     df_traits = pd.read_csv(path_input_traits)
     assert "Genus_Species" in df_traits.columns
@@ -90,7 +99,7 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
     assert len(tree.get_leaves()) == len(set_taxa_names)
     dico_variance_pop, dico_traits = defaultdict(list), defaultdict(list)
     for taxa_name in set_taxa_names:
-        leaf_pS_df = pS_df[pS_df["specie"] == taxa_name]
+        leaf_pS_df = pS_df[pS_df["species"] == taxa_name]
         if len(leaf_pS_df) == 0:
             pS = np.nan
         else:
@@ -144,7 +153,7 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
 
     # Remove the species with only nan values across the traits
     df_variance_pop = pd.DataFrame(dico_variance_pop)
-    df_variance_pop = df_variance_pop[df_variance_pop["TaxonName"].isin(set(pS_df["specie"]))]
+    df_variance_pop = df_variance_pop[df_variance_pop["TaxonName"].isin(set(pS_df["species"]))]
     df_variance_pop = df_variance_pop[df_variance_pop["TaxonName"].isin(set_taxa_names_traits)]
     df_variance_pop = df_variance_pop[np.isfinite(df_variance_pop.drop(["TaxonName", "pS"], axis=1)).any(axis=1)]
     # Write NaN for the species with no variance

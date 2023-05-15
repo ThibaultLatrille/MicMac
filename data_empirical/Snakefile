@@ -6,17 +6,26 @@ FOLDER = os.path.abspath('.')
 rule all:
     input: f"{FOLDER}/results/merge.tsv"
 
+BURN_IN, UNTIL = 1000, 2000
 
 def data_dS(dataset, empirical=True):
     if empirical:
-        dico_dS = {"E": "Edempdnds.dsom.tre", "Zoo": "Zoo739_empiricaldnds.dsom.tre"}
+        dico_dS = {"E": "Edempdnds.dsom.tre",
+                   "Zoo":"Zoo739_empiricaldnds.dsom.tre"}
     else:
-        dico_dS = {"E": "Ed708genebrdnds.dsom.tre", "Zoo": "Zoo739_sub1to5_genebranchdnds.dsom.tre"}
+        dico_dS = {"E": "Ed708genebrdnds.dsom.tre",
+                   "Zoo": "Zoo739_sub1to5_genebranchdnds.dsom.tre"}
+    dico_dS["Zoonomia"] = "241-mammalian-2020v2.phast-242.nh"
+    dico_dS["Consensus30"] = "science.abl8189.Timescale/PreliminaryTopologies/X_lessGC40_241.tree"
+    dico_dS["Consensus75"] = "science.abl8189.Timescale/PreliminaryTopologies/200Mammals_X_lessGC40_75consensus.tr"
     return dico_dS[dataset]
 
 
 def data_pS(dataset):
-    dico_pS = {"E": "EdtableTHV_158sp", "Zoo": "ZootableTHV_180Zoonomia_8traits_7287genes_withgc3andHzoo"}
+    dico_pS = {"E": "EdtableTHV_158sp",
+               "Zoo": "ZootableTHV_180Zoonomia_8traits_7287genes_withgc3andHzoo"}
+    for k in ["Zoonomia", "Consensus30", "Consensus75"]:
+        dico_pS[k] = "science.abn5856.Ne/science.abn5856_table_s1.csv"
     return dico_pS[dataset]
 
 
@@ -63,7 +72,7 @@ rule run_inference:
         run=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}.run",
     params:
         chain=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}",
-        until=f"-u 500"
+        until=f"--until {UNTIL}",
     log:
         stdout=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}.log"
     shell:
@@ -78,7 +87,7 @@ rule read_trace:
     output:
         tsv=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.tsv",
     params:
-        burn_in=f"--burn_in 300",
+        burn_in=f"--burn_in {BURN_IN}",
         infer=lambda w: f"{FOLDER}/data_processed/inference/{w.dataset}_{w.sex}_{w.logT}.trace.gz"
     log:
         stdout=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.trace.log"
@@ -89,8 +98,8 @@ rule read_trace:
 rule merge_tsv:
     input:
         script=f"{ROOT}/scripts/merge_results_mammals.py",
-        tsv_Bayes=expand(rules.read_trace.output.tsv,dataset=["E", "Zoo"],sex=["m", "f"],logT=[True, False]),
-        tsv_ML=expand(rules.neutrality_index.output.tsv,dataset=["E", "Zoo"],sex=["m", "f"],logT=[True, False])
+        tsv_Bayes=expand(rules.read_trace.output.tsv,dataset=["Consensus30", "Consensus75"],sex=["m", "f"],logT=[True, False]),
+        tsv_ML=expand(rules.neutrality_index.output.tsv,dataset=["Consensus30", "Consensus75"],sex=["m", "f"],logT=[True, False])
     output:
         tsv=f"{FOLDER}/results/merge.tsv",
     shell:
