@@ -1,6 +1,7 @@
 import os
 import argparse
 from glob import glob
+from natsort import natsorted
 import numpy as np
 import pandas as pd
 from collections import defaultdict
@@ -59,6 +60,8 @@ def open_trace_file(trace_file, burn_in):
 
 
 def main(folder, tsv_path, burn_in, output):
+    os.makedirs(os.path.dirname(output), exist_ok=True)
+
     # Read the tsv file with multiindex columns
     df = pd.read_csv(tsv_path, sep="\t", header=None)
     df.columns = pd.MultiIndex.from_arrays([df.iloc[0], df.iloc[1]])
@@ -71,11 +74,11 @@ def main(folder, tsv_path, burn_in, output):
         for rep, val in zip(reps, df[(name, model)].values):
             dict_tree[(name, model, rep)] = float(val)
 
-    models_path = {basename(p): p for p in glob(folder + "/*") if isdir(p)}
     model_prefs = {"moving_optimum": 0, "directional": 1, "stabilizing": 2, "neutral": 3}
+    models_path = {basename(p): p for p in glob(folder + "/*") if isdir(p) and basename(p) in model_prefs}
     models = list(sorted(models_path, key=lambda x: model_prefs[x] if x in model_prefs else -1))
 
-    replicates = {m: glob(p + "/*.trace.gz") for m, p in models_path.items()}
+    replicates = {m: natsorted(glob(f"{p}/*.trace.gz")) for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
 
     var_dict = defaultdict(lambda: defaultdict(list))
@@ -100,10 +103,10 @@ def main(folder, tsv_path, burn_in, output):
     df.to_csv(output, sep="\t", index=False)
     nb_genes = set([len(v) for v in var_dict["phy_pop"].values()]).pop()
     rename = lambda x: output.replace(".tsv.gz", x)
-    hist_plot(var_dict["phy_pop"], "$\\frac{\\sigma_{phy}^2}{\\sigma_{pop}^2}$", rename(".pdf"), nb_genes,
+    hist_plot(var_dict["phy_pop"], "$\\frac{\\sigma_{B}^2}{\\sigma_{W}^2}$", rename(".pdf"), nb_genes,
               'Var inter divided by Var intra')
 
-    hist_plot(var_dict["phy_pop_pv"], "$P ( \\sigma_{phy}^2 > \\sigma_{pop}^2 )$", rename(".pvalues.pdf"), nb_genes,
+    hist_plot(var_dict["phy_pop_pv"], "$P ( \\sigma_{B}^2 > \\sigma_{W}^2 )$", rename(".pvalues.pdf"), nb_genes,
               'Var inter divided by Var intra', xscale="linear")
 
     scatter_plot(var_dict["mut"], var_dict["phy"], "mut", "phy", rename(".mutphy.pdf"), nb_genes,

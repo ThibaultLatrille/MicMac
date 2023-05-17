@@ -11,9 +11,10 @@ SEEDS = [int(i) for i in np.linspace(config["min_seed"],config["max_seed"],confi
 SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() if k != "model"]) for s, d in
                     config["simulators"].items()}
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
-output_pdf = [f"{FOLDER}/inference_ML.tsv.gz"]
+SEED_POP_SIZE = 42
+output_pdf = [f"{FOLDER}/results/inference_ML.tsv.gz"]
 if 'bayes_inference' in config and config['bayes_inference']:
-    output_pdf.append(f"{FOLDER}/inference_bayesian.tsv.gz")
+    output_pdf.append(f"{FOLDER}/results/inference_bayesian.tsv.gz")
 
 rule all:
     input: output_pdf
@@ -45,29 +46,43 @@ rule run_simulations:
             mut_rate=config["core"]["mutation_rate_per_loci_per_generation"],pop_size=config["core"]["population_size"],
             h2=config["heritability"])
     shell:
-        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --seed {wildcards.seed} --output {params.file} && gzip {params.file}.nhx'
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --seed {wildcards.seed} --seed_pop_size {SEED_POP_SIZE} --output {params.file} && gzip {params.file}.nhx'
+
+rule run_neutral_simulation:
+    input:
+        exec=lambda wildcards: f"{ROOT}/simulator/build/neutral",
+        tree=f"{ROOT}/simulator/{config['tree']}"
+    output:
+        nhx=f"{FOLDER}/tree/neutral_tree.nhx.gz"
+    params:
+        file=f"{FOLDER}/tree/neutral_tree",
+        folder=lambda wildcards: f"{FOLDER}/tree",
+        simulator=lambda wildcards: "{0} {1}".format(SIMULATOR_PARAMS["core"],SIMULATOR_PARAMS["neutral"])
+    shell:
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment 0.0 --number_loci 50000 --seed 42 --seed_pop_size {SEED_POP_SIZE} --output {params.file} && gzip {params.file}.nhx'
 
 
 rule plot_simulations_ML:
     input:
         exp=expand(rules.run_simulations.output.nhx,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"]),
+        neutral_tree=rules.run_neutral_simulation.output.nhx,
         script=f"{ROOT}/scripts/plot_simulations_ML.py"
     output:
-        tsv=f"{FOLDER}/inference_ML.tsv.gz"
+        tsv=f"{FOLDER}/results/inference_ML.tsv.gz"
     shell:
-        'python3 {input.script} --folder {FOLDER} --output {output.tsv}'
+        'python3 {input.script} --folder {FOLDER} --neutral_tree {input.neutral_tree} --output {output.tsv}'
 
 
 rule pre_processed_traits:
     input:
         script=f"{ROOT}/scripts/pre_processed_traits_simulations.py",
         nhx=rules.run_simulations.output.nhx,
-        neutral=expand(rules.run_simulations.output.nhx,scaling=REPLICATES[0],seed=SEEDS[0],simulator='neutral')
+        neutral_tree=rules.run_neutral_simulation.output.nhx,
     output:
         tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.tree",
         traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.traits.tsv"
     shell:
-        'python3 {input.script} --input {input.nhx} --neutral {input.neutral} --tree {output.tree} --traits {output.traits}'
+        'python3 {input.script} --input {input.nhx} --neutral_tree {input.neutral_tree} --tree {output.tree} --traits {output.traits}'
 
 
 def chain_name(wildcards):
@@ -93,7 +108,7 @@ rule plot_simulations_bayesian:
         tsv=rules.plot_simulations_ML.output.tsv,
         cov=expand(rules.run_inference.output.run,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
     output:
-        plot=f"{FOLDER}/inference_bayesian.tsv.gz",
+        plot=f"{FOLDER}/results/inference_bayesian.tsv.gz",
     params:
         burn_in=f"--burn_in {config['bayes_burn_in']}"
     shell:

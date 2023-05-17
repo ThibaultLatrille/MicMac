@@ -31,8 +31,8 @@ def main(input_path, input_neutral_path, tree_path, traits_path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--input", help="Input tree file", required=True)
-    parser.add_argument("--neutral", help="Input neutral tree file", required=True)
+    parser.add_argument("--neutral_tree", help="Input neutral tree file", required=True)
     parser.add_argument("--tree", help="Output tree file", required=True)
     parser.add_argument("--traits", help="Output traits file", required=True)
     args = parser.parse_args()
-    main(args.input, args.neutral, args.tree, args.traits)
+    main(args.input, args.neutral_tree, args.tree, args.traits)
