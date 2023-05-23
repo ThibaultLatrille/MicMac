@@ -8,6 +8,10 @@ rule all:
 
 BURN_IN, UNTIL = 1000, 2000
 
+datasets = ["NeutralPhyloP"]
+sexes = ["m", "f"]
+logTs = [True]
+
 def data_dS(dataset, empirical=True):
     if empirical:
         dico_dS = {"E": "Edempdnds.dsom.tre",
@@ -18,13 +22,14 @@ def data_dS(dataset, empirical=True):
     dico_dS["Zoonomia"] = "241-mammalian-2020v2.phast-242.nh"
     dico_dS["Consensus30"] = "science.abl8189.Timescale/PreliminaryTopologies/X_lessGC40_241.tree"
     dico_dS["Consensus75"] = "science.abl8189.Timescale/PreliminaryTopologies/200Mammals_X_lessGC40_75consensus.tr"
+    dico_dS["NeutralPhyloP"] = "science.abl8189.Timescale/Table_S2_RootedTrees/Concatenation_HRA_neutral_241_10miss_rooted.tree"
     return dico_dS[dataset]
 
 
 def data_pS(dataset):
     dico_pS = {"E": "EdtableTHV_158sp",
                "Zoo": "ZootableTHV_180Zoonomia_8traits_7287genes_withgc3andHzoo"}
-    for k in ["Zoonomia", "Consensus30", "Consensus75"]:
+    for k in ["Zoonomia", "Consensus30", "Consensus75", "NeutralPhyloP"]:
         dico_pS[k] = "science.abn5856.Ne/science.abn5856_table_s1.csv"
     return dico_pS[dataset]
 
@@ -98,8 +103,8 @@ rule read_trace:
 rule merge_tsv:
     input:
         script=f"{ROOT}/scripts/merge_results_mammals.py",
-        tsv_Bayes=expand(rules.read_trace.output.tsv,dataset=["Consensus30", "Consensus75"],sex=["m", "f"],logT=[True, False]),
-        tsv_ML=expand(rules.neutrality_index.output.tsv,dataset=["Consensus30", "Consensus75"],sex=["m", "f"],logT=[True, False])
+        tsv_Bayes=expand(rules.read_trace.output.tsv,dataset=datasets,sex=sexes,logT=logTs),
+        tsv_ML=expand(rules.neutrality_index.output.tsv,dataset=datasets,sex=sexes,logT=logTs),
     output:
         tsv=f"{FOLDER}/results/merge.tsv",
     shell:

@@ -105,18 +105,18 @@ def main(folder, tsv_path, burn_in, output):
     rename = lambda x: output.replace(".tsv.gz", x)
     hist_plot(var_dict["phy_pop"], "$\\frac{\\sigma_{B}^2}{\\sigma_{W}^2}$", rename(".pdf"), nb_genes,
               'Var inter divided by Var intra')
-
     hist_plot(var_dict["phy_pop_pv"], "$P ( \\sigma_{B}^2 > \\sigma_{W}^2 )$", rename(".pvalues.pdf"), nb_genes,
               'Var inter divided by Var intra', xscale="linear")
 
-    scatter_plot(var_dict["mut"], var_dict["phy"], "mut", "phy", rename(".mutphy.pdf"), nb_genes,
-                 title=' - Vm versus Vd', histy_log=True)
-
-    scatter_plot(var_dict["mut"], var_dict["pop"], "mut", "pop", rename(".mutpop.pdf"), nb_genes,
-                 title=' - Vm versus Vg', histy_log=True)
-
-    scatter_plot(var_dict["pop"], var_dict["phy"], "pop", "phy", rename(".popphy.pdf"), nb_genes,
-                 title=' - Vg versus Vd', histy_log=True)
+    mut_str = r"Variance mutational $\left( \sigma^2_{M} \right)$"
+    within_str = r"Variance within $\left( \sigma^2_{W} \right)$"
+    between_str = r"Variance between $\left( \sigma^2_{B} \right)$"
+    scatter_plot(var_dict["mut"], var_dict["phy"], mut_str, between_str, rename(".mutphy.pdf"), nb_genes,
+                 title='', histy_log=True)
+    scatter_plot(var_dict["mut"], var_dict["pop"], mut_str, within_str, rename(".mutpop.pdf"), nb_genes,
+                 title='', histy_log=True)
+    scatter_plot(var_dict["pop"], var_dict["phy"], within_str, between_str, rename(".popphy.pdf"), nb_genes,
+                 title='', histy_log=True)
 
 
 if __name__ == '__main__':

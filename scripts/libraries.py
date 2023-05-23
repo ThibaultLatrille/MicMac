@@ -7,8 +7,8 @@ mpl.use('Agg')
 hist_filled = {'alpha': 0.3, 'histtype': 'stepfilled'}
 hist_step = {'histtype': 'step'}
 my_dpi = 128
-fontsize = 14
-fontsize_legend = 12
+fontsize = 24
+fontsize_legend = 18
 
 
 def colors(x):
@@ -85,7 +85,7 @@ def hist_plot(x, x_label, output, nbr_genes, title="", xscale="log"):
         bins = np.geomspace(min_x, max_x, 100)
     else:
         min_x = np.min([min(i) for i in x.values()])
-        bins = np.linspace(min_x, max_x, 1000)
+        bins = np.linspace(min_x, max_x, 100)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_filled)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_step)
     max_y = 1.2 * (max([max(h) for h in hist]) if len(x) > 1 else max(hist))
@@ -103,6 +103,11 @@ def hist_plot(x, x_label, output, nbr_genes, title="", xscale="log"):
     else:
         ax.set_xlim((-0.01, 1.01))
         ax.set_yscale("log")
+    # Change x and y ticks font size
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(fontsize)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(fontsize)
     ax.set_ylim((0, max_y))
     ax.set_ylabel("Density", fontsize=fontsize)
     ax.legend(fontsize=fontsize_legend)

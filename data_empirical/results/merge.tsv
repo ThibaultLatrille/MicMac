@@ -1,33 +1,9 @@
 trait	nbr_taxa_pop	nbr_taxa_phy	variance_pop	variance_phy	ratio	method	dataset	sex	logT	ratio_pv
-Body_mass_g	59	59	28422884329584.848	345278566000.000	0.012	Bayesian	Consensus30	f	False	0.000
-Body_mass_g	23	59	28422884329584.848	512207413292.968	0.018	ML	Consensus30	f	False	
-Body_mass_g	59	59	39.970	14.245	0.356	Bayesian	Consensus30	f	True	0.000
-Body_mass_g	23	59	39.970	14.185	0.355	ML	Consensus30	f	True	
-Body_mass_g	64	64	19402190596025.410	3850708825000.000	0.198	Bayesian	Consensus30	m	False	0.000
-Body_mass_g	28	64	19402190596025.410	6377362052794.994	0.329	ML	Consensus30	m	False	
-Body_mass_g	64	64	39.855	24.609	0.617	Bayesian	Consensus30	m	True	0.003
-Body_mass_g	28	64	39.855	24.503	0.615	ML	Consensus30	m	True	
-Body_mass_g	56	56	29714826892792.930	312951066750.000	0.011	Bayesian	Consensus75	f	False	0.000
-Body_mass_g	22	56	29714826892792.930	484624288460.502	0.016	ML	Consensus75	f	False	
-Body_mass_g	56	56	41.447	12.838	0.310	Bayesian	Consensus75	f	True	0.000
-Body_mass_g	22	56	41.447	12.810	0.309	ML	Consensus75	f	True	
-Body_mass_g	62	62	20120788580148.508	3665104297500.000	0.182	Bayesian	Consensus75	m	False	0.000
-Body_mass_g	27	62	20120788580148.508	5988557223096.597	0.298	ML	Consensus75	m	False	
-Body_mass_g	62	62	41.305	22.251	0.539	Bayesian	Consensus75	m	True	0.000
-Body_mass_g	27	62	41.305	22.056	0.534	ML	Consensus75	m	True	
-Brain_mass_g	59	59	2499364.361	1167528.025	0.467	Bayesian	Consensus30	f	False	0.000
-Brain_mass_g	23	59	2499364.361	1582277.026	0.633	ML	Consensus30	f	False	
-Brain_mass_g	59	59	4.414	7.762	1.758	Bayesian	Consensus30	f	True	1.000
-Brain_mass_g	23	59	4.414	7.635	1.729	ML	Consensus30	f	True	
-Brain_mass_g	64	64	94292664.645	7747230.150	0.082	Bayesian	Consensus30	m	False	0.000
-Brain_mass_g	28	64	94292664.645	12653430.042	0.134	ML	Consensus30	m	False	
-Brain_mass_g	64	64	5.714	10.400	1.820	Bayesian	Consensus30	m	True	0.999
-Brain_mass_g	28	64	5.714	10.237	1.792	ML	Consensus30	m	True	
-Brain_mass_g	56	56	2612882.428	983501.195	0.376	Bayesian	Consensus75	f	False	0.000
-Brain_mass_g	22	56	2612882.428	1530436.232	0.586	ML	Consensus75	f	False	
-Brain_mass_g	56	56	4.593	7.014	1.527	Bayesian	Consensus75	f	True	0.985
-Brain_mass_g	22	56	4.593	6.952	1.514	ML	Consensus75	f	True	
-Brain_mass_g	62	62	97784765.488	7261349.000	0.074	Bayesian	Consensus75	m	False	0.000
-Brain_mass_g	27	62	97784765.488	11868170.844	0.121	ML	Consensus75	m	False	
-Brain_mass_g	62	62	5.882	9.338	1.587	Bayesian	Consensus75	m	True	0.998
-Brain_mass_g	27	62	5.882	9.156	1.556	ML	Consensus75	m	True	
+Body_mass_g	59	59	39.970	12.592	0.315	Bayesian	NeutralPhyloP	f	True	0.000
+Body_mass_g	23	59	39.970	12.485	0.312	ML	NeutralPhyloP	f	True	
+Body_mass_g	64	64	39.855	21.824	0.548	Bayesian	NeutralPhyloP	m	True	0.001
+Body_mass_g	28	64	39.855	21.807	0.547	ML	NeutralPhyloP	m	True	
+Brain_mass_g	59	59	4.414	6.769	1.533	Bayesian	NeutralPhyloP	f	True	0.991
+Brain_mass_g	23	59	4.414	6.683	1.514	ML	NeutralPhyloP	f	True	
+Brain_mass_g	64	64	5.714	9.186	1.608	Bayesian	NeutralPhyloP	m	True	0.995
+Brain_mass_g	28	64	5.714	9.123	1.597	ML	NeutralPhyloP	m	True	
