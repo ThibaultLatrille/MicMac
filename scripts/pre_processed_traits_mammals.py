@@ -63,12 +63,9 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
     pS_df["species"] = pS_df["species"].apply(lambda x: x.replace(" ", "_"))
     print(f"The pS dataframe has {len(pS_df)} rows before filtering.")
     pS_df = pS_df[pS_df["species"].isin(set_taxa_names)]
-    pS_col_list = ["heterozygosity", "pS", 'Hzoo']
-    for pS_col in pS_col_list:
-        if pS_col in pS_df.columns:
-            print(f"Keeping only species with available '{pS_col}'.")
-            pS_df = pS_df[np.isfinite(pS_df[pS_col]) & (pS_df[pS_col] > 0)]
-            break
+    pS_col = [p for p in ["heterozygosity", "pS", 'Hzoo'] if p in pS_df.columns][0]
+    print(f"Keeping only species with available '{pS_col}'.")
+    pS_df = pS_df[np.isfinite(pS_df[pS_col]) & (pS_df[pS_col] > 0)]
     print(f"The pS dataframe has {len(pS_df)} rows after filtering taxon name and available pS.")
     assert len(pS_df) >= 5, "Not enough species with pS. Exiting."
 
