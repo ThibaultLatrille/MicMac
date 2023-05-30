@@ -27,4 +27,6 @@ class OutputArgParse {
         "", "seed", "Random number generator seed", false, 0, "u_long", cmd};
     TCLAP::ValueArg<u_long> seed_pop_size{"", "seed_pop_size",
         "Random number generator seed (specific to the population size)", false, 0, "u_long", cmd};
+    TCLAP::ValueArg<u_long> seed_mut_rate{"", "seed_mut_rate",
+        "Random number generator seed (specific to the mutation rate)", false, 0, "u_long", cmd};
 };

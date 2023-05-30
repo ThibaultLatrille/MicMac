@@ -24,35 +24,97 @@ using namespace std;
 
 typedef chrono::high_resolution_clock::time_point TimeVar;
 
+class MutationRateProcess {
+  private:
+    double mutation_rate;
+    double mutation_rate_min;
+    double mutation_rate_max;
+
+    double brownian;
+    double brownian_min;
+    double brownian_max;
+    double brownian_sigma;
+
+    normal_distribution<double> normal_distrib;
+
+  public:
+    explicit MutationRateProcess(double mutation_rate, double mutation_rate_min,
+        double mutation_rate_max, double brownian_sigma)
+        : mutation_rate{mutation_rate},
+          mutation_rate_min{mutation_rate_min},
+          mutation_rate_max{mutation_rate_max},
+          brownian_sigma{brownian_sigma} {
+        brownian = log(mutation_rate);
+        brownian_min = log(mutation_rate_min);
+        brownian_max = log(mutation_rate_max);
+        normal_distrib = normal_distribution<double>(0.0, 1.0);
+    }
+
+    void update() {
+        brownian += brownian_sigma * normal_distrib(generator_mut_rate);
+        if (brownian < brownian_min) { brownian = 2 * brownian_min - brownian; }
+        if (brownian > brownian_max) { brownian = 2 * brownian_max - brownian; }
+        mutation_rate = exp(brownian);
+    }
+    double get_mutation_rate() const {
+        return min(max(mutation_rate, mutation_rate_min), mutation_rate_max);
+    }
+};
+
+
+class MutationRateArgParse {
+  protected:
+    TCLAP::CmdLine &cmd;
+
+  public:
+    ~MutationRateArgParse() = default;
+    explicit MutationRateArgParse(TCLAP::CmdLine &cmd) : cmd{cmd} {}
+
+    TCLAP::ValueArg<double> mutation_rate_per_loci_per_generation{"",
+        "mutation_rate_per_loci_per_generation", "Mutation rate per locus per generation", false,
+        1e-5, "double", cmd};
+    TCLAP::ValueArg<double> mutation_rate_min{
+        "", "mutation_rate_min", "Minimum mutation_rate", false, 1e-7, "double", cmd};
+    TCLAP::ValueArg<double> mutation_rate_max{
+        "", "mutation_rate_max", "Maximum mutation_rate", false, 1e-3, "double", cmd};
+    TCLAP::ValueArg<double> mutation_brownian_sigma{"", "mutation_brownian_sigma",
+        "The Brownian sigma (0<sigma) applied to μ at each generation", false, 0.05, "double", cmd};
+
+    MutationRateProcess get_model() {
+        return MutationRateProcess(mutation_rate_per_loci_per_generation.getValue(),
+            mutation_rate_min.getValue(), mutation_rate_max.getValue(),
+            mutation_brownian_sigma.getValue());
+    }
+};
 
 class GenomeStructure : public vector<double> {
   public:
     u_long number_loci{};
     double mutation_mean_effect_size{};
-    double mutation_rate_per_loci_per_generation{};
     double background_genotype{0};
     double expected_var{0};
     double std_environment{0};
 
     GenomeStructure() = default;
     ~GenomeStructure() = default;
-    explicit GenomeStructure(u_long n, double radius, double mu, double variance_environment)
+    explicit GenomeStructure(u_long n, double radius, double variance_environment)
         : vector<double>(n, 0),
           number_loci{n},
           mutation_mean_effect_size{radius},
-          mutation_rate_per_loci_per_generation{mu},
           std_environment{sqrt(variance_environment)} {
         for (u_long i = 0; i < number_loci; ++i) {
             (*this)[i] = mutation_mean_effect_size * normal_distrib(generator);
         }
-        expected_var = 2 * mutation_rate_per_loci_per_generation * sum_squarred(*this);
+        expected_var = 2 * sum_squarred(*this);
     }
 
-    double expected_mutations() const {
+    double expected_mutations(double const &mutation_rate_per_loci_per_generation) const {
         return 2 * static_cast<double>(number_loci) * mutation_rate_per_loci_per_generation;
     };
 
-    double expected_variance() const { return expected_var; };
+    double expected_variance(double const &mutation_rate_per_loci_per_generation) const {
+        return mutation_rate_per_loci_per_generation * expected_var;
+    };
 };
 
 class GenomeStructureArgParse {
@@ -67,15 +129,12 @@ class GenomeStructureArgParse {
         "", "number_loci", "Number of loci", false, 10000, "u_long", cmd};
     TCLAP::ValueArg<double> mutation_mean_effect_size{
         "", "mutation_mean_effect_size", "Mutation mean effect size", false, 1.0, "double", cmd};
-    TCLAP::ValueArg<double> mutation_rate_per_loci_per_generation{"",
-        "mutation_rate_per_loci_per_generation", "Mutation rate per locus per generation", false,
-        1e-5, "double", cmd};
     TCLAP::ValueArg<double> variance_environment{
         "", "variance_environment", "Environmental variance (Ve).", false, 0.0, "double", cmd};
 
     GenomeStructure get_model() {
         return GenomeStructure(number_loci.getValue(), mutation_mean_effect_size.getValue(),
-            mutation_rate_per_loci_per_generation.getValue(), variance_environment.getValue());
+            variance_environment.getValue());
     }
 };
 
@@ -135,8 +194,10 @@ class Individual {
         fitness = fitness_model.fitness(phenotype);
     };
 
-    void mutation(GenomeStructure const &genome, FitnessModel const &fitness_model) {
-        poisson_distribution<u_long> poisson_distrib(genome.expected_mutations());
+    void mutation(GenomeStructure const &genome, MutationRateProcess const &mutation_rate,
+        FitnessModel const &fitness_model) {
+        poisson_distribution<u_long> poisson_distrib(
+            genome.expected_mutations(mutation_rate.get_mutation_rate()));
         u_long poisson_draw = poisson_distrib(generator);
 
         if (poisson_draw > 0) {
@@ -168,26 +229,30 @@ class PopulationSizeProcess {
   private:
     u_long population_size;
     u_long population_size_min;
+    u_long population_size_max;
 
     double brownian;
     double brownian_min;
+    double brownian_max;
     double brownian_sigma;
 
-    double ou{0};
+    double ou{0.0};
     double ou_sigma;
     double ou_theta;
     normal_distribution<double> normal_distrib;
 
   public:
     explicit PopulationSizeProcess(u_long population_size, u_long population_size_min,
-        double brownian_sigma, double ou_sigma, double ou_theta)
+        u_long population_size_max, double brownian_sigma, double ou_sigma, double ou_theta)
         : population_size{population_size},
           population_size_min{population_size_min},
+          population_size_max{population_size_max},
           brownian_sigma{brownian_sigma},
           ou_sigma{ou_sigma},
           ou_theta{ou_theta} {
         brownian = log(population_size);
         brownian_min = log(population_size_min);
+        brownian_max = log(population_size_max);
         normal_distrib = normal_distribution<double>(0.0, 1.0);
     }
 
@@ -195,9 +260,12 @@ class PopulationSizeProcess {
         ou += ou_sigma * normal_distrib(generator_pop_size) - ou_theta * ou;
         brownian += brownian_sigma * normal_distrib(generator_pop_size);
         if (brownian < brownian_min) { brownian = 2 * brownian_min - brownian; }
+        if (brownian > brownian_max) { brownian = 2 * brownian_max - brownian; }
         population_size = static_cast<u_long>(exp(ou + brownian));
     }
-    u_long get_population_size() const { return max(population_size, population_size_min); }
+    u_long get_population_size() const {
+        return min(max(population_size, population_size_min), population_size_max);
+    }
 };
 
 
@@ -213,19 +281,22 @@ class PopulationSizeArgParse {
         "", "population_size", "Number of individuals", false, 100, "u_long", cmd};
     TCLAP::ValueArg<u_long> population_size_min{
         "", "population_size_min", "Minimum population size", false, 20, "u_long", cmd};
-    TCLAP::ValueArg<double> brownian_sigma{"", "brownian_sigma",
+    TCLAP::ValueArg<u_long> population_size_max{
+        "", "population_size_max", "Maximum population size", false, 1000, "u_long", cmd};
+    TCLAP::ValueArg<double> population_size_brownian_sigma{"", "population_size_brownian_sigma",
         "The Brownian sigma (0<sigma) applied to Ne at each generation", false, 0.05, "double",
         cmd};
-    TCLAP::ValueArg<double> noise_sigma{"", "noise_sigma",
+    TCLAP::ValueArg<double> population_size_noise_sigma{"", "population_size_noise_sigma",
         "The Ornstein–Uhlenbeck sigma (0<sigma) applied to Ne at each generation", false, 0.1,
         "double", cmd};
-    TCLAP::ValueArg<double> noise_theta{"", "noise_theta",
+    TCLAP::ValueArg<double> population_size_noise_theta{"", "population_size_noise_theta",
         "The Ornstein–Uhlenbeck theta (0<=theta<1) applied to Ne at each generation", false, 0.9,
         "double", cmd};
 
     PopulationSizeProcess get_model() {
         return PopulationSizeProcess(population_size.getValue(), population_size_min.getValue(),
-            brownian_sigma.getValue(), noise_sigma.getValue(), noise_theta.getValue());
+            population_size_max.getValue(), population_size_brownian_sigma.getValue(),
+            population_size_noise_sigma.getValue(), population_size_noise_theta.getValue());
     }
 };
 
@@ -236,6 +307,7 @@ class Population {
     GenomeStructure genome;
     FitnessModel &fitness_function;
     PopulationSizeProcess pop_size;
+    MutationRateProcess mutation_rate;
     FitnessState fitness_state;
     mutable double heritability{0};
 
@@ -245,9 +317,12 @@ class Population {
     unordered_map<string, Stat> stat_map{};
 
     ~Population() = default;
-    explicit Population(
-        const GenomeStructure &genome, FitnessModel &f_model, const PopulationSizeProcess &pop_size)
-        : genome(genome), fitness_function{f_model}, pop_size(pop_size) {
+    explicit Population(const GenomeStructure &genome, FitnessModel &f_model,
+        const PopulationSizeProcess &pop_size, const MutationRateProcess &mutation_rate)
+        : genome(genome),
+          fitness_function{f_model},
+          pop_size(pop_size),
+          mutation_rate(mutation_rate) {
         fitness_state = fitness_function.get_state();
         parents.resize(pop_size.get_population_size());
         selection_and_random_mating();
@@ -272,7 +347,7 @@ class Population {
     }
 
     void mutation() {
-        for (auto &p : parents) { p.mutation(genome, fitness_function); }
+        for (auto &p : parents) { p.mutation(genome, mutation_rate, fitness_function); }
     };
 
     vector<Individual> sampling_individuals(bool fitness) const {
@@ -389,9 +464,9 @@ class Population {
     void save_node(Tree &tree, Tree::NodeIndex node) {
         tree.set_tag(node, "Population size", to_string(pop_size.get_population_size()));
         tree.set_tag(node, "Number of loci", to_string(genome.number_loci));
-        tree.set_tag(
-            node, "Mutational rate", to_string(genome.mutation_rate_per_loci_per_generation));
-        tree.set_tag(node, "Expected Mutational var", to_string(genome.expected_variance()));
+        tree.set_tag(node, "Mutational rate", to_string(mutation_rate.get_mutation_rate()));
+        tree.set_tag(node, "Expected Mutational var",
+            to_string(genome.expected_variance(mutation_rate.get_mutation_rate())));
         tree.set_tag(node, "Heritability", to_string(heritability));
         for (auto const &stat : stat_map) {
             tree.set_tag(node, "BranchMean_" + stat.first, to_string(stat.second.mean()));
@@ -424,6 +499,7 @@ class Population {
         for (u_long sample{1}; sample <= nbr_generations; sample++) {
             elapsed++;
             pop_size.update();
+            mutation_rate.update();
             trace.add("Lineage", name);
             trace.add("Generation", elapsed);
             trace.add("Population size", pop_size.get_population_size());

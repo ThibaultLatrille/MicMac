@@ -8,12 +8,15 @@ int main(int argc, char *argv[]) {
     GenomeStructureArgParse args_genome(cmd);
     PopulationSizeArgParse args_pop_size(cmd);
     OrnsteinUhlenbeckBiasArgParse args_fitness(cmd);
+    MutationRateArgParse args_mutation_rate(cmd);
     cmd.parse(argc, argv);
 
     generator.seed(args.seed.getValue());
     generator_pop_size.seed(args.seed_pop_size.getValue());
+    generator_mut_rate.seed(args.seed_mut_rate.getValue());
     OrnsteinUhlenbeckBiasModel fitness = args_fitness.get_model();
-    Population population(args_genome.get_model(), fitness, args_pop_size.get_model());
+    Population population(args_genome.get_model(), fitness, args_pop_size.get_model(),
+        args_mutation_rate.get_model());
 
     double root_age{args.number_of_generations.getValue()};
     Tree tree = args.tree_path.getValue().empty()

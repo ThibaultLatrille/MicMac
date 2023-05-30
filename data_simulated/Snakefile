@@ -12,6 +12,7 @@ SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() i
                     config["simulators"].items()}
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
 SEED_POP_SIZE = 42
+SEED_MUT_RATE = 42
 output_pdf = [f"{FOLDER}/results/inference_ML.tsv.gz"]
 if 'bayes_inference' in config and config['bayes_inference']:
     output_pdf.append(f"{FOLDER}/results/inference_bayesian.tsv.gz")
@@ -46,7 +47,7 @@ rule run_simulations:
             mut_rate=config["core"]["mutation_rate_per_loci_per_generation"],pop_size=config["core"]["population_size"],
             h2=config["heritability"])
     shell:
-        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --seed {wildcards.seed} --seed_pop_size {SEED_POP_SIZE} --output {params.file} && gzip {params.file}.nhx'
+        'mkdir -p {params.folder} && {input.exec} --tree {input.tree} {params.simulator} --variance_environment {params.ve} --number_loci {wildcards.scaling} --seed {wildcards.seed} --seed_pop_size {SEED_POP_SIZE} --seed_mut_rate {SEED_MUT_RATE} --output {params.file} && gzip {params.file}.nhx'
 
 rule run_neutral_simulation:
     input:

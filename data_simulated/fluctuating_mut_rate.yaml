@@ -1,5 +1,5 @@
-min_number_loci: 15000
-max_number_loci: 15000
+min_number_loci: 5000
+max_number_loci: 5000
 nb_genes: 1
 min_seed: 0
 max_seed: 98745641
@@ -28,10 +28,13 @@ simulators:
 core:
   mutation_mean_effect_size: 1.0
   mutation_rate_per_loci_per_generation: 1e-5
+  mutation_rate_min: 1e-7
+  mutation_rate_max: 1e-3
+  mutation_brownian_sigma: 0.02
   population_size: 50
   population_size_brownian_sigma: 0.0
   population_size_noise_sigma: 0.0
-  population_size_noise_theta: 0.9
+  population_size_noise_theta: 0.0
   number_of_generations: 10000
   number_of_lineages: 50
   burn_in: 1000
