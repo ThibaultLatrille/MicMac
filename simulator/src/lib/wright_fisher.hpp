@@ -464,32 +464,32 @@ class Population {
     void save_node(Tree &tree, Tree::NodeIndex node) {
         tree.set_tag(node, "Population size", to_string(pop_size.get_population_size()));
         tree.set_tag(node, "Number of loci", to_string(genome.number_loci));
-        tree.set_tag(node, "Mutational rate", to_string(mutation_rate.get_mutation_rate()));
+        tree.set_tag(node, "Mutational rate", d_to_string(mutation_rate.get_mutation_rate()));
         tree.set_tag(node, "Expected Mutational var",
-            to_string(genome.expected_variance(mutation_rate.get_mutation_rate())));
-        tree.set_tag(node, "Heritability", to_string(heritability));
+            d_to_string(genome.expected_variance(mutation_rate.get_mutation_rate())));
+        tree.set_tag(node, "Heritability", d_to_string(heritability));
         for (auto const &stat : stat_map) {
-            tree.set_tag(node, "BranchMean_" + stat.first, to_string(stat.second.mean()));
+            tree.set_tag(node, "BranchMean_" + stat.first, d_to_string(stat.second.mean()));
             tree.set_tag(
-                node, "BranchGeometricMean_" + stat.first, to_string(stat.second.geometric_mean()));
+                node, "BranchGeometricMean_" + stat.first, d_to_string(stat.second.geometric_mean()));
             tree.set_tag(
-                node, "BranchHarmonicMean_" + stat.first, to_string(stat.second.harmonic_mean()));
+                node, "BranchHarmonicMean_" + stat.first, d_to_string(stat.second.harmonic_mean()));
         }
         auto stats = summary_states();
-        for (auto const &stat : stats) { tree.set_tag(node, stat.first, to_string(stat.second)); }
+        for (auto const &stat : stats) { tree.set_tag(node, stat.first, d_to_string(stat.second)); }
 
         fixation();
         auto sfs = site_frequency_spectrum();
         auto theta_tuple = theta(sfs);
-        tree.set_tag(node, "Theta Watterson", to_string(get<0>(theta_tuple)));
-        tree.set_tag(node, "Theta Tajima", to_string(get<1>(theta_tuple)));
-        tree.set_tag(node, "Theta Fay Wu", to_string(get<2>(theta_tuple)));
-        tree.set_tag(node, "Theta", to_string(sampled_theta_pairwise()));
+        tree.set_tag(node, "Theta Watterson", d_to_string(get<0>(theta_tuple)));
+        tree.set_tag(node, "Theta Tajima", d_to_string(get<1>(theta_tuple)));
+        tree.set_tag(node, "Theta Fay Wu", d_to_string(get<2>(theta_tuple)));
+        tree.set_tag(node, "Theta", d_to_string(sampled_theta_pairwise()));
 
         double d = nbr_fixations / static_cast<double>(genome.number_loci);
         tree.set_tag(node, "Fixations", to_string(nbr_fixations));
-        tree.set_tag(node, "d", to_string(d));
-        tree.set_tag(node, "q", to_string(d / tree.node_length(node)));
+        tree.set_tag(node, "d", d_to_string(d));
+        tree.set_tag(node, "q", d_to_string(d / tree.node_length(node)));
     }
 
     void run(u_long nbr_generations, Trace &trace) {
