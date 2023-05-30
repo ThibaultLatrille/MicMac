@@ -34,9 +34,9 @@ core:
   population_size: 50
   population_size_min: 20
   population_size_max: 1000
-  brownian_sigma: 0.02
-  noise_sigma: 0.1
-  noise_theta: 0.9
+  population_size_brownian_sigma: 0.02
+  population_size_noise_sigma: 0.1
+  population_size_noise_theta: 0.9
   number_of_generations: 10000
   number_of_lineages: 50
   burn_in: 1000
