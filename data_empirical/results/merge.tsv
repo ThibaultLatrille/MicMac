@@ -1,9 +1,9 @@
-trait	nbr_taxa_pop	nbr_taxa_phy	variance_pop	variance_phy	ratio	method	dataset	sex	logT	ratio_pv
-Body_mass_g	59	59	39.970	12.592	0.315	Bayesian	NeutralPhyloP	f	True	0.000
+trait	nbr_taxa_pop	nbr_taxa_phy	var_within	var_between	ratio	method	dataset	sex	logT	ratio_pv
+Body_mass_g	59	59	39.970	12.650	0.316	Bayesian	NeutralPhyloP	f	True	0.000
 Body_mass_g	23	59	39.970	12.485	0.312	ML	NeutralPhyloP	f	True	
-Body_mass_g	64	64	39.855	21.824	0.548	Bayesian	NeutralPhyloP	m	True	0.001
+Body_mass_g	64	64	39.855	22.041	0.553	Bayesian	NeutralPhyloP	m	True	0.000
 Body_mass_g	28	64	39.855	21.807	0.547	ML	NeutralPhyloP	m	True	
-Brain_mass_g	59	59	4.414	6.769	1.533	Bayesian	NeutralPhyloP	f	True	0.991
+Brain_mass_g	59	59	4.414	6.862	1.554	Bayesian	NeutralPhyloP	f	True	0.994
 Brain_mass_g	23	59	4.414	6.683	1.514	ML	NeutralPhyloP	f	True	
-Brain_mass_g	64	64	5.714	9.186	1.608	Bayesian	NeutralPhyloP	m	True	0.995
+Brain_mass_g	64	64	5.714	9.298	1.627	Bayesian	NeutralPhyloP	m	True	0.998
 Brain_mass_g	28	64	5.714	9.123	1.597	ML	NeutralPhyloP	m	True	

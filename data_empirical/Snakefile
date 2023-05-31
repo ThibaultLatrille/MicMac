@@ -43,7 +43,7 @@ rule pre_processed_traits:
     output:
         tree=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.tree",
         traits=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.traits.tsv",
-        variance_pop=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.variance_pop.tsv"
+        var_within=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.var_within.tsv"
     params:
         phenotype=lambda wildcards: f"--log_transform {wildcards.logT} --sex {wildcards.sex}"
     log:
@@ -51,20 +51,20 @@ rule pre_processed_traits:
     shell:
         'python3 {input.script} {params.phenotype} --input_dS {input.input_dS} --input_pS {input.input_pS}'
         ' --input_traits {input.input_traits} --output_tree {output.tree} --output_traits {output.traits}'
-        ' --output_variance_pop {output.variance_pop} > {log.stdout}'
+        ' --output_var_within {output.var_within} > {log.stdout}'
 
 rule neutrality_index:
     input:
         script=f"{ROOT}/scripts/neutrality_index.py",
         tree=rules.pre_processed_traits.output.tree,
         traits=rules.pre_processed_traits.output.traits,
-        variance_pop=rules.pre_processed_traits.output.variance_pop
+        var_within=rules.pre_processed_traits.output.var_within
     output:
         tsv=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}.tsv"
     log:
         stdout=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}.processed.log"
     shell:
-        'python3 {input.script} --tree {input.tree} --traits {input.traits} --variance_pop {input.variance_pop}'
+        'python3 {input.script} --tree {input.tree} --traits {input.traits} --var_within {input.var_within}'
         ' --output {output.tsv} > {log.stdout}'
 
 
@@ -86,9 +86,9 @@ rule run_inference:
 
 rule read_trace:
     input:
-        script=f"{ROOT}/scripts/read_trace.py",
+        script=f"{ROOT}/scripts/ratio_pvalue.py",
         inference=rules.run_inference.output.run,
-        variance_pop=rules.pre_processed_traits.output.variance_pop
+        var_within=rules.pre_processed_traits.output.var_within
     output:
         tsv=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.tsv",
     params:
@@ -97,7 +97,7 @@ rule read_trace:
     log:
         stdout=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.trace.log"
     shell:
-        'python3 {input.script} {params.burn_in} --inference {params.infer} --variance_pop {input.variance_pop}'
+        'python3 {input.script} {params.burn_in} --inference {params.infer} --var_within {input.var_within}'
         ' --output {output.tsv} > {log.stdout}'
 
 rule merge_tsv:

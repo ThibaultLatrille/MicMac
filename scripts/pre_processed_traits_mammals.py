@@ -7,6 +7,7 @@ from ete3 import Tree
 from neutrality_index import open_tree, prune_tree
 
 
+
 def rename_tree(tree: Tree) -> Tree:
     for node in tree.traverse("levelorder"):
         if node.is_leaf():
@@ -31,10 +32,10 @@ def name_internal_nodes(tree: Tree) -> Tree:
 
 
 def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path_output_traits,
-         path_output_variance_pop, log_transform, sex):
+         path_output_var_within, log_transform, sex):
     for path in [path_input_traits, path_input_pS, path_input_dS]:
         assert os.path.exists(path), f"Path {path} does not exist"
-    for path in [path_output_tree, path_output_traits, path_output_variance_pop]:
+    for path in [path_output_tree, path_output_traits, path_output_var_within]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
     tree = open_tree(path_input_dS, format_ete3=1)
@@ -98,7 +99,7 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
     print(f"The intersection of the tree and trait dataframe has {len(set_taxa_names)} taxa.")
     tree = prune_tree(tree, list(set_taxa_names))
     assert len(tree.get_leaves()) == len(set_taxa_names)
-    dico_variance_pop, dico_traits = defaultdict(list), defaultdict(list)
+    dico_var_within, dico_traits = defaultdict(list), defaultdict(list)
     for taxa_name in set_taxa_names:
         leaf_pS_df = pS_df[pS_df["species"] == taxa_name]
         if len(leaf_pS_df) == 0:
@@ -106,8 +107,8 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
         else:
             assert len(leaf_pS_df) == 1
             pS = float(leaf_pS_df[pS_col])
-        dico_variance_pop["TaxonName"].append(taxa_name)
-        dico_variance_pop[f"pS"].append(pS)
+        dico_var_within["TaxonName"].append(taxa_name)
+        dico_var_within[f"pS"].append(pS)
         dico_traits["TaxonName"].append(taxa_name)
 
     for trait in ["Body mass (g)", "Brain mass (g)"]:
@@ -132,8 +133,8 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
                 phenotype_var = np.var(var_grouped[taxa_name][trait], ddof=1)
             else:
                 phenotype_var = np.nan
-            dico_variance_pop[f"{trait_name}_variance"].append(phenotype_var)
-        assert len(set_taxa_names) == len(dico_variance_pop[f"{trait_name}_variance"])
+            dico_var_within[f"{trait_name}_variance"].append(phenotype_var)
+        assert len(set_taxa_names) == len(dico_var_within[f"{trait_name}_variance"])
         print(f"{len(var_grouped)} species with variance computed.")
 
         mean_df = trait_df.copy()
@@ -153,17 +154,17 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
     set_taxa_names_traits = set(df_traits["TaxonName"])
 
     # Remove the species with only nan values across the traits
-    df_variance_pop = pd.DataFrame(dico_variance_pop)
-    df_variance_pop = df_variance_pop[df_variance_pop["TaxonName"].isin(set(pS_df["species"]))]
-    df_variance_pop = df_variance_pop[df_variance_pop["TaxonName"].isin(set_taxa_names_traits)]
-    df_variance_pop = df_variance_pop[np.isfinite(df_variance_pop.drop(["TaxonName", "pS"], axis=1)).any(axis=1)]
+    df_var_within = pd.DataFrame(dico_var_within)
+    df_var_within = df_var_within[df_var_within["TaxonName"].isin(set(pS_df["species"]))]
+    df_var_within = df_var_within[df_var_within["TaxonName"].isin(set_taxa_names_traits)]
+    df_var_within = df_var_within[np.isfinite(df_var_within.drop(["TaxonName", "pS"], axis=1)).any(axis=1)]
     # Write NaN for the species with no variance
-    df_variance_pop.to_csv(path_output_variance_pop, sep="\t", index=False, na_rep="NaN")
+    df_var_within.to_csv(path_output_var_within, sep="\t", index=False, na_rep="NaN")
 
     # Prune the tree and write it
     set_taxa_names = set(df_traits["TaxonName"])
     tree = prune_tree(tree, list(set_taxa_names))
-    for taxa in df_variance_pop["TaxonName"]:
+    for taxa in df_var_within["TaxonName"]:
         assert taxa in set_taxa_names, f"{taxa} not in the tree"
     print(f"The final tree has {len(tree.get_leaves())} taxa.")
     tree_length = sum([node.dist for node in tree.traverse()])
@@ -178,10 +179,10 @@ if __name__ == '__main__':
     parser.add_argument("--input_dS", help="Input dS tree file", required=True)
     parser.add_argument("--output_tree", help="Output tree file", required=True)
     parser.add_argument("--output_traits", help="Output traits file", required=True)
-    parser.add_argument('--output_variance_pop', help="Output variance_pop file", required=True)
+    parser.add_argument('--output_var_within', help="Output var_within file", required=True)
     parser.add_argument('--log_transform', help="log transformed valued", default="false", type=str, required=False)
     parser.add_argument('--sex', help="Sex (m or f)", default="m", type=str, required=False)
     args = parser.parse_args()
     args.log_transform = args.log_transform.lower() == "true"
     main(args.input_traits, args.input_pS, args.input_dS, args.output_tree, args.output_traits,
-         args.output_variance_pop, args.log_transform, args.sex)
+         args.output_var_within, args.log_transform, args.sex)

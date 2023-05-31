@@ -74,8 +74,8 @@ def replace_last(s: str, old: str, new: str) -> str:
     return new.join(li)
 
 
-def main(input_traits: str, input_tree: str, input_variance_pop: str, output_tsv: str):
-    for path in [input_traits, input_tree, input_variance_pop]:
+def main(input_traits: str, input_tree: str, input_var_within: str, output_tsv: str):
+    for path in [input_traits, input_tree, input_var_within]:
         assert os.path.exists(path), f"Path {path} does not exist"
     for path in [output_tsv]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -105,29 +105,29 @@ def main(input_traits: str, input_tree: str, input_variance_pop: str, output_tsv
     # The second column should be "pS", and not contain any missing value
     # "*_variance" is mandatory, but can contain missing values (ideally not)
     # "*_heritability" is optional, if not found, it will be set to 1.0
-    var_pop_df = pd.read_csv(input_variance_pop, sep="\t")
-    assert "TaxonName" == var_pop_df.columns[0], f"Column 'TaxonName' is not the first column in {input_variance_pop}."
-    assert "pS" == var_pop_df.columns[1], f"Column 'pS' is not the second column in {input_variance_pop}."
+    var_pop_df = pd.read_csv(input_var_within, sep="\t")
+    assert "TaxonName" == var_pop_df.columns[0], f"Column 'TaxonName' is not the first column in {input_var_within}."
+    assert "pS" == var_pop_df.columns[1], f"Column 'pS' is not the second column in {input_var_within}."
     for trait in traits:
-        assert f"{trait}_variance" in var_pop_df.columns, f"Column {trait}_variance not found in {input_variance_pop}."
+        assert f"{trait}_variance" in var_pop_df.columns, f"Column {trait}_variance not found in {input_var_within}."
     for taxa in var_pop_df["TaxonName"]:
-        assert taxa in set_taxa, f"Taxon {taxa} in file {input_variance_pop} not found in {input_tree}."
-        assert taxa in trait_set_taxa, f"Taxon {taxa} in file {input_variance_pop} not found in {input_traits}."
+        assert taxa in set_taxa, f"Taxon {taxa} in file {input_var_within} not found in {input_tree}."
+        assert taxa in trait_set_taxa, f"Taxon {taxa} in file {input_var_within} not found in {input_traits}."
     print("The traits found are:")
     print("\t" + "\n\t".join(traits))
     output_dict = defaultdict(list)
     for trait in traits:
         print(f"\nProcessing phenotype {trait}.")
         if f"{trait}_heritability" not in var_pop_df.columns:
-            print(f"Warning: column {trait}_heritability not found in {input_variance_pop}.")
+            print(f"Warning: column {trait}_heritability not found in {input_var_within}.")
             print("Assuming heritability = 1.0.")
             var_pop_df[f"{trait}_heritability"] = 1.0
         notna = np.isfinite(var_pop_df[f"{trait}_variance"])
         # Computing the genetic variance (geno = h² * pheno)
         genetic_variance_array = var_pop_df[f"{trait}_heritability"][notna] * var_pop_df[f"{trait}_variance"][notna]
-        variance_pop_array = genetic_variance_array / (var_pop_df["pS"][notna])
+        var_within_array = genetic_variance_array / (var_pop_df["pS"][notna])
         print(f'Found {len(genetic_variance_array)} species with a variance for {trait}.')
-        variance_pop = np.mean(variance_pop_array)
+        var_within = np.mean(var_within_array)
 
         sp_mean_pheno = {sp: v for sp, v in zip(trait_df["TaxonName"], trait_df[f"{trait}_mean"]) if np.isfinite(v)}
         keep_leaf = [leaf.name for leaf in tree.get_leaves() if leaf.name in sp_mean_pheno]
@@ -139,16 +139,16 @@ def main(input_traits: str, input_tree: str, input_variance_pop: str, output_tsv
             setattr(leaf, trait, sp_mean_pheno[leaf.name])
 
         # Fitting the brownian model to obtain the phylogenetic variance
-        anc_phenotype_mean, variance_phy = brownian_fitting(pruned_tree, trait=trait)
-        ratio = variance_phy / variance_pop
-        print(f"variance_phy = {variance_phy}")
-        print(f"variance_pop = {variance_pop}.")
+        anc_phenotype_mean, var_between = brownian_fitting(pruned_tree, trait=trait)
+        ratio = var_between / var_within
+        print(f"var_between = {var_between}")
+        print(f"var_within = {var_within}.")
         print(f"ratio = {ratio}.")
         output_dict["trait"].append(trait)
         output_dict["nbr_taxa_pop"].append(len(genetic_variance_array))
         output_dict["nbr_taxa_phy"].append(len(keep_leaf))
-        output_dict["variance_pop"].append(variance_pop)
-        output_dict["variance_phy"].append(variance_phy)
+        output_dict["var_within"].append(var_within)
+        output_dict["var_between"].append(var_between)
         output_dict["ratio"].append(ratio)
     output_df = pd.DataFrame(output_dict)
     output_df.to_csv(output_tsv, sep="\t", index=False)
@@ -157,8 +157,8 @@ def main(input_traits: str, input_tree: str, input_variance_pop: str, output_tsv
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--traits", help="Input trait file", required=True)
-    parser.add_argument("--variance_pop", help="Input variance_pop file", required=True)
+    parser.add_argument("--var_within", help="Input var_within file", required=True)
     parser.add_argument("--tree", help="Input tree file", required=True)
     parser.add_argument("--output", help="Output file", required=True)
     args = parser.parse_args()
-    main(args.traits, args.tree, args.variance_pop, args.output)
+    main(args.traits, args.tree, args.var_within, args.output)
