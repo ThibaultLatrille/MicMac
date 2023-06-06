@@ -76,8 +76,8 @@ $^{2}$Laboratoire de Biométrie et Biologie Evolutive, UMR5558, Université Lyon
     Conversely, using between species variation, current methods usually discards the variance in traits between individuals, leaving out valuable information.
     The main goal of this study is to define a neutrality index for a quantitative trait, by combining within- and between-species variation.
     This neutrality index this does not require estimation of population size nor of time of speciation for normalization since it also leverages sequence polymorphism and divergence.
-    Our index can be used to seek deviation from the null model of neutral evolution, and is greater than one for a trait under diversifying selection. 
-    As an example, we show that brain mass at the mammalian scale is under diversifying selection. 
+    Our index can be used to seek deviation from the null model of neutral evolution, and is greater than one for a trait under diversifying selection.
+    As an example, we show that brain mass at the mammalian scale is under diversifying selection.
     Finally, we show that our test is not sensitive to the assumption that population sizes, mutation rates and generation time are constant across the phylogeny, and automatically adjust for it.
 \end{abstract}
 
@@ -87,12 +87,12 @@ $^{2}$Laboratoire de Biométrie et Biologie Evolutive, UMR5558, Université Lyon
 \section{Introduction}\label{sec:introduction}
 
 Determining whether a particular trait is neutrally evolving or under a particular regime of selection has been a long-standing goal in evolutionary biology.
-Fundamentally, distinguishing neutral evolution from selection requires to determine which mode of selection is supported from the observed variation of traits and sequences.
-This variation of traits can be observed at different scales, across different development stages at the individual level, across different individuals and populations at the species level, and finally across different species at the phylogenetic level.
-All these scales requires different assumptions and methodology, and the endeavor to determine the mode of selection for a given trait has thus incorporated theories, methods and developments across different fields of evolutionary biology such as quantitative-genetics, population-genetics, phylogenetics and comparative genomics\cite{lynch_genetics_1998, walsh_evolution_2018}.
+Fundamentally, distinguishing neutral evolution from selection requires determining which mode of selection is supported by the observed variation of traits and sequences.
+Trait variation can be observed at different scales, across different development stages at the individual level, across different individuals and populations at the species level, and finally across different species at the phylogenetic level.
+All these scales require different assumptions and methodologies, and the endeavor to determine the mode of selection for a given trait has thus incorporated theories, methods, and developments across various fields of evolutionary biology such as quantitative-genetics, population-genetics, phylogenetics and comparative genomics\cite{lynch_genetics_1998, walsh_evolution_2018}.
 
 At the population level across individuals, Genome Wide Association Studies (GWAS) in humans have revealed that traits are mostly polygenic (many loci associated to a given trait), pleiotropic (many traits associated to a given loci), additive and mainly under stabilizing selection\cite{simons_population_2018, sella_thinking_2019}.
-At the species level, by contrasting both trait and genetic differentiation across populations, Q$_\text{ST}$--F$_\text{ST}$ methods have allowed to quantify selection acting on a trait\cite{martin_multivariate_2008, leinonen_qst_2013} 
+At the species level, by contrasting both trait and genetic differentiation across populations, Q$_\text{ST}$--F$_\text{ST}$ methods have allowed to quantify selection acting on a trait\cite{martin_multivariate_2008, leinonen_qst_2013}
 For example, studies have shown that stabilizing selection is largely dominant in the evolution of expression of genes in different populations\cite{whitehead_neutral_2006, gilad_natural_2006}.
 However, dominant mode of selection acting on gene expression is still controversial and neutral evolution is still debated\cite{signor_evolution_2018, price_detecting_2022}.
 Theoretically, change in traits accumulate linearly with time from divergence for a pair of species, and proportionally to the trait variance\cite{lande_genetic_1980, turelli_heritable_1984}.
@@ -129,50 +129,50 @@ From a phylogenetic perspective, our study can be seen as a extension of the EVE
 
 For a given trait, its genetic architecture is defined by the number of loci encoding the trait ($\NbrLoci$) and the random effect of a mutation on the trait ($a$).
 New mutations are thus generating variance for such a trait.
-At the individual level, the mutational variance ($\VarMutation$) is the rate at which new mutations contributes to the trait variance per generation.
+At the individual level, the mutational variance ($\VarMutation$) is the rate at which new mutations contribute to the trait variance per generation.
 As shown in \textcite{lande_quantitative_1979, lande_sexual_1980}, $\VarMutation$ is a function of the mutation rate per loci per generation ($\MutationRate$), as:
 \begin{gather}
-    \VarMutation = 2 \MutationRate \Multiply \NbrLoci \Multiply \E \left[ a^2 \right] \label{eq:var-mutation}.
+    \VarMutation = 2 \MutationRate \Multiply \RateMut \label{eq:var-mutation}.
 \end{gather}
 
 At the population level, mutations supply new variants in the population, while genetic random drift depletes standing variation.
-As shown in \textcite{lynch_mutation_1998}, if the trait is neutral, at equilibrium between mutation and drift, the genetic variance in a population ($\VarGenetic$) is a function of the mutational variance ($\VarMutation$) and the effective number of individual in the population ($\Ne$) as:
+As shown in \textcite{lynch_mutation_1998}, if the trait is neutral, at equilibrium between mutation and drift, the genetic variance in a population ($\VarGenetic$) is a function of the mutational variance ($\VarMutation$) and the effective number of individuals in the population ($\Ne$) as:
 \begin{align}
     \VarGenetic & =  2 \Ne \Multiply \VarMutation, \\
-    & = 4 \Ne \Multiply \MutationRate \Multiply \NbrLoci \Multiply \E \left[ a^2 \right] \text{ from eq.~\ref{eq:var-mutation}}\label{eq:var-genetic}.
+    & = 4 \Ne \Multiply \MutationRate \Multiply \RateMut \text{ from eq.~\ref{eq:var-mutation}}\label{eq:var-genetic}.
 \end{align}
 
 Moreover, for any neutral genomic region of interest, the genetic diversity, called $\pi$, is measured as the number of mutation segregating in the population divided by the size of the region.
-Any of the segregating mutation will eventually reach fixation or extinction due to genetic drift, such that the amount of segregating mutations is also a balance between mutations and drift.
+Any of the segregating mutations will eventually reach fixation or extinction due to genetic drift, such that the amount of segregating mutations is also a balance between mutations and drift.
 As shown in \textcite{tajima_statistical_1989}, $\pi$ is thus a function of the mutation rate per loci per generation ($\MutationRate$) and the effective population size ($\Ne$), given as:
 \begin{gather}
     \pi = 4 \Ne \Multiply \MutationRate \label{eq:genetic-diversity}.
 \end{gather}
 
-Altogether, we define define $\RatePop$ as the ratio of genetic variance of the trait ($\VarGenetic$) over genetic diversity of any neutral genomic region of interest ($\pi$).
-This ratio allows to the discard the effect of $\Ne$ and $\MutationRate$, which are parameters not related to the genetic architecture of the trait, giving $\RatePop$ as:
+Altogether, we define $\RatePop$ as the ratio of genetic variance of the trait ($\VarGenetic$) over genetic diversity of any neutral genomic region of interest ($\pi$).
+This ratio allows discarding the effect of $\Ne$ and $\MutationRate$, which are parameters not related to the genetic architecture of the trait, giving $\RatePop$ as:
 \begin{align}
     \RatePop & \defEqual \frac{\VarGenetic }{\pi}, \\
-    & = \frac{4 \Ne \Multiply \MutationRate \Multiply \NbrLoci \Multiply \E \left[ a^2 \right]}{4 \Ne \Multiply \MutationRate} \text{ from eq.~\ref{eq:var-mutation} and~\ref{eq:genetic-diversity}}, \\
-    & = \NbrLoci \Multiply \E \left[ a^2 \right]. \label{eq:rate-pop}
+    & = \frac{4 \Ne \Multiply \MutationRate \Multiply \RateMut}{4 \Ne \Multiply \MutationRate} \text{ from eq.~\ref{eq:var-mutation} and~\ref{eq:genetic-diversity}}, \\
+    & = \RateMut. \label{eq:rate-pop}
 \end{align}
 
-Additionally, the genetic variance is equal to the observed phenotypic variance ($\VarPhenotype$) multiplied by heredity ($h^2$), giving also $\RatePop$ as:
+Additionally, the genetic variance is equal to the observed phenotypic variance ($\VarPhenotype$) multiplied by heredity ($\Heredity$), giving also $\RatePop$ as:
 \begin{align}
-    \RatePop & = \frac{h^2 \Multiply \VarPhenotype }{\pi }. \label{eq:rate-pheno-pop}
+    \RatePop & = \frac{\Heredity \Multiply \VarPhenotype }{\pi }. \label{eq:rate-pheno-pop}
 \end{align}
 
 \subsubsection{Phylogenetic evolution of a trait}
 
-Along a lineage, we denote $\Trait$ as the mean value of the trait over the individuals in the species.
-If the trait is neutral and encoded by many loci, $\Trait$ evolves as Brownian process\cite{hansen_translating_1996}.
-After the species has evolved for $\Time$ generations, the variance of $\Trait$, called $\VarPhy$, is given by \textcite{hansen_translating_1996} as:
+Along a lineage, we denote $\MeanTrait$ as the mean value of the trait over the individuals in the species.
+If the trait is neutral and encoded by many loci, $\MeanTrait$ evolves as Brownian process\cite{hansen_translating_1996}.
+After the species has evolved for $\Time$ generations, the variance of $\MeanTrait$, called $\VarPhy$, is given by \textcite{hansen_translating_1996} as:
 \begin{align}
     \VarPhy & = \frac{\VarGenetic}{\Ne} \Multiply \Time \\
-    & = 4 \Time \Multiply \MutationRate \Multiply \NbrLoci \Multiply \E \left[ a^2 \right] \label{eq:covar},\text{ from eq.~\ref{eq:var-genetic}},
+    & = 4 \Time \Multiply \MutationRate \Multiply \RateMut \label{eq:covar},\text{ from eq.~\ref{eq:var-genetic}},
 \end{align}
 
-Moreover, for any neutral genomic region of interest, out of all neutral mutations that originated, some will we eventually reach fixation due to genetic drift, resulting in a substitution at the species level.
+Moreover, for any neutral genomic region of interest, out of all neutral mutations that originated, some will eventually reach fixation due to genetic drift, resulting in a substitution at the species level.
 For a neutral mutation, its probability of fixation ($\pfix$) is $1/2\Ne$, as shown in \textcite{kimura_probability_1962}.
 As reviewed in \textcite{mccandlish_modeling_2014}, we can thus derive the substitution rate per generation, denoted $\SubRate$ as the number of mutations per generation ($2\Ne \Multiply \MutationRate$) multiplied by the probability of fixation for each of these newly arisen mutations $\pfix$, giving:
 \begin{align}
@@ -191,8 +191,8 @@ Altogether, we defined $\RatePhy$ as the variance in the mean trait value ($\Var
 This ratio allows to the discard the effect of $\Time$ and $\MutationRate$, which are parameters not related to the genetic architecture of the trait, giving $\RatePhy$ as:
 \begin{align}
     \RatePhy & \defEqual \frac{\VarPhy}{4 d},\\
-    & = \frac{4 \Time \Multiply \MutationRate \Multiply \NbrLoci \Multiply \E \left[ a^2 \right]}{4 \Time \Multiply \MutationRate}\text{ from eq.~\ref{eq:covar} and~\ref{eq:distance}}, \\
-    & = \NbrLoci \Multiply \E \left[ a^2 \right] \label{eq:rate-phy}.
+    & = \frac{4 \Time \Multiply \MutationRate \Multiply \RateMut}{4 \Time \Multiply \MutationRate}\text{ from eq.~\ref{eq:covar} and~\ref{eq:distance}}, \\
+    & = \RateMut \label{eq:rate-phy}.
 \end{align}
 
 \begin{figure*}[!ht]
@@ -211,7 +211,7 @@ This ratio allows to the discard the effect of $\Time$ and $\MutationRate$, whic
 
  The variability between individuals or between species can be obtained for both quantitative trait and genomic sequences.
  At the population level, the variability of the trait between individuals allows to compute $\VarGenetic$, and the variability and of any genomic region neutrally evolving allow to compute $\pi$.
-Combined as a ratio, we obtain $\RatePop$ at the population level, which depends solely on the genetic architecture of the trait (as $\NbrLoci \Multiply \E \left[ a^2 \right]$).
+Combined as a ratio, we obtain $\RatePop$ at the population level, which depends solely on the genetic architecture of the trait (as $\RateMut$).
 At the phylogenetic level, the variability of the mean trait value between species allows to compute $\VarPhy$, and the variability and of any genomic region neutrally evolving allows to compute $d$.
 Similarly, combined as a ratio, we obtain $\RatePhy$ at the phylogenetic scale, which also depends solely on the genetic architecture of the trait.
 Altogether, we thus have:
@@ -225,12 +225,6 @@ Importantly, $\RatePhy$ and $\RatePop$ can both be estimated using quantitative 
 \subsection{Estimate}
 
 \subsubsection{Maximum likelihood estimate}
-For each species of interest with inter-individual data available, $\RatePop$ can be estimated as the ratio of genetic variance of a trait over genetic diversity of neutrally evolving sequences.
-Averaged across all species we obtain the mean as:
-\begin{gather}
-    \EstRatePop = \left< \frac{\VarGenetic}{\pi} \right> = \left< \frac{h^2 \Multiply \VarPhenotype }{\pi } \right> \label{eq:estimated-rate-pop}
-\end{gather}
-
 At the phylogenetic scale, for $\NbrSpecies$ taxa in the tree, $\Cr$ is the $\NbrSpecies \times \NbrSpecies$ contrast matrix computed from the branch lengths ($d$) and the topology of the phylogenetic tree.
 The contrast matrix is symmetric, along the diagonal are the total distances ($d_{\Spi}$) from the root of the tree to each taxon ($\Spi$).
 The off-diagonal elements $C_{\Spi,\Spj}$ are the total branch lengths shared by particular pairs of taxa $\Spi$ and $\Spj$, computed from the distance between the pair ($d_{\Spi,\Spj}$) as:
@@ -239,31 +233,44 @@ The off-diagonal elements $C_{\Spi,\Spj}$ are the total branch lengths shared by
 \end{gather}
 Then, the root state for the character, called $\RootTrait$, can be estimated from the $\NbrSpecies \times 1$ vector of mean trait values for tip species in the tree, called $\VecTrait$, as a maximum likelihood estimate\cite{omeara_testing_2006}, given as:
 \begin{gather}
-    \RootTrait = \left( \VecOne\tr \Cr\inv \VecOne \right)\inv \left( \VecOne\tr \Cr\inv \VecTrait \right), \label{eq:estimated-root-trait}
+    \RootTrait = \left( \VecOne\tr \MultiplyMatrix \Cr\inv \MultiplyMatrix \VecOne \right)\inv \Multiply \left( \VecOne\tr \MultiplyMatrix \Cr\inv \MultiplyMatrix \VecTrait \right), \label{eq:estimated-root-trait}
 \end{gather}
 where $\VecOne$ is an $\NbrSpecies \times 1$ column vector of ones.
 
 Finally, the normalized mutational variance at the phylogenetic scale ($\EstRatePhy$) is estimated\cite{omeara_testing_2006} as:
 \begin{gather}
-    \EstRatePhy = \frac{1}{4}\frac{\left( \VecTrait -  \RootTrait \VecOne \right)\tr \Cr\inv \left( \VecTrait -  \RootTrait  \VecOne  \right)}{\NbrSpecies - 1}. \label{eq:estimated-rate-phy}
+    \EstRatePhy = \frac{1}{4}\frac{\left( \VecTrait -  \RootTrait \Multiply \VecOne \right)\tr \MultiplyMatrix \Cr\inv \MultiplyMatrix \left( \VecTrait -  \RootTrait \Multiply \VecOne  \right)}{\NbrSpecies - 1}. \label{eq:estimated-rate-phy}
 \end{gather}
+
+For a species $i$ of interest with inter-individual data available, $\RatePopSpi$ can be estimated as the ratio of genetic variance of a trait ($\VarGeneticSpi = \VarPhenotypeSpi \Multiply \HereditySpi$) over genetic diversity of neutrally evolving sequences ($\pi_{\Spi}$).
+Averaged across all species, we obtain the mean as:
+\begin{gather}
+    \EstRatePop = \dfrac{1}{\NbrSpecies}\sum_{i=1}^{\NbrSpecies}\RatePopSpi = \dfrac{1}{\NbrSpecies}\sum_{i=1}^{\NbrSpecies} \frac{  V_{\Trait, i} \Multiply \Heredity_{i}}{ \pi_{i}}. \label{eq:estimated-rate-pop}
+\end{gather}
+
 Importantly, the sequence from which $\pi$ and $d$ are estimated should be neutrally evolving, but they are not necessarily linked to the quantitative trait under study, they allow to normalize for diversity driven by mutation rate and population size.
+
+\subsubsection{Bayesian estimate}
+We used the software Bayescode
 
 \subsection{Simulation}\label{subsec:simulations}
 
-We will assume that the trait genotypic value is encoded by $\NbrLoci$ loci, with each locus contributing ly to the genotypic value, these effect are Gamma distributed with mean $a$ (Fig.~\ref{fig:simulator}).
+We will assume that the trait genotypic value is encoded by $\NbrLoci$ loci, with each locus contributing to the genotypic value, these effect are Normally distributed with standard deviation $a$ (Fig.~\ref{fig:simulator}).
 We will follow a Wright-Fisher model with mutation, selection and drift to formalise the evolutionary dynamics of the system.
-Assuming a panmictic population of size $\Ne$ and with non-overlapping generations, we can simulate explicitly each generation along a phylogenetic tree.
-Mutations will be based on a user-defined nucleotide matrix, while drift will be modelled by the multinomial resampling of the currently segregating alleles.
-The changes in the mutation rate per generation, the generation time and $\Ne$ along the lineages will be modelled by a geometric Brownian multivariate and an Ornstein-Uhlenbeck process to test different processes of evolution of these parameters.
-The instant value of log-$\Ne$ can also be modelled as a sum of a geometric Brownian process and an Ornstein-Uhlenbeck process.
+Assuming a diploid panmictic population of size $\Ne$ and with non-overlapping generations, we can simulate explicitly each generation along a phylogenetic tree.
+Genetic drift is modelled by the multinomial resampling of the currently segregating alleles.
+The number of mutations is drawn from a Poisson distribution with mean $2 \Multiply \MutationRate \Multiply \NbrLoci $.
+The changes in the mutation rate per generation ($\MutationRate$) and $\Ne$ along the lineages is modelled by a geometric Brownian process.
+Additionally, the instant value of log-$\Ne$ is modelled as a sum of a geometric Brownian process and an Ornstein-Uhlenbeck process.
 The geometric Brownian motion accounts for long-term fluctuations, while the Ornstein-Uhlenbeck introduces short-term fluctuations.
 The simulations will start from an initial sequence at equilibrium at the root of the tree and, at each node, the process will be split until it finally reaches the leaves of the tree.
-We will introduce selection as a one dimensional Fisher's geometric landscape, with the fitness of an individual being a monotonously decreasing function of the distance between the individual and optimal phenotype \cite{tenaillon_utility_2014,blanquart_epistasis_2016}.
+From a speciation process perspective, this a equivalent to an allopatric speciation over one generation.
+Selection is modelled as a one dimensional Fisher's geometric landscape, with the fitness of an individual being a monotonously decreasing function of the distance between the individual and optimal phenotype \cite{tenaillon_utility_2014,blanquart_epistasis_2016}.
 The exact functional phenotype-fitness map depends on $2$ external parameters controlling for strength of selection and optimum phenotype.
 Mutations are seen has displacement of the phenotype in the multidimensional space.
-Beneficial mutations will move the phenotype closer to the optimum, while deleterious mutations will move it further away.
-Stabilizing selection will be implemented by means of a fixed optimum phenotype, while diversifying selection will be implemented by means of a moving optimum phenotype, changing along the phylogeny.
+Beneficial mutations moves the phenotype closer to the optimum, while deleterious mutations moves it further away.
+Stabilizing selection is implemented by means of a fixed optimum phenotype.
+Diversifying selection is implemented by means of a moving optimum phenotype, changing along the phylogeny as a geometric Brownian process.
 
 
 \begin{figure*}[!ht]
@@ -288,24 +295,30 @@ In contrast, under an inflated variation between species, meaning $\RatePhy > \R
 
 \begin{table*}[t!]
     \centering
-    \begin{adjustbox}{width = 0.5\textwidth}
-    \begin{tabular}{|c||c|c|}
+    \begin{adjustbox}{width = 1.0\textwidth}
+    \begin{tabular}{||l|l||c|c||c|c||}
             \hline
-            & Coding sequences & Quantitative traits \\ \hline \hline
-            Adaptation / Diversifying selection & $\dnds > \pnps$ & $ \RatePhy > \RatePop  $ \\ \hline
-            Neutral regime of evolution & $\dnds = \pnps$ & $ \RatePhy = \RatePop  $ \\ \hline
-            Purifying / Stabilizing selection & $\dnds < \pnps$ & $ \RatePhy < \RatePop  $ \\ \hline
+            Assumption & Consequences & $\EstRatePop$ & $\EstRatePhy$ & Test $\NIx > 1$  & Test $\NIx < 1$ \\ \hline \hline
+            Changing $\MutationRate$ & Scaling with $\pi$, $d$, $\VarPhenotype$ and $\VarPhy$ & Adjusted & Adjusted & -- & --  \\ \hline
+            Changing $\Ne$ & Scaling with $\pi$ and $\VarPhenotype$ & Adjusted & -- & -- & --  \\ \hline
+            Unknown heredity & $\Heredity = 1$ is over-estimated  & Over-estimated & -- & Conservative & False positives  \\ \hline
+            Inbreeding & $\pi$ is under-estimated  & Over-estimated & -- & Conservative & False positives  \\ \hline
+            Polymorphism are selected & $\pi$ is under-estimated  & Over-estimated & -- & Conservative & False positives  \\ \hline
+            Sexual dimorphism & $\VarPhenotype$ is over-estimated  & Over-estimated & -- & Conservative & False positives  \\ \hline
+            Trait encoded by few loci & $\VarPhy$ is under-estimated  & -- & Under-estimated & Conservative & False positives  \\ \hline
+            Divergence are selected & $d$ is under-estimated & -- & Over-estimated & False positives & Conservative  \\ \hline
+            Structured population & unknown & unknown & unknown & unknown & unknown \\ \hline
+            Gene flow between species & unknown & unknown & unknown & unknown & unknown \\ \hline
     \end{tabular}
     \end{adjustbox}
-    \caption{
-        The relationship between trait variation between and within species can be used as method to detect whether traits are evolving under a neutral model of evolution.
-        Similarly, in molecular evolution, non-synonymous divergence ($\dn$) and polymorphism $\pn$ are normalized by synonymous divergence ($\ds$) and polymorphism ($\ps$) to produce a neutrality index\cite{mcdonald_adaptative_1991, fay_evaluating_2008}.
-    }
-    \label{table:unfolded-MK}
+    \caption{Assumptions and their consequences on deviation from neutraliity.}
+    \label{table:assumptions}
 \end{table*}
 
 Importantly, the genetic sequences from which $\pi$ and $d$ are estimated should be neutrally evolving, but they are not necessarily linked to the quantitative trait under study, they allow to normalize for diversity driven by mutation rate and population size.
 Analogously to the \textcite{mcdonald_adaptative_1991} test devised for protein-coding DNA sequences, a category of neutral mutations (synonymous) is used to determine the neutral expectation, and the inflation of divergence is compared to polymorphism within species.
+The relationship between trait variation between and within species can be used as method to detect whether traits are evolving under a neutral model of evolution.
+Similarly, in molecular evolution, non-synonymous divergence ($\dn$) and polymorphism $\pn$ are normalized by synonymous divergence ($\ds$) and polymorphism ($\ps$) to produce a neutrality index\cite{mcdonald_adaptative_1991, fay_evaluating_2008}.
 Altogether, our neutrality index for a quantitative trait leverages the data for any number of species, and takes advantage of the signal over the whole phylogeny, while at the same time taking into account phylogenetic inertia and addressing the non-independence between species (see fig.~\ref{fig:methods}).
 This statistic can be obtained as a maximum likelihood estimate, from eq.~\ref{eq:estimated-rate-pop} and~\ref{eq:estimated-rate-phy}.
 
@@ -343,7 +356,7 @@ Importantly, our neutrality index leverages sequence divergence and polymorphism
 We argue that the main novelty of this study is being able to use sequence divergence and polymorphism to normalize the variation of trait between and within species.
 By doing so, our test is not sensitive to the assumption that population sizes ($\Ne$) and mutation rates ($\MutationRate$) are constant across the phylogeny, not requiring to estimate divergence time\cite{litsios_effects_2012}.
 Instead, the normalization by sequence divergence and polymorphism automatically absorbs these changes\cite{seo_estimating_2004}.
-Contrarily, we argue that the main drawback of our method is that the heritability ($h^2$) of a trait is required if one has access only to the phenotypic variance ($\VarPhenotype$) and not the genetic variance ($\VarGenetic$), which is empirically hard to measure for any trait.
+Contrarily, we argue that the main drawback of our method is that the heritability ($\Heredity$) of a trait is required if one has access only to the phenotypic variance ($\VarPhenotype$) and not the genetic variance ($\VarGenetic$), which is empirically hard to measure for any trait.
 
 % What about the other methods? What are we testing for?
 At the phylogenetic scale, the change in mean trait value across different species is typically used to test for neutrality for a quantitative trait.
@@ -351,7 +364,7 @@ These models are seeking deviation from a Brownian process\cite{catalan_drift_20
 For example, the analysis on the transcriptome across different individuals and species concluded that the expression level of 81\% of genes are under a neutral regime and 16\% under directional selection\cite{catalan_drift_2019}.
 However, the alternative model of a varying directional or stabilizing selection was not implemented, and thus can not be ruled out by this analysis.
 With our statistical test, we can set a threshold for neutrality and thus are able to make the difference between a trait evolving neutrally as a Brownian process or a trait under selection where the optimal is moving as a Brownian.
-Our diversity index can thus allow to revisit these studies, assuming we have access to genomic datasets to estimate divergence ($d$) and polymorphism ($\pi$), as well as estimate for heritabilities ($h^2$).
+Our diversity index can thus allow to revisit these studies, assuming we have access to genomic datasets to estimate divergence ($d$) and polymorphism ($\pi$), as well as estimate for heritabilities ($\Heredity$).
 
 % What do we expect for biological traits
 % Problem for slow evolving diversifying selection
@@ -360,8 +373,8 @@ Our diversity index can thus allow to revisit these studies, assuming we have ac
 
 % Assumption that could be relaxed: constant genetic architecture and multidimensional generalization
 More theoretically, our development is based on several assumption that could be relaxed.
-First, $\NbrLoci \Multiply \E \left[ a^2 \right]$ is assumed to be constant across the phylogeny, while it is determined by the underlying genetic architecture of a trait, which can be variable among individuals and species.
-Having a constant $\NbrLoci \Multiply \E \left[ a^2 \right]$ across the phylogeny is an assumption that can theoretically by relaxed by adding a time component\cite{arnold_understanding_2008, hohenlohe_mipod_2008}, where $\NbrLoci \Multiply \E \left[ a^2 \right](t)$ could jointly be estimated along the phylogeny\cite{kostikova_bridging_2016, gaboriau_multiplatform_2020}.
+First, $\RateMut$ is assumed to be constant across the phylogeny, while it is determined by the underlying genetic architecture of a trait, which can be variable among individuals and species.
+Having a constant $\RateMut$ across the phylogeny is an assumption that can theoretically by relaxed by adding a time component\cite{arnold_understanding_2008, hohenlohe_mipod_2008}, where $\RateMut(t)$ could jointly be estimated along the phylogeny\cite{kostikova_bridging_2016, gaboriau_multiplatform_2020}.
 Moreover, even though the neutrality index can be applied for has many traits as available, each trait is so far assumed to be independent.
 Assuming covariation between traits is also an extension that can be implemented within the multidimensional Brownian framework\cite{huelsenbeck_detecting_2003, lartillot_phylogenetic_2011, lartillot_joint_2012}.
 Altogether, we argue that our neutrality index is a promising statistical procedure allowing to determine the evolutionary regime of a quantitative trait, through articulation of the variance between and within species in a unified framework.
@@ -386,6 +399,79 @@ The authors declare no conflicts of interest.
 Snakemake pipeline, analysis scripts and documentation are available at \href{https://github.com/ThibaultLatrille/MicMac}{github.com/ThibaultLatrille/MicMac}.
 
 \printbibliography
+
+\part*{Supplementary materials}
+
+\section{Theoretical derivation}
+\subsection{Definitions}
+
+We denote $\Trait_{i}$ the quantitative trait $\Trait$ for individual $i$.
+
+\begin{align}
+    \VarPhenotype = \sum_{i=1}^{\Ne} \Trait_{i}^2 - \left( \sum_{i=1}^{\Ne} \Trait_{i} \right)^2
+\end{align}
+
+\subsection{Simulator}
+\begin{itemize}
+    \setlength\itemsep{-0.2em}
+    \item $\NbrLoci$ is the number of loci encoding the trait.
+    \item $a_l \sim \mathcal{N}(0,a^2)$ is the effect of a mutation on the trait at locus $l \in \{1, \hdots, \NbrLoci\}$.
+    \item $\Ne$ is the effective number of individual in the population.
+    \item $g_{i,l} \in \{0, 1, 2\}$ is the genotype at locus $l$ for individual $i \in \{1, \hdots, \Ne\}$.
+    \item $G_i = \sum_{l=1}^{\NbrLoci} a_l \times g_{i,l}$ is the influence of genotype on the trait for individual $i$.
+\end{itemize}
+The mean ($\bar{G}$) and variance ($\VarGenetic$) of the genotype are:
+\begin{equation}
+    \bar{G} = \frac{1}{\Ne}\sum_{i=1}^{\Ne} G_i  \text{\quad and \quad}	\VarGenetic = \frac{1}{\Ne}\sum_{i=1}^{\Ne}\left(G_i - \bar{G} \right)^2
+\end{equation}
+\begin{itemize}
+    \setlength\itemsep{-0.2em}
+    \item $\xi_i \sim \mathcal{N}(0, \VarEnv)$ is the effect of environment on the trait for individual i.
+    \item $\Trait_i = G_i + \xi_i$ is the phenotype for individual $i$.
+\end{itemize}
+The mean ($\bar{\Trait}$) and variance ($\VarPhenotype$) of the phenotype are:
+\begin{equation}
+    \bar{\Trait} = \frac{1}{\Ne}\sum_{i=1}^{\Ne} \Trait_i \text{\quad and \quad} \VarPhenotype = \frac{1}{\Ne}\sum_{i=1}^{\Ne}\left(\Trait_i - \bar{\Trait} \right)^2
+\end{equation}
+Heritability ($h^2$) is defined as:
+\begin{equation}
+    h^2 = \frac{\VarGenetic}{\VarPhenotype} = \frac{\VarGenetic}{\VarGenetic + \VarEnv}
+\end{equation}
+\begin{gather}
+    G_i = \sum_{l=1}^{\NbrLoci} a_l \times g_{i,l} \\
+    \Trait_i = \sum_{l=1}^{\NbrLoci} a_l \times g_{i,l} + \xi_i
+\end{gather}
+
+\newpage
+
+\begin{itemize}
+    \item $W_i$ is the weight for individual $i$ to be chosen for the next generation.
+    \item Neutral model with no fitness function: $W_i = 1$.
+    \item Stabilizing selection with fitness $W_i = \e^{(\Trait_i - \theta)^2/ \sigma}$, parameters $\theta=0$ and $\sigma=0.02$.
+    \item Moving optimum with fitness $W_i = \e^{(\Trait_i - \theta_t)^2/ \sigma}$, parameters $\theta_t \sim \mathcal{B}_t$ and $\sigma=0.02$.
+\end{itemize}
+\begin{itemize}
+    \item Trait encoded by $5,000$ loci, $1000$ replicates.
+    \item $a=1$, $h^2=0.2$, $\Ne=50$, $\mu=10^{-5}$, $t=10,000$.
+\end{itemize}
+
+\begin{table*}[t!]
+    \centering
+    \begin{adjustbox}{width = 0.5\textwidth}
+        \begin{tabular}{|c||c|c|}
+            \hline
+            & Coding sequences & Quantitative traits \\ \hline \hline
+            Adaptation / Diversifying selection & $\dnds > \pnps$ & $ \RatePhy > \RatePop  $ \\ \hline
+            Neutral regime of evolution & $\dnds = \pnps$ & $ \RatePhy = \RatePop  $ \\ \hline
+            Purifying / Stabilizing selection & $\dnds < \pnps$ & $ \RatePhy < \RatePop  $ \\ \hline
+        \end{tabular}
+    \end{adjustbox}
+    \caption{
+        The relationship between trait variation between and within species can be used as method to detect whether traits are evolving under a neutral model of evolution.
+        Similarly, in molecular evolution, non-synonymous divergence ($\dn$) and polymorphism $\pn$ are normalized by synonymous divergence ($\ds$) and polymorphism ($\ps$) to produce a neutrality index\cite{mcdonald_adaptative_1991, fay_evaluating_2008}.
+    }
+    \label{table:dnds}
+\end{table*}
 
 \end{document}
 %TC:endignore

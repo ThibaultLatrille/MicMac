@@ -1,5 +1,6 @@
 \newcommand{\defEqual}{\stackrel{\text{def}}{=}}
-\newcommand{\Multiply}{\times}
+\newcommand{\Multiply}{\cdot}
+\newcommand{\MultiplyMatrix}{\times}
 \newcommand{\UniDimArray}[1]{\bm{#1}}
 \newcommand{\BiDimArray}[1]{\bm{#1}}
 \newcommand{\tr}{^{\intercal}}
@@ -8,7 +9,6 @@
 \DeclareMathOperator{\Var}{\text{Var}}
 \DeclareMathOperator{\Cov}{\text{Cov}}
 \newcommand{\der}{\mathrm{d}}
-\newcommand{\angstrom}{\text{\normalfont\AA}}
 \newcommand{\e}{\text{e}}
 \newcommand{\Ne}{N_{\text{e}}}
 \newcommand{\dn}{d_N}
@@ -23,27 +23,36 @@
 \newcommand{\Spj}{j}
 \newcommand{\NbrSpecies}{n}
 \newcommand{\Time}{t}
-\newcommand{\MeanTrait}{P}
-\newcommand{\Trait}{\bar{\MeanTrait_{\Time}}}
-\newcommand{\VecTrait}{\UniDimArray{\Trait}}
+\newcommand{\Trait}{P}
+\newcommand{\Heredity}{h^2}
+\newcommand{\HereditySpi}{\Heredity_{\Spi}}
+\newcommand{\MeanTrait}{\bar{\Trait_{\Time}}}
+\newcommand{\VecTrait}{\UniDimArray{\bar{\Trait}}}
 \newcommand{\Root}{0}
-\newcommand{\RootTrait}{\MeanTrait_{\Root}}
-\newcommand{\VarPhy}{\Var \left[\Trait\right]}
+\newcommand{\RootTrait}{\widehat{\theta}}
+\newcommand{\VarPhy}{\Var \left[\MeanTrait\right]}
 \newcommand{\VecOne}{\UniDimArray{1}}
 \newcommand{\Cr}{\BiDimArray{C}}
 \newcommand{\MutationRate}{\mu}
 \newcommand{\SubRate}{q}
 \newcommand{\NbrLoci}{L}
-\newcommand{\VarPhenotype}{V_{P}}
-\newcommand{\VarGenetic}{V_{G}}
+\newcommand{\VarPhenotype}{V_{\Trait}}
+\newcommand{\VarPhenotypeSpi}{V_{\Trait, \Spi}}
+\newcommand{\VarGenetic}{V_{\mathrm{G}}}
+\newcommand{\VarGeneticSpi}{V_{\mathrm{G}, \Spi}}
+\newcommand{\VarEnv}{V_{\mathrm{E}}}
 \newcommand{\MatrixGenetic}{\BiDimArray{G}}
-\newcommand{\VarMutation}{V_{M}}
-\newcommand{\RatePhy}{\sigma^2_{\text{B}}}
-\newcommand{\RatePop}{\sigma^2_{\text{W}}}
-\newcommand{\EstRatePhy}{\widehat{\sigma^2_{\mathrlap{\text{B}}}}\quad}
-\newcommand{\EstRatePop}{\widehat{\sigma^2_{\mathrlap{\text{W}}}}\quad}
-\newcommand{\RateMut}{\sigma^2_{\text{M}}}
+\newcommand{\VarMutation}{V_{\mathrm{M}}}
+\newcommand{\GenArchi}{\NbrLoci \Multiply \E \left[ a^2 \right]}
+\newcommand{\RateMut}{\sigma^2_{\mathrm{M}}}
+\newcommand{\RatePhy}{\sigma^2_{\mathrm{B}}}
+\newcommand{\RatePop}{\sigma^2_{\mathrm{W}}}
+\newcommand{\RatePopSpi}{\sigma^2_{\mathrm{W}, \Spi}}
+\newcommand{\VecRatePop}{\UniDimArray{\RatePop}}
+\newcommand{\EstRatePhy}{\widehat{\RatePhy}}
+\newcommand{\EstRatePop}{\widehat{\RatePop}}
 \newcommand{\NIx}{\RatePhy / \RatePop}
+\newcommand{\EstNIx}{\EstRatePhy / \EstRatePop}
 \newcommand{\NI}{\frac{\RatePhy}{\RatePop}}
 
 \newcommand{\StdSelection}{\sigma}
