@@ -7,12 +7,14 @@ from ete3 import Tree
 from neutrality_index import open_tree, prune_tree
 
 
-
 def rename_tree(tree: Tree) -> Tree:
     for node in tree.traverse("levelorder"):
         if node.is_leaf():
             if node.name.endswith("_E"):
                 node.name = "_".join(node.name.replace("_E", "").split("_")[:-1])
+            elif "PD_" in node.name[:3]:
+                node.name = "_".join(node.name.split("_")[2:])
+                assert node.name.count("_") == 1
             else:
                 node.name = node.name.replace(" ", "_")
     return tree
@@ -59,12 +61,14 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
         assert len(pS_df) == n_taxa
     else:
         pS_df = pd.read_csv(path_input_pS, sep=",")
+        if "SPECIES_BINOMIAL" in pS_df.columns:
+            pS_df["species"] = pS_df["SPECIES_BINOMIAL"]
 
     # Remove all spaces in the specie name
     pS_df["species"] = pS_df["species"].apply(lambda x: x.replace(" ", "_"))
     print(f"The pS dataframe has {len(pS_df)} rows before filtering.")
     pS_df = pS_df[pS_df["species"].isin(set_taxa_names)]
-    pS_col = [p for p in ["heterozygosity", "pS", 'Hzoo'] if p in pS_df.columns][0]
+    pS_col = [p for p in ["MEDIAN_HETEROZYGOSITY", "heterozygosity", "pS", 'Hzoo'] if p in pS_df.columns][0]
     print(f"Keeping only species with available '{pS_col}'.")
     pS_df = pS_df[np.isfinite(pS_df[pS_col]) & (pS_df[pS_col] > 0)]
     print(f"The pS dataframe has {len(pS_df)} rows after filtering taxon name and available pS.")
@@ -124,29 +128,21 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
 
         # Filter out the species with a unique row in the trait dataframe
         var_df = trait_df.copy()
-        var_df = var_df[var_df["Sample size (Brain)"] == 1]
+        var_df = var_df[var_df[ss_brain] == 1]
         print(f"The trait dataframe has {len(var_df)} rows after filtering for Nsize != 1.")
         var_grouped = {k: v for k, v in var_df.groupby("Genus_Species") if len(v) > 1}
         print(f"The trait dataframe has {len(var_grouped)} taxa after keeping taxon with more than 1 individuals.")
         for taxa_name in set_taxa_names:
             if taxa_name in var_grouped:
                 phenotype_var = np.var(var_grouped[taxa_name][trait], ddof=1)
+                phenotype_mean = np.average(var_grouped[taxa_name][trait])
             else:
                 phenotype_var = np.nan
+                phenotype_mean = np.nan
             dico_var_within[f"{trait_name}_variance"].append(phenotype_var)
+            dico_traits[f"{trait_name}_mean"].append(phenotype_mean)
         assert len(set_taxa_names) == len(dico_var_within[f"{trait_name}_variance"])
         print(f"{len(var_grouped)} species with variance computed.")
-
-        mean_df = trait_df.copy()
-        mean_grouped = {k: v for k, v in mean_df.groupby("Genus_Species")}
-        for taxa_name in set_taxa_names:
-            if taxa_name in mean_grouped:
-                filtered = mean_grouped[taxa_name]
-                phenotype_mean = np.average(filtered[trait], weights=filtered["Sample size (Body)"])
-            else:
-                phenotype_mean = np.nan
-            dico_traits[f"{trait_name}_mean"].append(phenotype_mean)
-        print(f"{sum(np.isfinite(dico_traits[f'{trait_name}_mean']))} species with mean computed.")
 
     df_traits = pd.DataFrame(dico_traits)
     df_traits = df_traits[np.isfinite(df_traits.drop(["TaxonName"], axis=1)).any(axis=1)]

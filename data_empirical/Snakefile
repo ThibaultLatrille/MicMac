@@ -8,21 +8,25 @@ rule all:
 
 BURN_IN, UNTIL = 1000, 2000
 
-datasets = ["NeutralPhyloP"]
+datasets = ["NeutralPhyloP", "Primates"]
 sexes = ["m", "f"]
 logTs = [True]
+
 
 def data_dS(dataset, empirical=True):
     if empirical:
         dico_dS = {"E": "Edempdnds.dsom.tre",
-                   "Zoo":"Zoo739_empiricaldnds.dsom.tre"}
+                   "Zoo": "Zoo739_empiricaldnds.dsom.tre"}
     else:
         dico_dS = {"E": "Ed708genebrdnds.dsom.tre",
                    "Zoo": "Zoo739_sub1to5_genebranchdnds.dsom.tre"}
+    dico_dS["Primates"] = "science.abn7829.primates/science.abn7829_data_s3.nw.tree"
+    dico_dS["PrimatesNeutral"] = "science.abn7829.primates/science.abn7829_data_s3.scaled.nw.tree"
     dico_dS["Zoonomia"] = "241-mammalian-2020v2.phast-242.nh"
     dico_dS["Consensus30"] = "science.abl8189.Timescale/PreliminaryTopologies/X_lessGC40_241.tree"
     dico_dS["Consensus75"] = "science.abl8189.Timescale/PreliminaryTopologies/200Mammals_X_lessGC40_75consensus.tr"
-    dico_dS["NeutralPhyloP"] = "science.abl8189.Timescale/Table_S2_RootedTrees/Concatenation_HRA_neutral_241_10miss_rooted.tree"
+    dico_dS[
+        "NeutralPhyloP"] = "science.abl8189.Timescale/Table_S2_RootedTrees/Concatenation_HRA_neutral_241_10miss_rooted.tree"
     return dico_dS[dataset]
 
 
@@ -31,7 +35,20 @@ def data_pS(dataset):
                "Zoo": "ZootableTHV_180Zoonomia_8traits_7287genes_withgc3andHzoo"}
     for k in ["Zoonomia", "Consensus30", "Consensus75", "NeutralPhyloP"]:
         dico_pS[k] = "science.abn5856.Ne/science.abn5856_table_s1.csv"
+    for k in ["Primates", "PrimatesNeutral"]:
+        dico_pS[k] = "science.abn7829.primates/science.abn7829_data_s2.csv"
     return dico_pS[dataset]
+
+
+rule scale_primate_tree:
+    input:
+        script=f"{ROOT}/scripts/scale_tree.py",
+        primate_tree=f"{FOLDER}/data/{data_dS('Primates')}",
+        mammal_neutral_tree=f"{FOLDER}/data/{data_dS('NeutralPhyloP')}",
+    output:
+        tree=f"{FOLDER}/data/{data_dS('PrimatesNeutral')}"
+    shell:
+        'python3 {input.script} --primate_tree {input.primate_tree} --mammal_neutral_tree {input.mammal_neutral_tree} --output_tree {output.tree}'
 
 
 rule pre_processed_traits:
