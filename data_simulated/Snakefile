@@ -15,7 +15,7 @@ for tag in ["population_size", "mutation_rate"]:
     if f"scaled_{tag_sigma}" not in config:
         continue
     print(f"Order of magnitude in change of {tag}: {config[f'scaled_{tag_sigma}']}")
-    config["core"][f"{tag_sigma}"] = config[f"scaled_{tag_sigma}"] / np.sqrt(config["core"]['number_generations'])
+    config["core"][f"{tag_sigma}"] = config[f"scaled_{tag_sigma}"] / np.sqrt(config["core"]['number_of_generations'])
     print(f"{tag}: {config['core'][f'{tag_sigma}']}")
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
 SEED_POP_SIZE = 42

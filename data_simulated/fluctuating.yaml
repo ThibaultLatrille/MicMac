@@ -39,4 +39,4 @@ core:
   burn_in: 1000
 heritability: 0.2
 scaled_population_size_brownian_sigma: 1.0 # The order of magnitude of change in population size along the tree
-scaled_mutation_brownian_sigma: 2.0 # The order of magnitude of change in mutation rate along the tree
+scaled_mutation_rate_brownian_sigma: 2.0 # The order of magnitude of change in mutation rate along the tree
