@@ -84,17 +84,17 @@ class MutationRateArgParse {
         "", "mutation_rate_min", "Minimum mutation_rate", false, 0.0, "double", cmd};
     TCLAP::ValueArg<double> mutation_rate_max{
         "", "mutation_rate_max", "Maximum mutation_rate", false, 1.0, "double", cmd};
-    TCLAP::ValueArg<double> mutation_brownian_sigma{"", "mutation_brownian_sigma",
+    TCLAP::ValueArg<double> mutation_rate_brownian_sigma{"", "mutation_rate_brownian_sigma",
         "The Brownian sigma (0<sigma) applied to μ at each generation", false, 0.0, "double", cmd};
 
     MutationRateProcess get_model() {
         assert(mutation_rate_min.getValue() <= mutation_rate_per_loci_per_generation.getValue());
         assert(mutation_rate_per_loci_per_generation.getValue() <= mutation_rate_max.getValue());
         assert(mutation_rate_per_loci_per_generation.getValue() >= 0.0);
-        assert(mutation_brownian_sigma.getValue() >= 0.0);
+        assert(mutation_rate_brownian_sigma.getValue() >= 0.0);
         return MutationRateProcess(mutation_rate_per_loci_per_generation.getValue(),
             mutation_rate_min.getValue(), mutation_rate_max.getValue(),
-            mutation_brownian_sigma.getValue());
+            mutation_rate_brownian_sigma.getValue());
     }
 };
 
