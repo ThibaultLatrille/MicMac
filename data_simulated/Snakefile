@@ -10,6 +10,13 @@ REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"],config["max_
 SEEDS = [int(i) for i in np.linspace(config["min_seed"],config["max_seed"],config["nb_seeds"])]
 SIMULATOR_PARAMS = {s: " ".join(['--{0} {1}'.format(k,v) for k, v in d.items() if k != "model"]) for s, d in
                     config["simulators"].items()}
+for tag in ["population_size", "mutation_rate"]:
+    tag_sigma = f"{tag}_brownian_sigma"
+    if f"scaled_{tag_sigma}" not in config:
+        continue
+    print(f"Order of magnitude in change of {tag}: {config[f'scaled_{tag_sigma}']}")
+    config["core"][f"{tag_sigma}"] = config[f"scaled_{tag_sigma}"] / np.sqrt(config["core"]['number_generations'])
+    print(f"{tag}: {config['core'][f'{tag_sigma}']}")
 SIMULATOR_PARAMS["core"] = " ".join(['--{0} {1}'.format(k,v) for k, v in config["core"].items()])
 SEED_POP_SIZE = 42
 SEED_MUT_RATE = 42

@@ -16,15 +16,14 @@ def colors(x):
     return [cs[idx % len(cs)] for idx in range(len(x))]
 
 
-def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=False, loglog=False):
+def scatter_plot(x_input, y_input, x_label, y_label, output, histy_log=False, loglog=False):
+    x = {k: np.array(v) for k, v in x_input.items()}
+    y = {k: np.array(v) for k, v in y_input.items()}
+    xy_filtered = {k: (np.isfinite(x[k]) & np.isfinite(y[k]) & (x[k] > 0) & (y[k] > 0)) for k in x.keys()}
+    x = {k: x[k][xy_filtered[k]] for k in x.keys()}
+    y = {k: y[k][xy_filtered[k]] for k in y.keys()}
     color_models = colors(x)
-    fig = plt.figure(figsize=(1920 / my_dpi, 880 / my_dpi), dpi=my_dpi)
-    set_nb_points = set([len(nb) for nb in x.values()])
-    assert len(set_nb_points) == 1
-    nb_points = set_nb_points.pop()
-    assert nb_points == nbr_genes
-    fig.suptitle("{0} genes".format(nbr_genes) + title)
-
+    fig = plt.figure(figsize=(1920 / my_dpi, 1080 / my_dpi), dpi=my_dpi)
     gs = fig.add_gridspec(2, 2, width_ratios=(7, 2), height_ratios=(2, 7),
                           left=0.1, right=0.9, bottom=0.1, top=0.9,
                           wspace=0.05, hspace=0.05)
@@ -65,30 +64,30 @@ def scatter_plot(x, y, x_label, y_label, output, nbr_genes, title="", histy_log=
         ax.set_xlim((0.95 * min_x, max_x * 1.05))
         ax.set_ylim((0.95 * min_y, max_y * 1.05))
     ax.legend(fontsize=fontsize_legend)
-    plt.tight_layout()
     plt.savefig(output, format="pdf")
     plt.savefig(output.replace(".pdf", ".png"), format="png")
     plt.close('all')
     print(output)
 
 
-def hist_plot(x, x_label, output, nbr_genes, title="", xscale="log"):
+def hist_plot(x_input, x_label, output, xscale="log"):
+    x = {k: np.array(v) for k, v in x_input.items()}
+    xy_filtered = {k: (np.isfinite(x[k]) & (x[k] >= 0)) for k in x.keys()}
+    x = {k: x[k][xy_filtered[k]] for k in x.keys()}
     output = output.replace("scatter_plot", "histogram")
     color_models = colors(x)
-    fig = plt.figure(figsize=(1920 / my_dpi, 480 / my_dpi), dpi=my_dpi)
-    fig.suptitle("{0} genes".format(nbr_genes) + title)
+    fig = plt.figure(figsize=(1280 / my_dpi, 640 / my_dpi), dpi=my_dpi)
     ax = fig.add_subplot(1, 1, 1)
-    x = {k: [i for i in v if np.isfinite(i)] for k, v in x.items()}
-    min_x = max(1e-6, np.min([min(i) for i in x.values()]))
-    max_x = np.max([max(i) for i in x.values()])
+    min_x = min([v.min() for v in x.values()])
+    max_x = max([v.max() for v in x.values()])
     if xscale == "log":
+        min_x = max(1e-6, min_x)
         bins = np.geomspace(min_x, max_x, 100)
     else:
-        min_x = np.min([min(i) for i in x.values()])
         bins = np.linspace(min_x, max_x, 100)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_filled)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_step)
-    max_y = 1.2 * (max([max(h) for h in hist]) if len(x) > 1 else max(hist))
+    max_y = 1.2 * (np.max([np.max(h) for h in hist]) if len(x) > 1 else np.max(hist))
 
     if xscale == "log":
         for id_m, m in enumerate(x):

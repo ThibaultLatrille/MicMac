@@ -87,10 +87,11 @@ def main(folder, tsv_path, burn_in, output):
             rep = os.path.basename(filepath).replace(".trace.gz", "").split("_")[-1]
             var_phy_trace = open_trace_file(filepath, burn_in=burn_in)
             var_phy = np.mean(var_phy_trace)
-            var_pop = abs(dict_tree[("within_sampled", m, rep)])
+            var_pop = dict_tree[("within_sampled", m, rep)]
+            if var_pop <= 0:
+                continue
             var_mut = dict_tree[("mutational", m, rep)]
             assert var_phy > 0
-            assert var_pop > 0
             assert var_mut > 0
             var_dict["phy"][m].append(var_phy)
             var_dict["pop"][m].append(var_pop)
@@ -101,22 +102,16 @@ def main(folder, tsv_path, burn_in, output):
 
     df = pd.DataFrame(var_dict)
     df.to_csv(output, sep="\t", index=False)
-    nb_genes = set([len(v) for v in var_dict["phy_pop"].values()]).pop()
     rename = lambda x: output.replace(".tsv.gz", x)
-    hist_plot(var_dict["phy_pop"], "$\\frac{\\sigma_{B}^2}{\\sigma_{W}^2}$", rename(".pdf"), nb_genes,
-              'Var inter divided by Var intra')
-    hist_plot(var_dict["phy_pop_pv"], "$P ( \\sigma_{B}^2 > \\sigma_{W}^2 )$", rename(".pvalues.pdf"), nb_genes,
-              'Var inter divided by Var intra', xscale="linear")
+    hist_plot(var_dict["phy_pop"], "$\\rho$", rename(".pdf"))
+    hist_plot(var_dict["phy_pop_pv"], "$P ( \\rho > 1 )$", rename(".pvalues.pdf"), xscale="linear")
 
     mut_str = r"Variance mutational $\left( \sigma^2_{M} \right)$"
     within_str = r"Variance within $\left( \sigma^2_{W} \right)$"
     between_str = r"Variance between $\left( \sigma^2_{B} \right)$"
-    scatter_plot(var_dict["mut"], var_dict["phy"], mut_str, between_str, rename(".mutphy.pdf"), nb_genes,
-                 title='', histy_log=True)
-    scatter_plot(var_dict["mut"], var_dict["pop"], mut_str, within_str, rename(".mutpop.pdf"), nb_genes,
-                 title='', histy_log=True)
-    scatter_plot(var_dict["pop"], var_dict["phy"], within_str, between_str, rename(".popphy.pdf"), nb_genes,
-                 title='', histy_log=True)
+    scatter_plot(var_dict["mut"], var_dict["phy"], mut_str, between_str, rename(".mutphy.pdf"), histy_log=True)
+    scatter_plot(var_dict["mut"], var_dict["pop"], mut_str, within_str, rename(".mutpop.pdf"), histy_log=True)
+    scatter_plot(var_dict["pop"], var_dict["phy"], within_str, between_str, rename(".popphy.pdf"), histy_log=True)
 
 
 if __name__ == '__main__':

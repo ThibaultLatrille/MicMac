@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 # Compilation options
 option(DEBUG_MODE "Debug mode (with asserts and such) " OFF) #OFF by default
-set(ALWAYSON_CXX_FLAGS "--std=c++14 -Wall -Wextra -Wno-unused-parameter -Wfatal-errors ")
+set(ALWAYSON_CXX_FLAGS "--std=c++14")
 if(DEBUG_MODE)
     set(CMAKE_CXX_FLAGS "-O0 -g ${ALWAYSON_CXX_FLAGS}") # debug mode
     message("-- INFO: Compiling in debug mode.\n-- INFO: flags are: " ${CMAKE_CXX_FLAGS})
