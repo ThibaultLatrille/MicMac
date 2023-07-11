@@ -3,14 +3,23 @@ import os
 ROOT = os.path.abspath('..')
 FOLDER = os.path.abspath('.')
 
-rule all:
-    input: f"{FOLDER}/results/merge.tsv"
-
 BURN_IN, UNTIL = 1000, 2000
-
 datasets = ["NeutralPhyloP", "Primates"]
 sexes = ["m", "f"]
 logTs = [True]
+
+bayescode_path = {}
+for executable in ["nodetraits", "readnodetraits"]:
+    exec_path = os.path.join(ROOT,f'utils/BayesCode/bin/{executable}')
+    if not os.path.exists(exec_path):
+        # Find executable in the path using whereis. If not found, raise an error.
+        split = os.popen(f'whereis {executable}').read().split()
+        if len(split) > 1:
+            exec_path = split[1].strip()
+        else:
+            raise FileNotFoundError(f'{executable} not found. Please install BayesCode and add it to your path.')
+    bayescode_path[executable] = exec_path
+    print(f"Found {executable} at {exec_path}")
 
 
 def data_dS(dataset, empirical=True):
@@ -39,6 +48,9 @@ def data_pS(dataset):
         dico_pS[k] = "science.abn7829.primates/science.abn7829_data_s2.csv"
     return dico_pS[dataset]
 
+
+rule all:
+    input: f"{FOLDER}/results/merge.tsv"
 
 rule scale_primate_tree:
     input:
@@ -81,13 +93,13 @@ rule neutrality_index:
     log:
         stdout=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}.processed.log"
     shell:
-        'python3 {input.script} --tree {input.tree} --traits {input.traits} --var_within {input.var_within}'
+        'python3 {input.script} --tree {input.tree} --traitsfile {input.traits} --var_within {input.var_within}'
         ' --output {output.tsv} > {log.stdout}'
 
 
 rule run_inference:
     input:
-        exec=f"{ROOT}/utils/BayesCode/bin/nodetraits",
+        exec=bayescode_path["nodetraits"],
         traits=rules.pre_processed_traits.output.traits,
         tree=rules.pre_processed_traits.output.tree
     output:
@@ -99,23 +111,21 @@ rule run_inference:
         stdout=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}.log"
     shell:
         '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} {params.chain}'
-        ' > {log.stdout} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
+        ' > {log.stdout}'
 
 rule read_trace:
     input:
-        script=f"{ROOT}/scripts/ratio_pvalue.py",
+        exec=bayescode_path["readnodetraits"],
         inference=rules.run_inference.output.run,
         var_within=rules.pre_processed_traits.output.var_within
     output:
-        tsv=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.tsv",
+        tsv=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.ratio.tsv",
     params:
-        burn_in=f"--burn_in {BURN_IN}",
-        infer=lambda w: f"{FOLDER}/data_processed/inference/{w.dataset}_{w.sex}_{w.logT}.trace.gz"
+        chain=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}"
     log:
-        stdout=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.trace.log"
+        stdout=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.read.log"
     shell:
-        'python3 {input.script} {params.burn_in} --inference {params.infer} --var_within {input.var_within}'
-        ' --output {output.tsv} > {log.stdout}'
+        '{input.exec} -b {BURN_IN} --var_within {input.var_within} --output {output.tsv} {params.chain} > {log.stdout} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
 
 rule merge_tsv:
     input:

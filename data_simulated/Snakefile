@@ -4,6 +4,19 @@ import numpy as np
 ROOT = os.path.abspath('../../..')
 FOLDER = os.path.abspath('.')
 
+bayescode_path = {}
+for executable in ["nodetraits", "readnodetraits"]:
+    exec_path = os.path.join(ROOT, f'utils/BayesCode/bin/{executable}')
+    if not os.path.exists(exec_path):
+        # Find executable in the path using whereis. If not found, raise an error.
+        split = os.popen(f'whereis {executable}').read().split()
+        if len(split) > 1:
+            exec_path = split[1].strip()
+        else:
+            raise FileNotFoundError(f'{executable} not found. Please install BayesCode and add it to your path.')
+    bayescode_path[executable] = exec_path
+    print(f"Found {executable} at {exec_path}")
+
 configfile: 'config.yaml'
 
 REPLICATES = [int(i) for i in np.linspace(config["min_number_loci"],config["max_number_loci"],config["nb_genes"])]
@@ -88,9 +101,10 @@ rule pre_processed_traits:
         neutral_tree=rules.run_neutral_simulation.output.nhx,
     output:
         tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.tree",
-        traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.traits.tsv"
+        traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.traits.tsv",
+        var_within=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.var_within.tsv",
     shell:
-        'python3 {input.script} --input {input.nhx} --neutral_tree {input.neutral_tree} --tree {output.tree} --traits {output.traits}'
+        'python3 {input.script} --input {input.nhx} --neutral_tree {input.neutral_tree} --tree {output.tree} --traitsfile {output.traits} --var_within {output.var_within}'
 
 
 def chain_name(wildcards):
@@ -99,7 +113,7 @@ def chain_name(wildcards):
 
 rule run_inference:
     input:
-        exec=f"{ROOT}/utils/BayesCode/bin/nodetraits",
+        exec=bayescode_path['nodetraits'],
         tree=rules.pre_processed_traits.output.tree,
         traits=rules.pre_processed_traits.output.traits
     output:
@@ -108,16 +122,29 @@ rule run_inference:
         chain=lambda wildcards: chain_name(wildcards),
         until=f"-u {config['bayes_until']}"
     shell:
-        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} {params.chain} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
+        '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} {params.chain}'
+
+rule read_inference:
+    input:
+        exec=bayescode_path['readnodetraits'],
+        inference=rules.run_inference.output.run,
+        var_within=rules.pre_processed_traits.output.var_within
+    output:
+        tsv=f"{FOLDER}/{{simulator}}/read_{{scaling}}_seed{{seed}}.ratio.tsv",
+    params:
+        chain=lambda wildcards: chain_name(wildcards),
+        burnin=config['bayes_until']
+    log:
+        stdout=f"{FOLDER}/{{simulator}}/read_{{scaling}}_seed{{seed}}.log",
+        stderr=f"{FOLDER}/{{simulator}}/read_{{scaling}}_seed{{seed}}.err"
+    shell:
+        '{input.exec} -b {params.burnin} --var_within {input.var_within} --output {output.tsv} {params.chain} 1> {log.stdout} 2> {log.stderr} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
 
 rule plot_simulations_bayesian:
     input:
         script=f"{ROOT}/scripts/plot_simulations_bayesian.py",
-        tsv=rules.plot_simulations_ML.output.tsv,
-        cov=expand(rules.run_inference.output.run,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
+        tsv=expand(rules.read_inference.output.tsv,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
     output:
         plot=f"{FOLDER}/results/inference_bayesian.tsv.gz",
-    params:
-        burn_in=f"--burn_in {config['bayes_burn_in']}"
     shell:
-        'python3 {input.script} {params.burn_in} --tsv {input.tsv} --folder {FOLDER} --output {output.plot}'
+        'python3 {input.script} --folder {FOLDER} --output {output.plot}'

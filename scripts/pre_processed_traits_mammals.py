@@ -33,46 +33,46 @@ def name_internal_nodes(tree: Tree) -> Tree:
     return tree
 
 
-def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path_output_traits,
+def main(path_input_traits, path_input_nuc_div, path_input_dS, path_output_tree, path_output_traits,
          path_output_var_within, log_transform, sex):
-    for path in [path_input_traits, path_input_pS, path_input_dS]:
+    for path in [path_input_traits, path_input_nuc_div, path_input_dS]:
         assert os.path.exists(path), f"Path {path} does not exist"
     for path in [path_output_tree, path_output_traits, path_output_var_within]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
-    tree = open_tree(path_input_dS, format_ete3=1)
-    tree = rename_tree(tree)
+    t = open_tree(path_input_dS, format_ete3=1)
+    tree = name_internal_nodes(rename_tree(t))
     set_taxa_names = set(tree.get_leaf_names())
     print(f"The tree has {len(set_taxa_names)} leaves")
 
-    # Open the pS/hererozygosity file
-    read_pS = open(path_input_pS, "r").readlines()
-    if read_pS[0].strip() == "#TRAITS":
-        columns = read_pS[1].strip().split(" ")
+    # Open the nucleotide diversity file
+    read_nuc_div = open(path_input_nuc_div, "r").readlines()
+    if read_nuc_div[0].strip() == "#TRAITS":
+        columns = read_nuc_div[1].strip().split(" ")
         n_taxa = int(columns[0])
         n_traits = int(columns[1])
         columns = ["species"] + columns[2:]
         assert len(columns) == n_traits + 1
-        pS_df = pd.read_csv(path_input_pS, sep=" ", skiprows=2, names=columns)
+        nuc_div_df = pd.read_csv(path_input_nuc_div, sep=" ", skiprows=2, names=columns)
         # Replace -1 by NaN
-        pS_df = pS_df.replace(-1, np.nan)
+        nuc_div_df = nuc_div_df.replace(-1, np.nan)
         # Remove "_E" from the specie name
-        pS_df["species"] = pS_df["species"].apply(lambda x: x.replace("_E", ""))
-        assert len(pS_df) == n_taxa
+        nuc_div_df["species"] = nuc_div_df["species"].apply(lambda x: x.replace("_E", ""))
+        assert len(nuc_div_df) == n_taxa
     else:
-        pS_df = pd.read_csv(path_input_pS, sep=",")
-        if "SPECIES_BINOMIAL" in pS_df.columns:
-            pS_df["species"] = pS_df["SPECIES_BINOMIAL"]
+        nuc_div_df = pd.read_csv(path_input_nuc_div, sep=",")
+        if "SPECIES_BINOMIAL" in nuc_div_df.columns:
+            nuc_div_df["species"] = nuc_div_df["SPECIES_BINOMIAL"]
 
     # Remove all spaces in the specie name
-    pS_df["species"] = pS_df["species"].apply(lambda x: x.replace(" ", "_"))
-    print(f"The pS dataframe has {len(pS_df)} rows before filtering.")
-    pS_df = pS_df[pS_df["species"].isin(set_taxa_names)]
-    pS_col = [p for p in ["MEDIAN_HETEROZYGOSITY", "heterozygosity", "pS", 'Hzoo'] if p in pS_df.columns][0]
-    print(f"Keeping only species with available '{pS_col}'.")
-    pS_df = pS_df[np.isfinite(pS_df[pS_col]) & (pS_df[pS_col] > 0)]
-    print(f"The pS dataframe has {len(pS_df)} rows after filtering taxon name and available pS.")
-    assert len(pS_df) >= 5, "Not enough species with pS. Exiting."
+    nuc_div_df["species"] = nuc_div_df["species"].apply(lambda x: x.replace(" ", "_"))
+    print(f"The dataframe of nucleotide diversity has {len(nuc_div_df)} rows before filtering.")
+    nuc_div_df = nuc_div_df[nuc_div_df["species"].isin(set_taxa_names)]
+    nuc_div_col = [p for p in ["MEDIAN_HETEROZYGOSITY", "heterozygosity", "pS", 'Hzoo'] if p in nuc_div_df.columns][0]
+    print(f"Keeping only species with available '{nuc_div_col}'.")
+    nuc_div_df = nuc_div_df[np.isfinite(nuc_div_df[nuc_div_col]) & (nuc_div_df[nuc_div_col] > 0)]
+    print(f"The dataframe has {len(nuc_div_df)} rows after filtering taxon name and available nucleotide diversity.")
+    assert len(nuc_div_df) >= 5, "Not enough species with nucleotide diversity. Exiting."
 
     df_traits = pd.read_csv(path_input_traits)
     assert "Genus_Species" in df_traits.columns
@@ -105,14 +105,14 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
     assert len(tree.get_leaves()) == len(set_taxa_names)
     dico_var_within, dico_traits = defaultdict(list), defaultdict(list)
     for taxa_name in set_taxa_names:
-        leaf_pS_df = pS_df[pS_df["species"] == taxa_name]
-        if len(leaf_pS_df) == 0:
-            pS = np.nan
+        leaf_nuc_div_df = nuc_div_df[nuc_div_df["species"] == taxa_name]
+        if len(leaf_nuc_div_df) == 0:
+            nuc_div = np.nan
         else:
-            assert len(leaf_pS_df) == 1
-            pS = float(leaf_pS_df[pS_col])
+            assert len(leaf_nuc_div_df) == 1
+            nuc_div = float(leaf_nuc_div_df[nuc_div_col])
         dico_var_within["TaxonName"].append(taxa_name)
-        dico_var_within[f"pS"].append(pS)
+        dico_var_within[f"Nucleotide_diversity"].append(nuc_div)
         dico_traits["TaxonName"].append(taxa_name)
 
     for trait in ["Body mass (g)", "Brain mass (g)"]:
@@ -140,6 +140,8 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
                 phenotype_var = np.nan
                 phenotype_mean = np.nan
             dico_var_within[f"{trait_name}_variance"].append(phenotype_var)
+            # dico_var_within[f"{trait_name}_heritability_lower"].append(0.1)
+            # dico_var_within[f"{trait_name}_heritability_upper"].append(0.4)
             dico_traits[f"{trait_name}_mean"].append(phenotype_mean)
         assert len(set_taxa_names) == len(dico_var_within[f"{trait_name}_variance"])
         print(f"{len(var_grouped)} species with variance computed.")
@@ -151,9 +153,10 @@ def main(path_input_traits, path_input_pS, path_input_dS, path_output_tree, path
 
     # Remove the species with only nan values across the traits
     df_var_within = pd.DataFrame(dico_var_within)
-    df_var_within = df_var_within[df_var_within["TaxonName"].isin(set(pS_df["species"]))]
+    df_var_within = df_var_within[df_var_within["TaxonName"].isin(set(nuc_div_df["species"]))]
     df_var_within = df_var_within[df_var_within["TaxonName"].isin(set_taxa_names_traits)]
-    df_var_within = df_var_within[np.isfinite(df_var_within.drop(["TaxonName", "pS"], axis=1)).any(axis=1)]
+    df_var_within = df_var_within[
+        np.isfinite(df_var_within.drop(["TaxonName", "Nucleotide_diversity"], axis=1)).any(axis=1)]
     # Write NaN for the species with no variance
     df_var_within.to_csv(path_output_var_within, sep="\t", index=False, na_rep="NaN")
 

@@ -84,7 +84,7 @@ def hist_plot(x_input, x_label, output, xscale="log"):
         min_x = max(1e-6, min_x)
         bins = np.geomspace(min_x, max_x, 100)
     else:
-        bins = np.linspace(min_x, max_x, 100)
+        bins = np.linspace(min_x, max_x, 50)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_filled)
     hist, _, _ = ax.hist(x.values(), bins=bins, color=color_models, **hist_step)
     max_y = 1.2 * (np.max([np.max(h) for h in hist]) if len(x) > 1 else np.max(hist))

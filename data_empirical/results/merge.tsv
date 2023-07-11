@@ -1,17 +1,17 @@
-trait	nbr_taxa_pop	nbr_taxa_phy	var_within	var_between	ratio	method	dataset	sex	logT	ratio_pv
-Body_mass_g	26	26	39.970	11.092	0.278	Bayesian	NeutralPhyloP	f	True	0.000
-Body_mass_g	23	26	39.970	10.602	0.265	ML	NeutralPhyloP	f	True	
-Body_mass_g	36	36	39.855	13.445	0.337	Bayesian	NeutralPhyloP	m	True	0.000
-Body_mass_g	28	36	39.855	13.337	0.335	ML	NeutralPhyloP	m	True	
-Body_mass_g	64	64	34.229	6.248	0.183	Bayesian	PrimatesNeutral	f	True	0.000
-Body_mass_g	61	64	34.229	6.214	0.182	ML	PrimatesNeutral	f	True	
-Body_mass_g	70	70	48.845	12.918	0.264	Bayesian	PrimatesNeutral	m	True	0.000
-Body_mass_g	65	70	48.845	12.824	0.263	ML	PrimatesNeutral	m	True	
-Brain_mass_g	26	26	4.414	7.750	1.756	Bayesian	NeutralPhyloP	f	True	0.980
-Brain_mass_g	23	26	4.414	7.268	1.646	ML	NeutralPhyloP	f	True	
-Brain_mass_g	36	36	5.714	7.739	1.354	Bayesian	NeutralPhyloP	m	True	0.891
-Brain_mass_g	28	36	5.714	7.474	1.308	ML	NeutralPhyloP	m	True	
-Brain_mass_g	64	64	4.158	3.784	0.910	Bayesian	PrimatesNeutral	f	True	0.263
-Brain_mass_g	61	64	4.158	3.746	0.901	ML	PrimatesNeutral	f	True	
-Brain_mass_g	70	70	4.165	3.740	0.898	Bayesian	PrimatesNeutral	m	True	0.239
-Brain_mass_g	65	70	4.165	3.617	0.869	ML	PrimatesNeutral	m	True	
+trait	nbr_taxa_between	var_between	nbr_taxa_within	var_within	ratio	method	dataset	sex	logT	pp_ratio_greater_1	pp_ratio_lower_1	ratio_CI95	ratio_CI99
+Body_mass_g	26	10.942	23	39.970	0.274	Bayesian	NeutralPhyloP	f	True	0.0	1.0	0.161117--0.465076	0.143985--0.545942
+Body_mass_g	26	10.602	23	39.970	0.265	ML	NeutralPhyloP	f	True.tsv	NaN	NaN	NaN	NaN
+Body_mass_g	36	13.729	28	39.855	0.344	Bayesian	NeutralPhyloP	m	True	0.0	1.0	0.219826--0.543568	0.198034--0.693393
+Body_mass_g	36	13.337	27	41.331	0.323	ML	NeutralPhyloP	m	True.tsv	NaN	NaN	NaN	NaN
+Body_mass_g	65	13.404	61	34.229	0.392	Bayesian	Primates	f	True	0.0	1.0	0.273922--0.552583	0.257002--0.631873
+Body_mass_g	65	13.232	59	35.390	0.374	ML	Primates	f	True.tsv	NaN	NaN	NaN	NaN
+Body_mass_g	71	26.895	65	48.845	0.551	Bayesian	Primates	m	True	0.0	1.0	0.398185--0.764362	0.363708--0.845742
+Body_mass_g	71	26.860	63	50.395	0.533	ML	Primates	m	True.tsv	NaN	NaN	NaN	NaN
+Brain_mass_g	26	7.762	23	4.414	1.758	Bayesian	NeutralPhyloP	f	True	0.977	0.023	1.02964--2.90439	0.881927--3.68481
+Brain_mass_g	26	7.268	23	4.414	1.646	ML	NeutralPhyloP	f	True.tsv	NaN	NaN	NaN	NaN
+Brain_mass_g	36	7.880	28	5.714	1.379	Bayesian	NeutralPhyloP	m	True	0.88	0.12	0.850537--2.24563	0.779283--2.55927
+Brain_mass_g	36	7.474	28	5.714	1.308	ML	NeutralPhyloP	m	True.tsv	NaN	NaN	NaN	NaN
+Brain_mass_g	65	8.217	61	4.158	1.976	Bayesian	Primates	f	True	1.0	0.0	1.39403--2.8225	1.29282--3.1994
+Brain_mass_g	65	8.068	61	4.158	1.940	ML	Primates	f	True.tsv	NaN	NaN	NaN	NaN
+Brain_mass_g	71	8.076	65	4.165	1.939	Bayesian	Primates	m	True	1.0	0.0	1.38562--2.74772	1.30739--3.07394
+Brain_mass_g	71	7.784	65	4.165	1.869	ML	Primates	m	True.tsv	NaN	NaN	NaN	NaN

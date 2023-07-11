@@ -12,7 +12,7 @@ from libraries import hist_plot, scatter_plot
 
 def main(folder, neutral_tree_path, output):
     os.makedirs(os.path.dirname(output), exist_ok=True)
-    
+
     model_prefs = {"moving_optimum": 0, "directional": 1, "stabilizing": 2, "neutral": 3}
     models_path = {basename(p): p for p in glob(f"{folder}/*") if isdir(p) and basename(p) in model_prefs}
     models = list(sorted(models_path, key=lambda x: model_prefs[x] if x in model_prefs else -1))
@@ -36,12 +36,15 @@ def main(folder, neutral_tree_path, output):
 
             leaves_value = defaultdict(list)
             for n, n_neutral in zip(tree.get_leaves(), neutral_tree.get_leaves()):
-                # vg = float(getattr(n, "Phenotype_var")) * float(getattr(n, "Heritability"))
-                vg = float(getattr(n, "Genotype_var"))
-                leaves_value['within_tajima'].append(vg / float(getattr(n_neutral, "Theta_Tajima")))
-                leaves_value['within_watterson'].append(vg / float(getattr(n_neutral, "Theta_Watterson")))
-                leaves_value["within_fay_wu"].append(vg / float(getattr(n_neutral, "Theta_Fay_Wu")))
-                leaves_value["within_sampled"].append(vg / float(getattr(n_neutral, "Theta")))
+                var_pheno = float(getattr(n, "Phenotype_var")) * float(getattr(n, "BranchMean_Heritability"))
+                leaves_value["within"].append(var_pheno / float(getattr(n_neutral, "Theta")))
+                leaves_value['within_tajima'].append(var_pheno / float(getattr(n_neutral, "Theta_Tajima")))
+                leaves_value['within_watterson'].append(var_pheno / float(getattr(n_neutral, "Theta_Watterson")))
+                leaves_value["within_fay_wu"].append(var_pheno / float(getattr(n_neutral, "Theta_Fay_Wu")))
+
+                var_geno = float(getattr(n, "Genotype_var"))
+                leaves_value["within_geno"].append(var_geno / float(getattr(n_neutral, "Theta")))
+
                 r = float(getattr(n, "Expected_Mutational_var")) / (2 * float(getattr(n_neutral, "Mutational_rate")))
                 leaves_value["mutational"].append(r)
 
@@ -49,33 +52,38 @@ def main(folder, neutral_tree_path, output):
             for k, v in leaves_value.items():
                 var_dict[k][m].append(np.mean(v))
 
-            z, var_between = brownian_fitting(tree, trait="Phenotype_mean")
-            var_dict['between'][m].append(var_between)
-    # Output the dictionary as a dataframe
+            pheno_anc, var_between_pheno = brownian_fitting(tree, trait="Phenotype_mean")
+            var_dict['between'][m].append(var_between_pheno)
+            geno_anc, var_between_geno = brownian_fitting(tree, trait="Genotype_mean")
+            var_dict['between_geno'][m].append(var_between_geno)
 
+    # Output the dictionary as a dataframe
     dict_of_df = {k: pd.DataFrame(v) for k, v in var_dict.items()}
     df = pd.concat(dict_of_df, axis=1)
     # to break out the lists into columns
     df.to_csv(output, sep="\t", index=False)
     x_str = r"Neutrality index $\left( \rho \right)$"
-    ratio_scaled = {m: np.array(var_dict["between"][m]) / np.array(var_dict["within_sampled"][m]) for m in models}
-    hist_plot(ratio_scaled, x_str, output.replace(".tsv.gz", ".hist.pdf"))
+    ratio_scaled = {m: np.array(var_dict["between"][m]) / np.array(var_dict["within"][m]) for m in models}
+    hist_plot(ratio_scaled, x_str, output.replace(".tsv.gz", ".hist.pheno.pdf"))
+
+    ratio_scaled_geno = {m: np.array(var_dict["between_geno"][m]) / np.array(var_dict["within_geno"][m]) for m in models}
+    hist_plot(ratio_scaled_geno, x_str, output.replace(".tsv.gz", ".hist.geno.pdf"))
 
     mut_str = r"Variance mutational $\left( \sigma^2_{M} \right)$"
     within_str = r"Variance within $\left( \sigma^2_{W} \right)$"
     between_str = r"Variance between $\left( \sigma^2_{B} \right)$"
-    scatter_plot(var_dict["within_sampled"], var_dict["between"], within_str, between_str,
-                 output.replace(".tsv.gz", "-H.pdf"), histy_log=True)
+    scatter_plot(var_dict["within"], var_dict["between"], within_str, between_str,
+                 output.replace(".tsv.gz", "-H.pheno.pdf"), histy_log=True)
     scatter_plot(var_dict["within_tajima"], var_dict["between"], within_str, between_str,
-                 output.replace(".tsv.gz", "_tajima.pdf"), histy_log=True)
+                 output.replace(".tsv.gz", "_tajima.pheno.pdf"), histy_log=True)
     scatter_plot(var_dict["within_watterson"], var_dict["between"], within_str, between_str,
-                 output.replace(".tsv.gz", "_watterson.pdf"), histy_log=True)
+                 output.replace(".tsv.gz", "_watterson.pheno.pdf"), histy_log=True)
     scatter_plot(var_dict["within_fay_wu"], var_dict["between"], within_str, between_str,
-                 output.replace(".tsv.gz", "_fay_Wu.pdf"), histy_log=True)
-    scatter_plot(var_dict["mutational"], var_dict["within_sampled"], mut_str, within_str,
-                 output.replace(".tsv.gz", "_mut_within.pdf"), histy_log=True)
+                 output.replace(".tsv.gz", "_fay_Wu.pheno.pdf"), histy_log=True)
+    scatter_plot(var_dict["mutational"], var_dict["within"], mut_str, within_str,
+                 output.replace(".tsv.gz", "_mut_within.pheno.pdf"), histy_log=True)
     scatter_plot(var_dict["mutational"], var_dict["between"], mut_str, between_str,
-                 output.replace(".tsv.gz", "_mut_between.pdf"), histy_log=True)
+                 output.replace(".tsv.gz", "_mut_between.pheno.pdf"), histy_log=True)
 
 
 if __name__ == '__main__':
