@@ -1,10 +1,12 @@
 import os
 import argparse
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 import pandas as pd
 import numpy as np
 from ete3 import Tree
 from neutrality_index import open_tree, prune_tree
+
+Heritability = namedtuple("Heritability", ["lower", "upper"])
 
 
 def rename_tree(tree: Tree) -> Tree:
@@ -33,8 +35,8 @@ def name_internal_nodes(tree: Tree) -> Tree:
     return tree
 
 
-def main(path_input_traits, path_input_nuc_div, path_input_dS, path_output_tree, path_output_traits,
-         path_output_var_within, log_transform, sex):
+def main(path_input_traits: str, path_input_nuc_div: str, path_input_dS: str, path_output_tree: str,
+         path_output_traits: str, path_output_var_within: str, log_transform: bool, sex: str, h2: Heritability):
     for path in [path_input_traits, path_input_nuc_div, path_input_dS]:
         assert os.path.exists(path), f"Path {path} does not exist"
     for path in [path_output_tree, path_output_traits, path_output_var_within]:
@@ -139,10 +141,15 @@ def main(path_input_traits, path_input_nuc_div, path_input_dS, path_output_tree,
             else:
                 phenotype_var = np.nan
                 phenotype_mean = np.nan
-            dico_var_within[f"{trait_name}_variance"].append(phenotype_var)
-            # dico_var_within[f"{trait_name}_heritability_lower"].append(0.1)
-            # dico_var_within[f"{trait_name}_heritability_upper"].append(0.4)
             dico_traits[f"{trait_name}_mean"].append(phenotype_mean)
+            dico_var_within[f"{trait_name}_variance"].append(phenotype_var)
+            if h2.lower == h2.upper == 1.0:
+                continue
+            elif h2.lower == h2.upper:
+                dico_var_within[f"{trait_name}_heritability"].append(h2.lower)
+            else:
+                dico_var_within[f"{trait_name}_heritability_lower"].append(h2.lower)
+                dico_var_within[f"{trait_name}_heritability_upper"].append(h2.upper)
         assert len(set_taxa_names) == len(dico_var_within[f"{trait_name}_variance"])
         print(f"{len(var_grouped)} species with variance computed.")
 
@@ -181,7 +188,21 @@ if __name__ == '__main__':
     parser.add_argument('--output_var_within', help="Output var_within file", required=True)
     parser.add_argument('--log_transform', help="log transformed valued", default="false", type=str, required=False)
     parser.add_argument('--sex', help="Sex (m or f)", default="m", type=str, required=False)
+    parser.add_argument('--h2', help="Heritability bounds in the format 'lower-upper', e.g. '0.1-0.2'",
+                        default='1.0-1.0', type=str, required=False)
     args = parser.parse_args()
-    args.log_transform = args.log_transform.lower() == "true"
+    args_log_transform = (args.log_transform.lower() == "true")
+    assert args.h2.count("-") <= 1
+    if "-" in args.h2:
+        args_h2 = Heritability(*[float(x) for x in args.h2.split("-")])
+    else:
+        try:
+            args_h2 = Heritability(float(args.h2), float(args.h2))
+        except ValueError:
+            args_h2 = Heritability(1.0, 1.0)
+
+    assert args_h2.lower <= args_h2.upper
+    assert args_h2.lower >= 0.0
+    assert args_h2.upper <= 1.0
     main(args.input_traits, args.input_pS, args.input_dS, args.output_tree, args.output_traits,
-         args.output_var_within, args.log_transform, args.sex)
+         args.output_var_within, args_log_transform, args.sex, args_h2)

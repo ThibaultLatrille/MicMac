@@ -7,6 +7,7 @@ BURN_IN, UNTIL = 1000, 2000
 datasets = ["NeutralPhyloP", "Primates"]
 sexes = ["m", "f"]
 logTs = [True]
+heritability_bounds = ['1.0', '0.2-0.4']
 
 bayescode_path = {}
 for executable in ["nodetraits", "readnodetraits"]:
@@ -56,7 +57,7 @@ rule scale_primate_tree:
     input:
         script=f"{ROOT}/scripts/scale_tree.py",
         primate_tree=f"{FOLDER}/data/{data_dS('Primates')}",
-        mammal_neutral_tree=f"{FOLDER}/data/{data_dS('NeutralPhyloP')}",
+        mammal_neutral_tree=f"{FOLDER}/data/{data_dS('NeutralPhyloP')}"
     output:
         tree=f"{FOLDER}/data/{data_dS('PrimatesNeutral')}"
     shell:
@@ -68,15 +69,15 @@ rule pre_processed_traits:
         script=f"{ROOT}/scripts/pre_processed_traits_mammals.py",
         input_dS=lambda wildcards: f"{FOLDER}/data/{data_dS(wildcards.dataset,empirical=True)}",
         input_pS=lambda wildcards: f"{FOLDER}/data/{data_pS(wildcards.dataset)}",
-        input_traits=f"{FOLDER}/data/Tsuboi_etal_NEE_mammal.csv",
+        input_traits=f"{FOLDER}/data/Tsuboi_etal_NEE_mammal.csv"
     output:
-        tree=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.tree",
-        traits=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.traits.tsv",
-        var_within=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.var_within.tsv"
+        tree=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.tree",
+        traits=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.traits.tsv",
+        var_within=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.var_within.tsv"
     params:
-        phenotype=lambda wildcards: f"--log_transform {wildcards.logT} --sex {wildcards.sex}"
+        phenotype=lambda wildcards: f"--log_transform {wildcards.logT} --sex {wildcards.sex} --h2 {wildcards.h2}"
     log:
-        stdout=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}.preprocessed.log"
+        stdout=f"{FOLDER}/data_processed/mammals/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.preprocessed.log"
     shell:
         'python3 {input.script} {params.phenotype} --input_dS {input.input_dS} --input_pS {input.input_pS}'
         ' --input_traits {input.input_traits} --output_tree {output.tree} --output_traits {output.traits}'
@@ -89,9 +90,9 @@ rule neutrality_index:
         traits=rules.pre_processed_traits.output.traits,
         var_within=rules.pre_processed_traits.output.var_within
     output:
-        tsv=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}.tsv"
+        tsv=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.ratio.tsv"
     log:
-        stdout=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}.processed.log"
+        stdout=f"{FOLDER}/data_processed/ML/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.processed.log"
     shell:
         'python3 {input.script} --tree {input.tree} --traitsfile {input.traits} --var_within {input.var_within}'
         ' --output {output.tsv} > {log.stdout}'
@@ -103,12 +104,12 @@ rule run_inference:
         traits=rules.pre_processed_traits.output.traits,
         tree=rules.pre_processed_traits.output.tree
     output:
-        run=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}.run",
+        run=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.run"
     params:
-        chain=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}",
-        until=f"--until {UNTIL}",
+        chain=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}_{{h2}}",
+        until=f"--until {UNTIL}"
     log:
-        stdout=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}.log"
+        stdout=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.log"
     shell:
         '{input.exec} {params.until} --uniq_kappa --df 1 --tree {input.tree} --traitsfile {input.traits} {params.chain}'
         ' > {log.stdout}'
@@ -119,20 +120,20 @@ rule read_trace:
         inference=rules.run_inference.output.run,
         var_within=rules.pre_processed_traits.output.var_within
     output:
-        tsv=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.ratio.tsv",
+        tsv=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.ratio.tsv"
     params:
-        chain=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}"
+        chain=f"{FOLDER}/data_processed/inference/{{dataset}}_{{sex}}_{{logT}}_{{h2}}"
     log:
-        stdout=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}.read.log"
+        stdout=f"{FOLDER}/data_processed/traces/{{dataset}}_{{sex}}_{{logT}}_{{h2}}.read.log"
     shell:
         '{input.exec} -b {BURN_IN} --var_within {input.var_within} --output {output.tsv} {params.chain} > {log.stdout} && gzip -f {params.chain}.chain && gzip -f {params.chain}.trace'
 
 rule merge_tsv:
     input:
         script=f"{ROOT}/scripts/merge_results_mammals.py",
-        tsv_Bayes=expand(rules.read_trace.output.tsv,dataset=datasets,sex=sexes,logT=logTs),
-        tsv_ML=expand(rules.neutrality_index.output.tsv,dataset=datasets,sex=sexes,logT=logTs),
+        tsv_Bayes=expand(rules.read_trace.output.tsv,dataset=datasets,sex=sexes,logT=logTs,h2=heritability_bounds),
+        tsv_ML=expand(rules.neutrality_index.output.tsv,dataset=datasets,sex=sexes,logT=logTs,h2=heritability_bounds)
     output:
-        tsv=f"{FOLDER}/results/merge.tsv",
+        tsv=f"{FOLDER}/results/merge.tsv"
     shell:
         'python3 {input.script} --tsv_ML {input.tsv_ML} --tsv_Bayes {input.tsv_Bayes} --output {output.tsv}'

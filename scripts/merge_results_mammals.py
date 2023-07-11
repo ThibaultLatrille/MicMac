@@ -16,12 +16,12 @@ def main(tsv_ML_list: str, tsv_Bayes_list: str, output: str):
             name_split = os.path.basename(path).replace(".ratio.tsv", "").split("_")
             df = pd.read_csv(path, sep='\t')
             df["method"] = method
-            for i, p in enumerate(["dataset", "sex", "logT"]):
+            for i, p in enumerate(["dataset", "sex", "logT", "h2"]):
                 df[p] = name_split[i]
             list_df.append(df)
     df_out = pd.concat(list_df)
     # Sort by trait, dataset, sex, logT and then method
-    df_out = df_out.sort_values(by=["trait", "dataset", "sex", "logT", "method"])
+    df_out = df_out.sort_values(by=["trait", "dataset", "sex", "logT", "h2", "method"])
     # Fill missing values with NaN
     df_out = df_out.fillna("NaN")
     df_out.to_csv(output, sep="\t", index=False, float_format="%.3f")
