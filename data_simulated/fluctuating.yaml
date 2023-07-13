@@ -4,7 +4,7 @@ nb_genes: 1
 min_seed: 0
 max_seed: 98745641
 nb_seeds: 1000
-tree: "trees/mammal.tre.annotated"
+tree: "trees/MamGenTimescale.m.species.nwk"
 bayes_inference: true
 bayes_burn_in: 200
 bayes_until: 500
@@ -27,7 +27,7 @@ simulators:
     theta_optimum: 0.02
 core:
   mutation_mean_effect_size: 1.0
-  mutation_rate_per_loci_per_generation: 1e-5
+  mutation_rate_per_loci_per_generation: 1.38e-5
   mutation_rate_min: 1e-7
   mutation_rate_max: 1e-3
   population_size: 50
@@ -35,7 +35,7 @@ core:
   population_size_max: 1000
   population_size_noise_sigma: 0.1
   population_size_noise_theta: 0.9
-  number_of_generations: 10000
+  number_of_generations: 13500
   burn_in: 1000
 heritability: 0.2
 scaled_population_size_brownian_sigma: 1.0 # The order of magnitude of change in population size along the tree
