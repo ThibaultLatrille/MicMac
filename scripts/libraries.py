@@ -12,7 +12,7 @@ fontsize_legend = 18
 
 
 def colors(x):
-    cs = ["#EB6231", "#8FB03E", "#E29D26", "#5D80B4", "#857BA1"]
+    cs = ["#D55E00", "#0072B2", "#F0E442", "#E69F00", "#56B4E9", "#009E73", "#CC79A7", "#000000"]
     return [cs[idx % len(cs)] for idx in range(len(x))]
 
 
@@ -94,6 +94,10 @@ def hist_plot(x_input, x_label, output, xscale="log"):
             x_mean = np.mean(x[m])
             ax.plot((x_mean, x_mean), (0, max_y), linewidth=3, color=color_models[id_m],
                     label=f'{m.replace("_", " ").capitalize()} (mean {x_mean:.2g})')
+    else:
+        for id_m, m in enumerate(x):
+            ax.plot((0, 0), (0, 0), linewidth=3, color=color_models[id_m],
+                    label=f'{m.replace("_", " ").capitalize()}')
 
     ax.set_xlabel(x_label, fontsize=fontsize)
     if xscale == "log":

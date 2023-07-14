@@ -98,11 +98,11 @@ rule pre_processed_traits:
     input:
         script=f"{ROOT}/scripts/pre_processed_traits_simulations.py",
         nhx=rules.run_simulations.output.nhx,
-        neutral_tree=rules.run_neutral_simulation.output.nhx,
+        neutral_tree=rules.run_neutral_simulation.output.nhx
     output:
         tree=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.tree",
         traits=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.traits.tsv",
-        var_within=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.var_within.tsv",
+        var_within=f"{FOLDER}/{{simulator}}/replicate_{{scaling}}_seed{{seed}}.var_within.tsv"
     shell:
         'python3 {input.script} --input {input.nhx} --neutral_tree {input.neutral_tree} --tree {output.tree} --traitsfile {output.traits} --var_within {output.var_within}'
 
@@ -117,7 +117,7 @@ rule run_inference:
         tree=rules.pre_processed_traits.output.tree,
         traits=rules.pre_processed_traits.output.traits
     output:
-        run=f"{FOLDER}/{{simulator}}/inference_{{scaling}}_seed{{seed}}.run",
+        run=f"{FOLDER}/{{simulator}}/inference_{{scaling}}_seed{{seed}}.run"
     params:
         chain=lambda wildcards: chain_name(wildcards),
         until=f"-u {config['bayes_until']}"
@@ -130,10 +130,10 @@ rule read_inference:
         inference=rules.run_inference.output.run,
         var_within=rules.pre_processed_traits.output.var_within
     output:
-        tsv=f"{FOLDER}/{{simulator}}/read_{{scaling}}_seed{{seed}}.ratio.tsv",
+        tsv=f"{FOLDER}/{{simulator}}/read_{{scaling}}_seed{{seed}}.ratio.tsv"
     params:
         chain=lambda wildcards: chain_name(wildcards),
-        burnin=config['bayes_until']
+        burnin=config['bayes_burn_in']
     log:
         stdout=f"{FOLDER}/{{simulator}}/read_{{scaling}}_seed{{seed}}.log",
         stderr=f"{FOLDER}/{{simulator}}/read_{{scaling}}_seed{{seed}}.err"
@@ -145,6 +145,8 @@ rule plot_simulations_bayesian:
         script=f"{ROOT}/scripts/plot_simulations_bayesian.py",
         tsv=expand(rules.read_inference.output.tsv,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
     output:
-        plot=f"{FOLDER}/results/inference_bayesian.tsv.gz",
+        plot=f"{FOLDER}/results/inference_bayesian.tsv.gz"
+    log:
+        stdout=f"{FOLDER}/results/inference_bayesian.log"
     shell:
-        'python3 {input.script} --folder {FOLDER} --output {output.plot}'
+        'python3 {input.script} --folder {FOLDER} --output {output.plot} 1> {log.stdout}'

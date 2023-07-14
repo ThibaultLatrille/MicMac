@@ -1,5 +1,5 @@
-min_number_loci: 5000
-max_number_loci: 5000
+min_number_loci: 500
+max_number_loci: 500
 nb_genes: 1
 min_seed: 0
 max_seed: 98745641

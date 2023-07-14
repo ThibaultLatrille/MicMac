@@ -29,17 +29,33 @@ def main(folder, output):
                 for col in df_trait.columns:
                     var_dict[f"{trait}_{col}"][m].append(df_trait[col].values[0])
 
-    df = pd.DataFrame(var_dict)
-    df.to_csv(output, sep="\t", index=False)
     rename = lambda x: output.replace(".tsv.gz", x)
     for trait in ["Phenotype", "Genotype"]:
-        hist_plot(var_dict[f"{trait}_ratio"], "Neutrality index ($\\rho$)", rename(f".{trait}.pdf"))
-        hist_plot(var_dict[f"{trait}_pp_ratio_greater_1"], "$\\mathbb{P} ( \\rho > 1 )$",
+        hist_plot(var_dict[f"{trait}_ratio"], "Neutrality index ($\\widehat{\\rho}$)", rename(f".{trait}.pdf"))
+        hist_plot(var_dict[f"{trait}_pp_ratio_greater_1"],
+                  "Probability of diversifying selection ($\\mathbb{P} [ \\widehat{\\rho} > 1 ])$",
                   rename(f".{trait}.pvalues.pdf"), xscale="linear")
         scatter_plot(var_dict[f"{trait}_var_within"], var_dict[f"{trait}_var_between"],
                      r"Variance within $\left( \sigma^2_{W} \right)$",
                      r"Variance between $\left( \sigma^2_{B} \right)$",
                      rename(f".{trait}.scatter.pdf"), histy_log=True)
+
+    out_dict = defaultdict(list)
+    for m in models:
+        for col, values in var_dict.items():
+            out_dict[col].extend(values[m])
+        print(f"{m}:")
+        n = len(var_dict["Phenotype_ratio"][m])
+        lower_bound, upper_bound = 0.025, 0.975
+        diversifying = len([i for i in var_dict["Phenotype_pp_ratio_greater_1"][m] if i > upper_bound]) / n
+        stabilizing = len([i for i in var_dict["Phenotype_pp_ratio_greater_1"][m] if i < lower_bound]) / n
+        neutral = len([i for i in var_dict["Phenotype_pp_ratio_greater_1"][m] if lower_bound <= i <= upper_bound]) / n
+        assert abs(diversifying + stabilizing + neutral - 1) < 1e-6
+        print(f"\tDiversifying: {diversifying:.2f}")
+        print(f"\tStabilizing: {stabilizing:.2f}")
+        print(f"\tNeutral: {neutral:.2f}")
+    df = pd.DataFrame(out_dict)
+    df.to_csv(output, sep="\t", index=False)
 
 
 if __name__ == '__main__':
