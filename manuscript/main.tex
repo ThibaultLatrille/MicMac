@@ -142,8 +142,8 @@
 \frenchspacing
 
 
-\title{Trait' selection from within and between species variations taking in genomics}
-\rhead{\scshape Test of trait selection}
+\title{Trait selection from within and between species variations while integrating genomics}
+\rhead{\scshape Trait selection from within and between species variations}
 
 \author{
 \large
@@ -353,6 +353,7 @@ The rate of change of the Brownian process is determined by the positive semi-de
 The off-diagonal elements of $\CovarianceMatrix$ are the covariance between traits, and the diagonal elements are the variance of each trait, thus corresponding to $\NI$.
 With an inverse Wishart distribution as the {prior} on the covariance matrix, the {posterior} on $\CovarianceMatrix$, conditional on $\brownian$ is also an invert Wishart distribution (see section~S\ref{subsec:sampling-the-covariance-matrix}).
 $\Brownian$ is sampled using a Metropolis-Hastings algorithm (acceptance-rejection), and the posterior distribution of $\CovarianceMatrix$ is sampled using a Gibbs sampler.
+For each trait and each species, heritability ($\Heritability$) is set as a uniform distribution with user-defined boundaries.
 The posterior distribution of $\EstNI$ thus allow to test for deviation from neutrality, for example by computing $\proba [\EstNI > 1 ]$ to test for evidence of diversifying selection and $\proba [\EstNI < 1 ]$ to test for evidence of stabilizing selection.
 
 \subsection*{Simulation}\label{subsec:simulations}
@@ -414,8 +415,8 @@ As such heritability is not a given parameter of the simulations, but rather mea
 
 \subsection*{Empirical dataset}\label{subsec:empirical-dataset}
 
-We analyzed a mammalian dataset, with the body size and brain mass as quantitative traits.
-The log-transformed values of body size and brain mass are gathered from \textcite{tsuboi_breakdown_2018}.
+We analyzed a mammalian dataset, with the body mass and brain mass as quantitative traits.
+The log-transformed values of body mass and brain mass are gathered from \textcite{tsuboi_breakdown_2018}.
 We removed individuals not marked as adult, and split the data into males and females due to sexual dimorphism.
 We discarded species with no intra-specific variability.
 The mammalian nucleotide diversity is obtained from the Zoonomia project, with nucleotide divergence obtained on a set of neutral markers in \textcite{foley_genomic_2023}, and with nucleotide diversity measured as heterozygosity in \textcite{wilder_contribution_2023}.
@@ -469,9 +470,9 @@ With the aim of applying the inference method to empirical datasets, the simulat
 First, we assumed a constant population size ($\Ne$) and a constant mutation rate ($\MutationRate$) across the phylogeny (fig.~\ref{fig:results-simulations}A\&B)
 Simulations performed under stabilizing selection where detected as such ($\proba [\EstNI < 1] > 0.95$), no false negative was observed (blue in fig.~\ref{fig:results-simulations}A\&B).
 Simulations performed under diversifying selection were detected as such ($\proba [\EstNI > 1] > 0.975$), no false negative was observed (red in fig.~\ref{fig:results-simulations}A\&B).
-Simulations performed under neutral evolution were detected as such ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$) in 79\% of the cases (yellow in fig.~\ref{fig:results-simulations}A\&B), the remaining cases were detected as stabilizing selection ($\proba [\EstNI < 1] > 0.975$) in 21\% of the simulations.
+Simulations performed under neutral evolution were detected as such ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$) in 77\% of the cases (yellow in fig.~\ref{fig:results-simulations}A\&B),while detected as stabilizing selection in 21\% of the cases, and detected as diversifying selection in 2\% of cases.
 Second, for simulations under a fluctuating $\Ne$ and $\MutationRate$ (see fig.~\ref{fig:results-simulations}C\&D), simulations of diversifying selection was detected as such and stabilizing selection was detected as such in 100\% of the cases.
-For simulations under neutral evolution, 46\% of the simulations were detected as such ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$), 54\% of the simulations were detected as stabilizing selection ($\proba [\EstNI < 1] > 0.975$).
+For simulations under neutral evolution, 51\% of the simulations were detected as such ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$), 49\% of the simulations were detected as stabilizing selection ($\proba [\EstNI < 1] > 0.975$).
 
 \begin{figure*}[!ht]
     \centering
@@ -498,15 +499,19 @@ For simulations under neutral evolution, 46\% of the simulations were detected a
 
 
 \subsection*{Results on empirical data}\label{subsec:results-on-empirical-data}
-For mammalian body size, we obtained males (\Male) trait and genetic variation for $\NbrTaxa=36$ species, and in females (\Female) variation for $\NbrTaxa=26$ species.
-The posterior estimate of neutrality index are $\EstNI_{\text{\Male}} = 0.346$ ($[0.183,~0.677]$ for $95\%$ credible interval) and $\EstNI_{\text{\Female}} = 0.278$ ($[0.136,~0.639]$ for $95\%$ credible interval).
-For mammalian brain mass, we obtained $\EstNI_{\text{\Male}} = 1.375$ ($[0.844,~2.212]$ for $95\%$ credible interval, $\NbrTaxa=36$) and $\EstNI_{\text{\Female}} = 1.762$ ($[1.021,~3.010]$ for $95\%$ credible interval, $\NbrTaxa=26$).
-In both males and females, brain mass is under diversifying selection, with p-values of $0.116$ and $0.022$ respectively.
+For mammalian body mass, we obtained males (\Male) trait and genetic variation for $\NbrTaxa=36$ species, and in females (\Female) variation for $\NbrTaxa=26$ species.
+The posterior estimate of neutrality index are $\EstNI_{\text{\Male}} = 0.34$ ($[0.22--0.52]$ for $95\%$ credible interval) and $\EstNI_{\text{\Female}} = 0.28$ ($[0.16--0.49]$ for $95\%$ CI).
+In males and females, brain mass is under diversifying selection with associated posterior probabilities of $0.0$ and $0.0$ respectively.
+Moreover, assuming that heritability ($\Heritability$) of body mass is uniformly distributed between 20\% and 40\%, posterior probabilities of diversifying selection ($ \proba [\EstNI > 1]$) becomes $0.635$ in males and $0.914$ in females.
+For mammalian brain mass, we obtained $\EstNI_{\text{\Male}} = 1.35$ ($[0.85--2.17]$ for $95\%$ CI, $\NbrTaxa=36$) and $\EstNI_{\text{\Female}} = 1.72$ ($[1.00--2.94]$ for $95\%$ CI, $\NbrTaxa=26$).
+In males and females, brain mass is under diversifying selection with associated posterior probabilities of $0.877$ and $0.972$ respectively.
+Moreover, assuming that heritability of brain mass is uniformly distributed between 20\% and 40\%, posterior probabilities of diversifying selection becomes $1.0$ in both males and females.
 
-For primates body size, we obtained $\EstNI_{\text{\Male}} = 0.557$ ($[0.406,~0.767]$ for $95\%$ credible interval, $\NbrTaxa=71$) and $\EstNI_{\text{\Female}} = 0.393$ ($[0.277,~0.561]$ for $95\%$ credible interval, $\NbrTaxa=65$).
-For primates brain mass, we obtained $\EstNI_{\text{\Male}} = 1.920$ ($[1.397,~2.616]$ for $95\%$ credible interval, $\NbrTaxa=71$) and $\EstNI_{\text{\Female}} = 1.974$ ($[1.393,~2.798]$ for $95\%$ credible interval, $\NbrTaxa=65$).
-In both males and females, brain mass is under diversifying selection, with p-values of $0.00$ and $0.00$ respectively.
-However, these tests are invalid because the assumption of neutral genetic markers used for normalization is violated (see table~\ref{table:assumptions}).
+For primates body mass, we obtained $\EstNI_{\text{\Male}} = 0.56$ ($[0.40,~0.78]$ for $95\%$ CI, $\NbrTaxa=71$) and $\EstNI_{\text{\Female}} = 0.39$ ($[0.28,~0.55]$ for $95\%$ CI, $\NbrTaxa=65$).
+Assuming that heritability of body mass is uniformly distributed between 20\% and 40\%, posterior probabilities of diversifying selection becomes $1.0$ in males and $0.914$ in females.
+For primates brain mass, we obtained $\EstNI_{\text{\Male}} = 1.95$ ($[1.40,~2.79]$ for $95\%$ CI, $\NbrTaxa=71$) and $\EstNI_{\text{\Female}} = 1.95$ ($[1.39,~2.79]$ for $95\%$ CI, $\NbrTaxa=65$).
+In both males and females, brain mass is under diversifying selection, with associated posterior probabilities of $1.0$.
+Importantly, these tests are invalid because the assumption of neutral genetic markers used for normalization is violated (see table~\ref{table:assumptions}).
 
 \section*{Discussion}\label{sec:discussion}
 
@@ -631,13 +636,13 @@ The mean ($\bar{\Trait}$) and variance ($\VarPhenotype$) of the phenotype are:
     \bar{\Trait} = \frac{1}{\Ne}\sum_{i=1}^{\Ne} \Trait_i \text{\quad and \quad} \VarPhenotype = \frac{1}{\Ne}\sum_{i=1}^{\Ne}\left(\Trait_i - \bar{\Trait} \right)^2 \label{eq:simu-between}
 \end{equation}
 
-Heritability ($h^2$) is defined as:
+Heritability ($\Heritability$) is defined as:
 \begin{equation}
-    h^2 = \frac{\VarGenetic}{\VarPhenotype} = \frac{\VarGenetic}{\VarGenetic + \VarEnv}\label{eq:simu-heritability}
+    \Heritability = \frac{\VarGenetic}{\VarPhenotype} = \frac{\VarGenetic}{\VarGenetic + \VarEnv}\label{eq:simu-heritability}
 \end{equation}
-Altogether, effective population size ($\Ne$), the number of loci ($\NbrLoci$) and the effect of a mutation ($a$), we can compute the variance of the environment ($\VarEnv$) that is required to reach a given heritability ($h^2$) as:
+Altogether, effective population size ($\Ne$), the number of loci ($\NbrLoci$) and the effect of a mutation ($a$), we can compute the variance of the environment ($\VarEnv$) that is required to reach a given heritability ($\Heritability$) as:
 \begin{equation}
-    \VarEnv = \VarGenetic \Multiply \left( \frac{1}{h^2} - 1 \right) = 4 \Ne \Multiply \MutationRate \Multiply \NbrLoci \Multiply a^2 \Multiply \left( \frac{1}{h^2} - 1 \right) \label{eq:simu-var-env}
+    \VarEnv = \VarGenetic \Multiply \left( \frac{1}{\Heritability} - 1 \right) = 4 \Ne \Multiply \MutationRate \Multiply \NbrLoci \Multiply a^2 \Multiply \left( \frac{1}{\Heritability} - 1 \right) \label{eq:simu-var-env}
 \end{equation}
 
 \newpage

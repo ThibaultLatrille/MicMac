@@ -31,10 +31,10 @@ def main(input_path, input_neutral_path, tree_path, traits_path, var_within_path
     for n, n_neutral in zip(tree.get_leaves(), neutral_tree.get_leaves()):
         assert n.name == n_neutral.name
         var_within["TaxonName"].append(n.name)
-        var_within["Nucleotide_diversity"].append(float(getattr(n_neutral, "Theta")))
-        var_within["Phenotype_variance"].append(float(getattr(n, "Phenotype_var")))
-        var_within["Phenotype_heritability"].append(float(getattr(n, "BranchMean_Heritability")))
-        var_within["Genotype_variance"].append(float(getattr(n, "Genotype_var")))
+        var_within["Nucleotide_diversity"].append(max([0, float(getattr(n_neutral, "Theta"))]))
+        var_within["Phenotype_variance"].append(max([0, float(getattr(n, "Phenotype_var"))]))
+        var_within["Phenotype_heritability"].append(max([0, float(getattr(n, "BranchMean_Heritability"))]))
+        var_within["Genotype_variance"].append(max([0, float(getattr(n, "Genotype_var"))]))
         var_within["Genotype_heritability"].append(1.0)
     df = pd.DataFrame(var_within)
     df.to_csv(var_within_path, sep="\t", index=False)

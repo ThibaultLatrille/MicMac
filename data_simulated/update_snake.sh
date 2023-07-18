@@ -4,6 +4,6 @@ for EXPERIMENT in $(pwd)/experiments/*; do
   rm -rf "${EXPERIMENT}"/Snakefile
   ln $(pwd)/Snakefile "${EXPERIMENT}"/Snakefile
   cd "${EXPERIMENT}"
-  snakemake -j 8 --rerun-incomplete
+  snakemake -j 8 --touch
   cd "${FOLDER}"
 done
