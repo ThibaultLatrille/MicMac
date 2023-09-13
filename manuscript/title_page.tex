@@ -1,0 +1,94 @@
+%! BibTeX Compiler = biber
+%TC:ignore
+\documentclass{article}
+\usepackage{caption}
+\usepackage{xcolor, colortbl}
+\definecolor{BLUELINK}{HTML}{0645AD}
+\definecolor{DARKBLUELINK}{HTML}{0B0080}
+\definecolor{LIGHTGREY}{gray}{0.9}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[colorlinks=false]{hyperref}
+% for linking between references, figures, TOC, etc in the pdf document
+\hypersetup{colorlinks,
+    linkcolor=DARKBLUELINK,
+    anchorcolor=DARKBLUELINK,
+    citecolor=DARKBLUELINK,
+    filecolor=DARKBLUELINK,
+    menucolor=DARKBLUELINK,
+    urlcolor=BLUELINK
+} % Color citation links in purple
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{naturalnames}{hyperref}
+
+\usepackage{biorxiv}
+\usepackage[backend=biber,eprint=false,isbn=false,url=false,intitle=true,style=nature,date=year]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage{url}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathtools}
+\usepackage{lmodern}
+\usepackage{xfrac, nicefrac}
+\usepackage{bm}
+\usepackage{listings, enumerate, enumitem}
+\usepackage[export]{adjustbox}
+\usepackage{graphicx}
+\usepackage{bbold}
+\usepackage{pdfpages}
+\pdfinclusioncopyfonts=1
+\usepackage{lineno}
+\usepackage{tabu}
+\usepackage{hhline}
+\usepackage{multicol,multirow,array}
+\usepackage{etoolbox}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{orcidlink}
+\usepackage{marvosym}
+
+% -- Defining colors:
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}% Definig a custom style:
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\scriptsize\bfseries,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=t,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}% -- Setting up the custom style:
+\lstset{style=mystyle}
+
+\renewcommand{\baselinestretch}{1.5}
+\renewcommand{\arraystretch}{1.2}
+\linenumbers
+\frenchspacing
+
+% Including genomics, Inclusion of genomics, Linking genomics, 
+\title{Leveraging genomics to detect trait selection from within and between species variations}
+\rhead{\scshape Trait selection from within and between species variations}
+
+\author{
+\large
+\textbf{T. {Latrille}$^{1}$\orcidlink{0000-0002-9643-4668}, M. {Bastian}$^{2}$, T. {Gaboriau}$^{1}$\orcidlink{0000-0001-7530-2204}, N. {Salamin}$^{1}$\orcidlink{0000-0002-3963-4954}}\\
+\normalsize
+$^{1}$Department of Computational Biology, Université de Lausanne, Lausanne, Switzerland\\
+$^{2}$Laboratoire de Biométrie et Biologie Evolutive, UMR5558, Université Lyon 1, Villeurbanne, France \\
+\texttt{\href{mailto:thibault.latrille@ens-lyon.org}{thibault.latrille@ens-lyon.org}} \\
+}
+\begin{document}
+
+\maketitle
+
+\subsection*{Acknowledgements}
+ We gratefully acknowledge the help of Nicolas Lartillot, Philippe Veber, Isabela Jeronimo do Ó, Anna Marcionetti, Julien Clavel, and Daniele Silvestro for their insightful discussions and Julien Joseph for his advice and reviews concerning this manuscript.
+
+
+\subsection*{Competing interests:}
+The authors declare no conflicts of interest.
+\subsection*{Data and materials availability:}
+The data that support the findings of this study are openly available in GitHub at \href{https://github.com/ThibaultLatrille/MicMac}{github.com/ThibaultLatrille/MicMac}. Snakemake pipeline, analysis scripts and documentation are available in the repository to replicate the study.
+
+\end{document}

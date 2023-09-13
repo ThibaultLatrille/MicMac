@@ -125,17 +125,18 @@ def main(input_traits: str, input_tree: str, input_var_within: str, output_tsv: 
         if h_low in var_pop_df.columns and h_up in var_pop_df.columns:
             print(f"Found upper and lower bound for heritability of {trait}.")
             print(f"Using the mean of the confidence interval.")
-            var_pop_df[h] = var_pop_df[[h_low, h_up]].mean(axis=1)
+            trait_h = var_pop_df[[h_low, h_up]].mean(axis=1)
         elif f"{trait}_heritability" in var_pop_df.columns:
             print(f"Found heritability for {trait}.")
+            trait_h = var_pop_df[h]
         else:
             print(f"Warning: column {trait}_heritability not found in {input_var_within}.")
             print("Assuming heritability = 1.0.")
-            var_pop_df[h] = 1.0
+            trait_h = np.array([1.0] * len(var_pop_df))
         notna = (np.isfinite(var_pop_df[f"{trait}_variance"]) & (var_pop_df[f"{trait}_variance"] > 0.0))
-        notna = (notna & (np.isfinite(var_pop_df[h]) & (var_pop_df[h] >= 0.0) & (var_pop_df[h] <= 1.0)))
+        notna = (notna & (np.isfinite(trait_h) & (trait_h >= 0.0) & (trait_h <= 1.0)))
         # Computing the genetic variance (geno = h² * pheno)
-        genetic_variance_array = var_pop_df[f"{trait}_heritability"][notna] * var_pop_df[f"{trait}_variance"][notna]
+        genetic_variance_array = trait_h[notna] * var_pop_df[f"{trait}_variance"][notna]
         var_within_array = genetic_variance_array / (var_pop_df["Nucleotide_diversity"][notna])
         print(f'Found {len(genetic_variance_array)} species with a variance for {trait}.')
         var_within = np.mean(var_within_array)

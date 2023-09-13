@@ -112,7 +112,7 @@ def main(path_input_traits: str, path_input_nuc_div: str, path_input_dS: str, pa
             nuc_div = np.nan
         else:
             assert len(leaf_nuc_div_df) == 1
-            nuc_div = float(leaf_nuc_div_df[nuc_div_col])
+            nuc_div = float(leaf_nuc_div_df[nuc_div_col].iloc[0])
         dico_var_within["TaxonName"].append(taxa_name)
         dico_var_within[f"Nucleotide_diversity"].append(nuc_div)
         dico_traits["TaxonName"].append(taxa_name)

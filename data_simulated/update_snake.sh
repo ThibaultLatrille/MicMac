@@ -1,5 +1,5 @@
 FOLDER=$(pwd)
-for EXPERIMENT in $(pwd)/experiments/*; do
+for EXPERIMENT in $(pwd)/experiments/fluc*ing; do
   echo "Updating snakemake in: ${EXPERIMENT}"
   rm -rf "${EXPERIMENT}"/Snakefile
   ln $(pwd)/Snakefile "${EXPERIMENT}"/Snakefile
