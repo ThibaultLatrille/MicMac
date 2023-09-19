@@ -75,6 +75,7 @@
 \DeclareMathOperator{\E}{\mathbb{E}}
 \DeclareMathOperator{\Var}{\text{Var}}
 \DeclareMathOperator{\Cov}{\text{Cov}}
+\newcommand{\QstFst}{Q$_\text{ST}$--F$_\text{ST}$}
 \newcommand{\der}{\mathrm{d}}
 \newcommand{\e}{\text{e}}
 \newcommand{\Ne}{N_{\text{e}}}
@@ -185,12 +186,10 @@ Fundamentally, distinguishing neutral evolution from selection requires determin
 The variation of phenotypes (traits) and genotypes (sequences) can be observed at different scales, across different development stages at the individual level, across different individuals and populations at the species level, and finally across different species at the phylogenetic level.
 All these systems require different assumptions and methodologies, and the endeavor to determine the selective regime for a given trait has thus incorporated theories, methods, and developments across various fields of evolutionary biology such as quantitative genetics, population genetics, phylogenetics and comparative genomics~\parencite{lynch_genetics_1998, walsh_evolution_2018}.
 
-[not sure of this paragraph...]
-
 Leveraging individual variations within the same species, Genome-Wide Association Studies (GWAS) in humans have shown that traits are mostly polygenic (many loci associated with a given trait), are also mostly pleiotropic (many traits associated with a given locus), additive and mainly under stabilizing selection~\parencite{simons_population_2018, sella_thinking_2019}.
-Additionally, contrasting both trait and genetic differentiation across several populations, Q$_\text{ST}$--F$_\text{ST}$ methods have allowed to determine the selective regime and to quantify the strength of selection acting on a trait~\parencite{martin_multivariate_2008, leinonen_qst_2013}.
-For example, studies have shown that stabilizing selection is largely dominant in the evolution of gene expression in different populations~\parencite{whitehead_neutral_2006, gilad_natural_2006}. [why only example from gene expression?]
-However, dominant selective regime acting on gene expression is still controversial, and neutral evolution is still debated~\parencite{signor_evolution_2018, price_detecting_2022}.
+Additionally, contrasting both trait and genetic differentiation across several populations, \QstFst methods have allowed to determine the selective regime and to quantify the strength of selection acting on a trait~\parencite{martin_multivariate_2008, leinonen_qst_2013}.
+For example, in the context of the evolution of gene expression, studies have shown that stabilizing selection is largely dominant~\parencite{whitehead_neutral_2006, gilad_natural_2006.
+However, selective regime acting on gene expression is still controversial, and neutral evolution is still debated~\parencite{signor_evolution_2018, price_detecting_2022}.
 
 To disentangle neutral evolution and selection, trait evolution can also be observed at a larger time scale.
 For example, change in mean trait value accumulates linearly with time of divergence from a sister species, and also proportionally to the trait variance~\parencite{lande_genetic_1980, turelli_heritable_1984}.
@@ -202,22 +201,21 @@ Alternatively, by accounting for the underlying relationships between several sp
 Under neutral evolution, the change in main trait value along a given branch of the tree is normally distributed, with a variance proportional to divergence time~\parencite{hansen_translating_1996}.
 As a result, the mean trait value can be modeled as a Brownian process branching at every node of the tree~\parencite{hansen_translating_1996, harmon_phylogenetic_2018}.
 Reconstructing the trait variation along the whole phylogeny as a Brownian process can thus constitute a null model of neutral trait evolution.
-Some deviations from the Brownian process, typically Ornstein-Uhlenbeck processes, are thus often interpreted as a signature of stabilizing selection~\parencite{catalan_drift_2019}.
+Some deviations from the Brownian process, typically Ornstein-Uhlenbeck processes, are thus often interpreted as a signature of stabilising selection~\parencite{catalan_drift_2019}.
 Alternatively, a trend in the Brownian process (the tendency of a trait to evolve in a certain direction) is interpreted as a signature of directional selection at the phylogenetic scale~\parencite{silvestro_early_2019}.
 However, studies have shown that such comparative approaches are subject to different biases~\parencite{harmon_phylogenetic_2018}.
-First, a trait under stabilizing selection for which the optimal trait value is also evolving as a Brownian process will not deviate from a Brownian process, and thus be wrongly classified as neutral~\parencite{hansen_translating_1996}.
+First, a trait under stabilising selection for which the optimal trait value is also evolving as a Brownian process will not deviate from a Brownian process, and thus be wrongly classified as neutral~\parencite{hansen_translating_1996}.
 In other words, the better fit of a Brownian process does not necessarily constitute proof of the neutral model.
 Secondly, and contrarily, even under a neutral trait, the Ornstein-Uhlenbeck process might sometimes be statistically preferred over a Brownian process due to sampling artifacts~\parencite{silvestro_measurement_2015, cooper_cautionary_2016, price_detecting_2022}.
 Those limitations, altogether with the use of mean trait estimates leaving out the variance in traits between individuals, easily generate misclassification of selection from methods at the phylogenetic scale.
 
 % At the frontier Phylogenetics/Population-genetics
-At the frontier between micro and macroevolution, comparative methods at the phylogenetic scale have acknowledged the importance of modeling within-species variation on top of changes in mean trait value~\parencite{fay_evaluating_2008, kostikova_bridging_2016, gaboriau_multiplatform_2020, gaboriau_exploring_2023}.
-However, in the context of detecting selection acting on a trait, within-species variation is mostly used to describe technical errors.
-One notable exception used the ratio of between to within variation estimated for many traits, and compared to the average over all traits to seek deviation from this average~\parencite{rohlfs_modeling_2014, rohlfs_phylogenetic_2015}.
-The goal of this study is to determine the evolutionary regime of a quantitative trait through the articulation of the variance between and within species while setting the threshold for neutral, stabilizing, and diversifying selection.
+At the frontier between micro and macroevolution, comparative methods at the phylogenetic scale have acknowledged the importance of modeling within-species variation on top of changes in mean trait value to describe technical errors~\parencite{lynch_methods_1991, felsenstein_comparative_2008, hansen_interpreting_2012} or to scale the rate of change in mean trait value~\parencite{kostikova_bridging_2016, gaboriau_multiplatform_2020, gaboriau_exploring_2023}.
+One notable exception used the ratio of between to within variation estimated for many traits, and compared to the average over all traits to seek deviation from this average as a signal of diversifying selection~\parencite{rohlfs_modeling_2014, rohlfs_phylogenetic_2015}.
+The goal of this study is to determine the evolutionary regime of a quantitative trait through the articulation of the variance between and within species while setting the threshold for neutral, stabilising, and diversifying selection.
 We propose a neutrality index for a quantitative trait articulating trait and nucleotide variation within and between species.
 Importantly, our neutrality index also leverages nucleotide divergence and polymorphism in order to normalize trait variation at both scales, such that it does not require estimating population size (within-species) or speciation time (between-species).
-For population geneticists, our study can be seen as the macro-evolutionary generalization of Q$_\text{ST}$--F$_\text{ST}$ methods to account for phylogenetic relationships between species.
+For population geneticists, our study can be seen as the macro-evolutionary generalization of \QstFst methods to account for phylogenetic relationships between species.
 For phylogeneticists, our study can be seen as an alternative to the EVE model~\parencite{rohlfs_modeling_2014, rohlfs_phylogenetic_2015}, where we set a clear threshold for neutral evolution by reviewing theoretical literature and leveraging species' nucleotide polymorphism and divergence.
 % Basically, we are testing whether the variance of means is greater than the mean of variances
 
@@ -258,7 +256,7 @@ This ratio allows to remove the effect of $\Ne$ and $\MutationRate$, which are p
     & = \RateMut. \label{eq:rate-pop}
 \end{align}
 
-The additive genetic variance is also equal to the observed phenotypic variance ($\VarPhenotype$) multiplied by narrow-sense heritability ($\Heritability$; \parencite{hill_data_2008}), which leads to $\RateWhithin$ beinf a function of $\VarPhenotype$ and $\Heritability$:
+The additive genetic variance is also equal to the observed phenotypic variance ($\VarPhenotype$) multiplied by narrow-sense heritability ($\Heritability$; \parencite{hill_data_2008}), which leads to $\RateWhithin$ being a function of $\VarPhenotype$ and $\Heritability$:
 \begin{align}
     \RateWhithin & = \frac{\Heritability \Multiply \VarPhenotype }{\pi }. \label{eq:rate-pheno-pop}
 \end{align}
@@ -305,7 +303,7 @@ This ratio allows to remove the effect of $\Time$ and $\MutationRate$, which are
         $\EstNI$ is the ratio of $\EstRateBetween$ over $\EstRateWhithin$.
         Under neutral evolution, $\EstNI$ is expected to be equal to one.
         Under diversifying selection, the trait is heterogeneous between species, but homogeneous within species, leading to $\EstNI$ greater than one.
-        Under stabilizing selection, the trait is homogeneous between species, leading to $\EstNI$ smaller than one.
+        Under stabilising selection, the trait is homogeneous between species, leading to $\EstNI$ smaller than one.
         Importantly, the sequence from which nucleotide diversity and divergence are estimated should be neutrally evolving, but they are not necessarily linked to the quantitative trait under study, they allow for discarding the confounding effect on mutation rate diversity, population size and divergence time.
     }
     \label{fig:methods}
@@ -358,19 +356,29 @@ As depicted in fig.~\ref{fig:methods}, the neutrality index is estimated as:
 \end{gather}
 
 \subsubsection*{Bayesian estimate}
-[NS: the start of this paragraph is not so clear -> to discuss]
-Even though the neutrality index can be applied to any trait, we assume here that the variation between several traits is independent.
-Assuming covariation between traits is also an extension that can be implemented within the multidimensional Brownian framework~\parencite{huelsenbeck_detecting_2003, lartillot_phylogenetic_2011, lartillot_joint_2012, latrille_inferring_2021}.
-Here we generalize to $\Ntrait$ non-independent traits evolving along the phylogeny using the \textit{BayesCode} software~\parencite{latrille_inferring_2021}.
-Their variation along the phylogeny is modeled as a $\Ntrait$-dimensional Brownian process $\Brownian$ ($1 \times \Ntrait$) starting at the root and branching along the tree topology (see section~S\ref{subsec:multivariate-brownian-process}).
+
+The Bayesian framework allows to obtain the posterior distribution the neutrality index ($\EstNI$) for a given trait.
+Even though $\EstNI$ is estimated independently for each trait of interest in the maximum likelihood framework (previous section), here we generalize to $\Ntrait$ traits co-varying along the phylogeny using the \textit{BayesCode} software~\parencite{latrille_inferring_2021}.
+Trait variation along the phylogeny is modeled as a $\Ntrait$-dimensional Brownian process $\Brownian$ ($1 \times \Ntrait$) starting at the root and branching along the tree topology~\parencite{huelsenbeck_detecting_2003, lartillot_phylogenetic_2011, lartillot_joint_2012, latrille_inferring_2021}.
 The rate of change of the Brownian process is determined by the positive semi-definite and symmetric covariance matrix between traits $\CovarianceMatrix$ ($\Ntrait \times \Ntrait$).
-The off-diagonal elements of $\CovarianceMatrix$ are the covariance between traits, and the diagonal elements are the variance of each trait, thus corresponding to $\NI$.
+The off-diagonal elements of $\CovarianceMatrix$ are the covariance between traits, and the diagonal elements are the variance of each trait, thus corresponding to $\EstRateBetween$ (see section~S\ref{subsec:multivariate-brownian-process}).
 With an inverse Wishart distribution as the {prior} on the covariance matrix, the {posterior} on $\CovarianceMatrix$, conditional on $\brownian$ is also an invert Wishart distribution (see section~S\ref{subsec:sampling-the-covariance-matrix}).
 $\Brownian$ is sampled using a Metropolis-Hastings algorithm (acceptance-rejection), and the posterior distribution of $\CovarianceMatrix$ is Gibbs sampled.
 For each trait and each species, prior on heritability ($\Heritability$) for each species is set as a uniform distribution with user-defined boundaries.
 Heritability and phenotypic variance for each trait is combined with nucleotide diversity to compute $\EstRateWhithin$ for each species, and is averaged out across species (as in eq.~\ref{eq:estimated-rate-pop}).
 From $\EstRateWhithin$ and $\CovarianceMatrix$, the posterior distribution of $\EstNI$ (as in eq.~\ref{eq:estimated-NI}) is obtained for each trait.
-The posterior distribution of $\EstNI$ thus allow to test for deviation from neutrality (see fig.~\ref{fig:methods}), for example by computing $\proba [\EstNI > 1 ]$ to test for evidence of diversifying selection and $\proba [\EstNI < 1 ]$ to test for evidence of stabilizing selection.
+The posterior distribution of $\EstNI$ thus allow to test for deviation from neutrality (see fig.~\ref{fig:methods}), for example by computing $\proba [\EstNI > 1 ]$ to test for evidence of diversifying selection and $\proba [\EstNI < 1 ]$ to test for evidence of stabilising selection.
+
+\subsubsection*{Applicability to empirical data}
+
+Our method assumes that the narrow-sense heritability ($\Heritability$) of a trait is known such as to estimate additive genetic variance ($\VarGenetic$) from phenotypic variance ($\VarPhenotype$) as $\VarGenetic = \Heritability \Multiply \VarPhenotype$.
+Fortunately, if heritability is not known, the test for diversifying selection can still be performed, although it is underpowered.
+Indeed, if the additive genetic variance is substituted by phenotypic variance, it is equivalent to assuming complete heritability ($\Heritability = 1$).
+Because $\Heritability \leq 1$ by definition, we overestimate the within-species variation and thus underestimate $\EstNI$.
+It is however possible to test for diversifying selection because testing for $\EstNI > 1$ while using phenotypic variance instead of additive genetic variance means that knowing the additive genetic variance would have only increased the evidence for diversifying selection.
+Similarly, using the broad-sense heritability ($H^2$) instead of narrow-sense heritability ($\Heritability$) results in under-estimated $\EstNI$ since $\Heritability \leq H^2$.
+Contrarily, the test for stabilising selection is invalid if $\EstNI$ is under-estimated.
+Several assumptions made by our test might not hold on empirical data and their consequences on the neutrality index and the test that can be performed are shown in Table~\ref{table:assumptions}.
 
 \subsection*{Simulation}\label{subsec:simulations}
 
@@ -383,12 +391,13 @@ The posterior distribution of $\EstNI$ thus allow to test for deviation from neu
 % nbr_sites_var = 27.577478571428568
 % u = 1.3788739285714283e-05
 % nbr_generations = 13336.114128321291
-We tested the xxx [NS: explain a bit what we test here -> NI]
-We simulated phenotypic values as the sum of genotypic value and an environmental effect.
+We tested the performance of our neutrality index ($\NI$) to detect selection on a quantitative trait using simulations.
+We performed simulations under different selective regimes (neutral, stabilising, diversifying), different demographic histories (constant or fluctuating population size) and different evolution of mutation rate (constant or fluctuating).
+Simulation are individual-based and follows a Wright-Fisher model with mutation, selection and drift for a diploid population including speciation along a predefined ultrametric phylogenetic tree (Fig.~\ref{fig:simulator}A\&B).
+Each individual phenotypic value is the sum of genotypic value and an environmental effect.
 The environmental effect was normally distributed with variance $\VarEnv$.
 We assumed that the genotypic value was encoded by $\NbrLoci=5,000$ loci, with each locus contributing an additive effect that was normally distributed with standard deviation $a=1$ (Fig.~\ref{fig:simulator}A and section~S\ref{subsec:genotype-phenotype-map} for theoretical formulation).
 We assumed a trait with a narrow-sense heritability of $\Heritability=0.2$ and computed the theoretical $\VarEnv$ accordingly (see section~S\ref{subsec:genotype-phenotype-map}).
-We followed a Wright-Fisher model with mutation, selection and drift to formalize the evolutionary dynamics of the system (Fig.~\ref{fig:simulator}A\&B).
 Assuming a diploid panmictic population of size $\Ne=50$ at the root of the tree, and with non-overlapping generations, we simulated explicitly each generation along an ultrametric phylogenetic tree.
 For each offspring, the number of mutations was drawn from a Poisson distribution with mean $2 \Multiply \MutationRate \Multiply \NbrLoci $, with mutation rate per generation $\MutationRate$.
 From the empirical mammalian dataset (see next section), we computed an average nucleotide divergence from root to leaves of $0.18$ and average genetic diversity of $0.00276$.
@@ -396,8 +405,8 @@ We scaled parameters to fit plausible values for mammals.
 We used a mutation rate of $\MutationRate=0.00276 / 4 \Ne = 1.38 \times 10^{-5}$ per generation per locus and a total of $\Time = 0.18 / 1.38 \times 10^{-5} = 13,500$ generations from root to leaves, and the number of generations along each branch was proportional to the branch length.
 
 The changes in log-$\MutationRate$ and log-$\Ne$ along the lineages were both modeled by a geometric Brownian process ($\brownian \left(0, \sigma_{\MutationRate}=0.0086\right)$ and $\brownian \left(0, \sigma_{\Ne}=0.0086\right)$, meaning standard deviation of $0.0086 \Multiply \sqrt {13,500} = 1.0$ in log-space from root to leaves.
-Additionally, the instant value of log-$\Ne$ was modeled as a sum of a geometric Brownian process and an Ornstein-Uhlenbeck process ($\text{OU} \left(0, \sigma_{\Ne}=0.1, \theta_{\Ne}=0.9\right)$).
-The geometric Brownian motion accounted for long-term fluctuations, while the Ornstein-Uhlenbeck introduced short-term fluctuations. [NS: not clear how you combined both here]
+Additionally, the instant value of log-$\Ne$ was modeled as a independent sum of a geometric Brownian process and an Ornstein-Uhlenbeck process ($\text{OU} \left(0, \sigma_{\Ne}=0.1, \theta_{\Ne}=0.9\right)$).
+The geometric Brownian motion accounted for long-term fluctuations (low rate of changes $\sigma_{\Ne}$ but unbounded), while the Ornstein-Uhlenbeck introduced short-term fluctuations (high rate of changes $\sigma_{\Ne}$ but bounded and mean-reverting).
 The simulation started from an initial sequence at equilibrium at the root of the tree and, at each node, the process was split until it finally reached the leaves of the tree.
 From a speciation process perspective, this is equivalent to an allopatric speciation over one generation.
 
@@ -447,18 +456,12 @@ However, the primate nucleotide divergence was not obtained on a set of neutral 
 \subsection*{Neutrality index}
 
 For a neutral trait, the genetic architecture, meaning the number of loci encoding the trait and the average effect of a mutation on the trait, is formally related to both within and between-species variation of the trait.
-At the species level, the additive genetic variance of the neutral trait ($\VarGenetic$) is normalized by nucleotide diversity of any neutral genomic region ($\pi$) to obtain $\RateWhithin$.
-At the scale of between-species variation, assuming a neutral trait evolving along the phylogeny, the mean trait value changes as a Brownian process.
-This variance in mean trait value can also be normalized by the nucleotide divergence of any neutral genomic region ($d$) to obtain $\RateBetween$. [NS: -> this is repeating the mat/met, is it really needed??]
 We defined the neutrality index as $\NI = \RateBetween/\RateWhithin$, which equals $1$ for a neutral trait (see methods), suggesting that traits for which this relationship is not verified are putatively under selection.
-Under stabilizing selection, the variation between species is depleted because the mean trait value is maintained similar between different species, which leads to $\NI < 1$.
+Under stabilising selection, the variation between species is depleted because the mean trait value is maintained similar between different species, which leads to $\NI < 1$.
 In contrast, under diversifying selection, the variation between species is inflated because species will have potentially different trait values~\parencite{hansen_stabilizing_1997}, which leads to $\NI > 1$.
-
-[NS: this is not a result but an assumption that we have. We also already say it above. I would move it to discussion if needed]
-Importantly, the genetic sequences from which $\pi$ and $d$ are estimated should be neutrally evolving, but they are not necessarily linked to the quantitative trait under study, they allow to normalize for diversity driven by mutation rate, population size and divergence time.
-The relationship between trait variation between and within species can be used as a method to detect whether traits are evolving under a neutral model of evolution.
-Altogether, our neutrality index for a quantitative trait leverages the data for any number of species, and takes advantage of the signal over the whole phylogeny, while at the same time taking into account phylogenetic inertia and addressing the non-independence between-species (see fig.~\ref{fig:methods}).
-This statistic can be obtained as a maximum likelihood estimate, from eq.~\ref{eq:estimated-rate-pop} and~\ref{eq:estimated-rate-phy}.
+Our neutrality index for a quantitative trait leverages the data for any number of species, and takes advantage of the signal over the whole phylogeny, while at the same time taking into account phylogenetic inertia and addressing the non-independence between-species (see fig.~\ref{fig:methods}).
+This statistic can be obtained as a maximum likelihood estimate ($\EstNI$), from eq.~\ref{eq:estimated-rate-pop} and~\ref{eq:estimated-rate-phy}.
+We devised a Bayesian estimate to obtain the posterior distribution of the neutrality index, and test for diversifying selection as $\proba [\EstNI > 1]$, and stabilising selection as $\proba [\EstNI < 1]$.
 
 \begin{table*}[t!]
     \centering
@@ -478,33 +481,18 @@ This statistic can be obtained as a maximum likelihood estimate, from eq.~\ref{e
         \end{tabular}
     \end{adjustbox}
     \caption{Assumptions breaks and their consequences on the estimation of within-species variation ($\EstRateWhithin$), between-species variation ($\EstRateBetween$), and on the neutrality index $\NI = \EstRateBetween/\EstRateWhithin$.
-    The two last columns indicate whether the test for diversifying selection ($\NI > 1$) and for stabilizing selection $\NI < 1$ are conservative or invalid due to violated assumptions.
+    The two last columns indicate whether the test for diversifying selection ($\NI > 1$) and for stabilising selection $\NI < 1$ are conservative or invalid due to violated assumptions.
     }
     \label{table:assumptions}
 \end{table*}
 
-\subsection*{Test of selection}
-
-[NS: here again, these are not results, but a discussion]
-We devised a Bayesian estimate to obtain the posterior distribution of the neutrality index, and test for diversifying selection as $\proba [\EstNI > 1]$, and stabilizing selection as $\proba [\EstNI < 1]$.
-
-Our method assumes that the narrow-sense heritability ($\Heritability$) of a trait is known such as to estimate additive genetic variance ($\VarGenetic$) from phenotypic variance ($\VarPhenotype$) as $\VarGenetic = \Heritability \Multiply \VarPhenotype$.
-Fortunately, if heritability is not known, the test for diversifying selection can still be performed, although it is underpowered.
-Indeed, if the additive genetic variance is substituted by phenotypic variance, it is equivalent to assuming complete heritability ($\Heritability = 1$).
-Because $\Heritability \leq 1$ by definition, we overestimate the within-species variation and thus underestimate $\EstNI$.
-It is however possible to test for diversifying selection because testing for $\EstNI > 1$ while using phenotypic variance instead of additive genetic variance means that knowing the additive genetic variance would have only increased the evidence for diversifying selection.
-Similarly, using the broad-sense heritability ($H^2$) instead of narrow-sense heritability ($\Heritability$) results in under-estimated $\EstNI$ since $\Heritability \leq H^2$.
-Contrarily, the test for stabilizing selection is invalid if $\EstNI$ is under-estimated.
-Several assumptions made by our test might not hold on empirical data and their consequences on the neutrality index and the test that can be performed are shown in Table~\ref{table:assumptions}.
-
 \subsection*{Results against simulations}\label{subsec:results-against-simulations}
 
-The inference framework was first tested on independently simulated datasets.
-With the aim of applying the inference method to empirical datasets, the simulation parameters were chosen so as to match an empirically relevant mammalian empirical regime (see Materials and Methods). [NS: I would remove this sentence]
-Under constant population size ($\Ne$) and constant mutation rate ($\MutationRate$) across the phylogenetic tree (fig.~\ref{fig:results-simulations}, top row), we found no false negative for simulations of stabilizing ($\proba [\EstNI < 1] > 0.975$; blue in fig.~\ref{fig:results-simulations}) or diversifying ($\proba [\EstNI > 1] > 0.975$; red in fig.~\ref{fig:results-simulations}) selection.
-For simulations under neutral evolution, 77\% of those were correctly identified ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$; yellow in fig.~\ref{fig:results-simulations}), while 21\% and 2\% were wrongly detected as stabilizing or diversifying selection, respectively.
-Once we introduced fluctuating $\Ne$ and $\MutationRate$ (see fig.~\ref{fig:results-simulations}, bottom row), our ability to identify simulations under either diversifying or stabilizing selection remained the same with all cases detected correctly.
-For simulations under neutral evolution, 51\% of the simulations were correctly detected ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$), while 49\% were detected as stabilizing selection ($\proba [\EstNI < 1] > 0.975$).
+The inference framework was first tested on independently simulated datasets matching an empirically relevant mammalian empirical regime (see Materials and Methods).
+Under constant population size ($\Ne$) and constant mutation rate ($\MutationRate$) across the phylogenetic tree (fig.~\ref{fig:results-simulations}, top row), we found no false negative for simulations of stabilising ($\proba [\EstNI < 1] > 0.975$; blue in fig.~\ref{fig:results-simulations}) or diversifying ($\proba [\EstNI > 1] > 0.975$; red in fig.~\ref{fig:results-simulations}) selection.
+For simulations under neutral evolution, 77\% of those were correctly identified ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$; yellow in fig.~\ref{fig:results-simulations}), while 21\% and 2\% were wrongly detected as stabilising or diversifying selection, respectively.
+Once we introduced fluctuating $\Ne$ and $\MutationRate$ (see fig.~\ref{fig:results-simulations}, bottom row), our ability to identify simulations under either diversifying or stabilising selection remained the same with all cases detected correctly.
+For simulations under neutral evolution, 51\% of the simulations were correctly detected ($0.025 \leq \proba [\EstNI > 1] \leq 0.975$), while 49\% were detected as stabilising selection ($\proba [\EstNI < 1] > 0.975$).
 
 \begin{figure*}[!ht]
     \centering
@@ -522,7 +510,7 @@ For simulations under neutral evolution, 51\% of the simulations were correctly 
     \end{minipage}
     \caption{
         $10,000$ replicate simulations of trait evolution along a phylogeny under different selection regimes.
-        Traits simulated under stabilizing selection (blue), under a neutral evolution (yellow), and under a moving optimum (red).
+        Traits simulated under stabilising selection (blue), under a neutral evolution (yellow), and under a moving optimum (red).
         Histogram of estimated the ratio of between-species trait variation ($\EstRateBetween$) over within-species trait variation $\EstRateWhithin$, as $\EstNI = \EstRateBetween / \EstRateWhithin$ estimated from each simulated data (left) and the histogram of probabilities that the estimated $\EstNI$ is greater than $1$ (right).
         Effective population size ($\Ne$) and mutation rate ($\MutationRate$) are either constant (top row), or fluctuating as a Brownian process along the phylogeny (bottom row).
     }
@@ -572,13 +560,13 @@ For simulations under neutral evolution, 51\% of the simulations were correctly 
 For mammalian body and brain mass, we obtained male (\Male) and female (\Female) trait variation.
 Combined with nucleotide diversity and divergence, we estimated $\EstNI$ and posterior probabilities of diversifying selection under different assumptions for trait heritability as shown in table~\ref{table:empirical}.
 Assuming complete heritability, brain mass was found to be under diversifying selection with posterior probabilities of $0.0$ for both males and females.
-If we assumed that heritability ($\Heritability$) of body mass was uniformly distributed between 20\% and 40\%, posterior probabilities of diversifying selection became $0.635$ for males and $0.324$ for females.
+If we assumed that heritability ($\Heritability$) of body mass was uniformly distributed between 20\% and 40\%~\parencite{hu_bringing_2022}, posterior probabilities of diversifying selection became $0.635$ for males and $0.324$ for females.
 Mammalian brain mass was found to be under diversifying selection with posterior probabilities of $0.877$ for males and $0.972$ for females when complete heritability was assumed.
 Assuming a uniform distribution between 20\% and 40\% for heritability led to posterior probabilities of diversifying selection of $1.0$ for both males and females.
 
 We also analyzed a similar dataset for body mass focussing this time only at Primates (see table~\ref{table:empirical}).
 For primate body mass, we found posterior probabilities of diversifying selection of $1.0$ for males and $0.914$ for females when assuming a uniform distribution for the heritability of body mass between 20\% and 40\%,
-Fixing the heritabity of body mass to $1.0$ did not change the posterior probability for males, but increased the one for female to $1.0$.
+Assuming complete heritability of body mass did not change the posterior probability for males, but increased the one for female to $1.0$.
 Evidence for diversifying selection on body mass was therefore more pronounced in Primates than in Mammals.
 However, the genetic markers used to normalize trait variance with divergence were not necessarily neutral, which could create spurious false positives by artificially inflating $\EstNI$ (see table~\ref{table:assumptions} and methods).
 
@@ -590,56 +578,65 @@ Our neutrality index for a trait, $\NI$, is the ratio of the normalized between-
 At the phylogenetic scale, trait variation between species is normalized by sequence divergence obtained from a neutral set of markers.
 Similarly, trait variation within species is normalized by sequence polymorphism obtained from a neutral set of markers.
 Estimated $\EstNI$ can be compared against the null hypothesis of neutrality by testing for deviation from the value of $1.0$.
-In other words, our statistical test seeks to find traits with extremal values in comparison to a pool of traits.
-Instead, our procedure can be applied to a single trait [NS: this is not clear as the previous sentence seems to contradict this one], estimating the neutrality index and giving a statistical test for departure from the null model of neutral evolution.
 Technically, the neutrality index is estimated either as a maximum likelihood point estimate, or as a mean posterior estimate from a Bayesian implementation (see section~S\ref{sec:implementation}) also giving access to the posterior credible interval allowing to test for a departure from a neutrally evolving trait (e.g. $ \proba [ \EstNI > 1 ]$).
-We tested our statistical procedure against simulated data and showed that for simulations under diversifying selection (test of $\EstNI > 1$) or under stabilizing selection (test of $\EstNI < 1$) our test is able to correctly detect those regimes of selection.
-However, for simulations of a neutral trait, our test detects frequently a spurious signal of stabilizing selection ($\EstNI < 1$).
-Thus, we argue that our test should be used to detect diversifying selection, but has low accuracy to detect stabilizing selection due to many false positives.
-Importantly, our neutrality index leverages nucleotide divergence and polymorphism, as well as the heritability of traits ($\Heritability$).
+We tested our statistical procedure against simulated data and showed that for simulations under diversifying selection (test of $\EstNI > 1$) or under stabilising selection (test of $\EstNI < 1$) our test is able to correctly detect those regimes of selection.
+However, for simulations of a neutral trait, our test detects frequently a spurious signal of stabilising selection ($\EstNI < 1$).
+Thus, we argue that our test should be used to detect diversifying selection, but has low accuracy to detect stabilising selection due to many false positives.
+
+Based on these results, we argue that our method is a significant improvement over current methods to detect selection acting on a trait at the phylogenetic scale.
+Current methods relying on evolution of the mean trait value between species also tend to statistically prefer a model of stabilising selection over a Brownian process when the trait is neutral~\parencite{silvestro_measurement_2015, cooper_cautionary_2016, price_detecting_2022}.
+Thus our method does not provide improvement to detect stabilising selection at the phylogenetic scale.
+However, to detect diversifying selection, current methods modelling mean trait value are limited by the theory behind~\parencite{harmon_phylogenetic_2018}
+Namely that under diversifying selection, mean trait value will not deviate from a Brownian process, and thus can not be distinguished from neutral evolution~\parencite{hansen_translating_1996}.
+For example, test for neutrality concluded that the expression level of the majority of genes are under a neutral regime~\parencite{catalan_drift_2019}.
+Our diversity index allows to discriminate the alternative model of diversifying selection from the neutral case, inviting us to revisit these studies.
+Leveraging the ratio of between-species over within-species variations, methods have compared this ratio across a pool of traits~\parencite{rohlfs_modeling_2014, rohlfs_phylogenetic_2015}.
+This strategy allows to identify outlier traits putatively under diversifying selection, but does not allow to test for selection on a single trait and requires independent confirmation~\parencite{rohlfs_phylogenetic_2015, gillard_comparative_2021}.
+Instead, our procedure can be applied to a single trait, estimating the neutrality index and giving a statistical test for departure from the null model of neutral evolution for a single test.
+Again, our diversity index can thus allow us to revisit these studies, assuming we have access to genomic datasets to estimate nucleotide divergence and polymorphism.
+
 We argue that the main novelty of this study is being able to use nucleotide divergence and polymorphism to normalize trait variation between and within species.
-By doing so, we also show using simulated data that our test is not sensitive to the assumption that population sizes ($\Ne$) and mutation rates ($\MutationRate$) are constant across the phylogeny, while not requiring to estimate them nor to estimate divergence time~\parencite{litsios_effects_2012}.
-Instead, the normalization by nucleotide divergence and polymorphism automatically absorbs these changes. [NS: we need to develop these arguments and show that the normalization works because it is similar to the dN/dS tests, etc.... I would thus move the paragraph below on this here. Otherwise, this paragraph is a bit hollow]
-
-% Pitfalls of the method
-In the context of detecting diversifying selection, we argue that the main drawback of our method is that the narrow-sense heritability ($\Heritability$) of a trait is required if one has access only to the phenotypic variance and not the additive genetic variance. [NS: a bit circular. If we have V_G, we know h^2 as V_P can be measured]
-If phenotypic variance is used instead of additive genetic variance to estimate $\EstNI$, meaning that we assumed complete heritability, the neutrality index $\EstNI$ is ultimately under-estimated.
-Similarly, using broad-sense heritability instead of narrow-sense heritability results in under-estimated $\EstNI$.
-In such context, the test of stabilizing selection ($\EstNI < 1]$) is statistically invalid.
-However, the test of diversifying selection ($\EstNI > 1$) is underpowered although not invalided, meaning that absence of evidence would not be evidence of absence.
-Because our test is also based on several assumptions that might not hold on empirical data, we also provide a table containing the main assumptions and their consequences on the neutrality index and the test that can be performed (see table~\ref{table:assumptions}). [NS: I would discuss the elements of this table and link that with some literature if possible.]
-As an example, even though we assumed complete heritability for brain mass, we can assert that brain mass is evolving under diversifying selection in mammals since $\EstNI > 1$.
-However, at the primate scale, the evidence for $\EstNI > 1$ does not necessarily imply that the brain mass is evolving under diversifying selection, since the markers used for nucleotide divergence are not neutral which can lead to a spurious $\EstNI > 1$ (see table~\ref{table:assumptions}).
-
-% What can and should be improved
-The development of our neutrality index is also based on several assumptions that could be relaxed in future studies.
-First, we cannot predict the behaviour of our test in the context of population structures, gene flow and introgression.
-These factors should be thoroughly investigated using simulations.
-Second, loci are assumed to contribute additively to the phenotype~\parencite{hill_data_2008, crow_epistasis_2010}, disregarding effects of dominance and epistasis. [NS: here a few words on the importance of dominance and epistasis in empirical quant genet studies would be interesting. And what about long-term effects at the phylogenetic level?]
-Third, the genetic architecture of the trait is assumed to be constant across the phylogeny, which might actually be variable among individuals and species. [NS: any literature on this (or is it the following ones)? I'm not aware of that right now, but we should have a look]
-Such assumption can theoretically be relaxed and changes in genetic architecture along the phylogeny could jointly be estimated ~\parencite{arnold_understanding_2008, hohenlohe_mipod_2008, kostikova_bridging_2016, gaboriau_multiplatform_2020}.
-Also, our Bayesian estimation could integrate uncertainty coming from the estimation of genetic variation, using sequences as input instead of estimated values of nucleotide diversity and divergence.
+In the context of within species variation but across several populations, \QstFst test developed from trait and sequence allow to test for selection of a trait~\parencite{martin_multivariate_2008, leinonen_qst_2013}.
+Similarly, in our test, the genetic sequences from which nucleotide divergence and polymorphism are estimated should be neutrally evolving, but they are not necessarily linked to the quantitative trait under study.
+Nucleotide variation allow to normalize for diversity driven by confounding factors such as population sizes ($\Ne$), mutation rates ($\MutationRate$) and generation time~\parencite{hansen_translating_1996, harmon_phylogenetic_2018}.
+Thus our test avoids to estimate them and also avoids to estimate divergence time which is otherwise necessary~\parencite{walsh_evolution_2018}.
+But importantly, by normalising with sequence variation, we also show using simulated data that our test is not sensitive to the assumption that $\Ne$, $\MutationRate$ and generation time are constant across the phylogeny, an unmet assumption empirically~\parencite{bergeron_evolution_2023, wilder_contribution_2023}.
+Indeed, under the neutral case of evolution, changes in $\Ne$, $\MutationRate$ and generation time impacts similarly trait and sequence variation.
+Thus the normalisation by nucleotide divergence and polymorphism automatically absorbs long-term and short-term changes in $\Ne$, $\MutationRate$ and generation time which cancels out in the ratio of trait variation $\EstNI$.
 
 % How is our test related to other tests of selection
 Even though our test is developed for a quantitative trait, analogies with other tests of selection developed for molecular sequences also provide insight into its behavior.
 First, we acknowledge that our test took inspiration from the \textcite{mcdonald_adaptative_1991} test devised for protein-coding DNA sequences, where synonymous mutations are used to determine the neutral expectation, and the inflation of divergence is compared to polymorphism within species.
 Second, because $\NI$ is compared to 1, our test ultimately bears analogy to the codon-based test of selection, where the ratio of non-synonymous to synonymous substitutions ($\dnds$) is compared to 1~\parencite{goldman_codonbased_1994, muse_likelihood_1994}.
-As $\dnds < 1$ is interpreted as purifying selection acting on the protein, $\NI < 1$ is interpreted as stabilizing selection acting on the trait.
+As $\dnds < 1$ is interpreted as purifying selection acting on the protein, $\NI < 1$ is interpreted as stabilising selection acting on the trait.
 Similarly, the interpretation of adaptation for $\dnds > 1$ is analogous to diversifying selection for $\NI > 1$.
 With this analogy in mind, we can leverage the vast bibliography discussing and interpreting results of these tests and their pitfalls~\parencite{nielsen_molecular_2005, anisimova_investigating_2009, jensen_importance_2019}.
-First, not rejecting the neutral null model of $\NI = 1$ does not necessarily imply that the trait is effectively neutral, since diversifying and stabilizing selection could compensate each other resulting in $\NI = 1$, analogously to $\dnds=1$ under a mix of adaptation and purifying selection~\parencite{nielsen_molecular_2005}.
-Second, empirical evidence for $\NI < 1$ does not rule out diversifying selection, but rather that this diversifying selection is not strong enough to overcome the stabilizing selection, similarly to strong purifying selection resulting $\dnds < 1$ even though those genes and sites are under adaptation~\parencite{latrille_genes_2023}.
-By explicitly modeling stabilizing selection as a moving optimum, it would theoretically allow to tease out the effect of diversifying and stabilizing selection in the context of quantitative traits to obtain a statistically more powerful test.
+First, not rejecting the neutral null model of $\NI = 1$ does not necessarily imply that the trait is effectively neutral, since diversifying and stabilising selection could compensate each other resulting in $\NI = 1$, analogously to $\dnds=1$ under a mix of adaptation and purifying selection~\parencite{nielsen_molecular_2005}.
+Second, empirical evidence for $\NI < 1$ does not rule out diversifying selection, but rather that this diversifying selection is not strong enough to overcome the stabilising selection, similarly to strong purifying selection resulting $\dnds < 1$ even though those genes and sites are under adaptation~\parencite{latrille_genes_2023}.
+By explicitly modeling stabilising selection as a moving optimum, it would theoretically allow to tease out the effect of diversifying and stabilising selection in the context of quantitative traits to obtain a statistically more powerful test.
+
+% Pitfalls of the method
+In the context of detecting diversifying selection, we argue that the main drawback of our method is that the additive genetic variance of the trait is required instead of the phenotypic variance.
+If phenotypic variance is used instead of additive genetic variance to estimate $\EstNI$, meaning that we assumed complete heritability, the neutrality index $\EstNI$ is ultimately under-estimated.
+Similarly, using broad-sense heritability instead of narrow-sense heritability results in under-estimated $\EstNI$.
+In such context, the test of stabilising selection ($\EstNI < 1]$) is statistically invalid.
+However, the test of diversifying selection ($\EstNI > 1$) is underpowered although not invalided, meaning that absence of evidence would not be evidence of absence.
+As an example, even though we assumed complete heritability for brain mass, we uncovered diversifying selection in mammals since $\EstNI > 1$.
+However, at the primate scale, the evidence for $\EstNI > 1$ does not necessarily imply that the brain mass is evolving under diversifying selection since the markers used for nucleotide divergence are not neutral, which can lead to a spurious $\EstNI > 1$ (see table~\ref{table:assumptions}).
+
+% What can and should be improved
+The development of our neutrality index is also based on several assumptions that could be relaxed in future studies.
+First, we cannot predict the behaviour of our test in the context of population structures, gene flow and introgression.
+These factors should be thoroughly investigated using simulations.
+Second, loci are assumed to contribute additively to the phenotype.
+Although the effects of dominance and epistasis is typically weak compared the additive effects on the phenotype, their influence shall be assessed~\parencite{hill_data_2008, crow_epistasis_2010}.
+Third, the genetic architecture of the trait is assumed to be constant across the phylogeny, it might actually be variable among individuals and species~\parencite{tung_genetic_2015, huber_conservatism_2015}.
+Such assumption can theoretically be relaxed and changes in genetic architecture along the phylogeny could jointly be estimated~\parencite{arnold_understanding_2008, hohenlohe_mipod_2008, kostikova_bridging_2016, gaboriau_multiplatform_2020}.
+Also, our Bayesian estimation could integrate uncertainty coming from the estimation of genetic variation, using sequences as input instead of estimated values of nucleotide diversity and divergence.
 
 % What can our test bring to the field
-[NS: should we not start with this idea?]
-Finally, from an empirical point of view, our test is also related to other methods that have been developed to test for selection on quantitative traits.
-At the phylogenetic scale, tests for neutrality of a quantitative trait are seeking deviation from a Brownian process~\parencite{catalan_drift_2019}, or from an Ornstein–Uhlenbeck process accounting for within-species variation~\parencite{rohlfs_phylogenetic_2015}.
-The analysis on the transcriptome across different individuals and species concluded that the expression level of 81\% of genes are under a neutral regime and 16\% under directional selection~\parencite{catalan_drift_2019}.
-However, the alternative model of a moving optimum was not implemented, and thus cannot be ruled out by this analysis.
-With our statistical test, we can set a threshold for neutrality and thus are able to make the difference between a trait evolving neutrally as a Brownian process or a trait under selection where the optimal is moving as a Brownian.
-Our diversity index can thus allow us to revisit these studies, assuming we have access to genomic datasets to estimate nucleotide divergence ($d$) and polymorphism ($\pi$).
-Even though our method requires integrating genomic and trait variation, we also showed that our method can be applied to the empirical dataset with the illustrative example of mammals' brain and body mass.
+From an empirical point of view, even though our method requires integrating genomic and trait variation, we also showed that our method can be applied to the empirical dataset with the illustrative example of mammals' brain and body mass.
+Because our test is also based on several assumptions that might not hold on empirical data, we also provide a table containing the main assumptions and their consequences on the neutrality index and the test that can be performed (see table~\ref{table:assumptions}).
 Altogether, our study provides a statistical framework to test for diversifying selection acting on a quantitative trait while integrating the trove of genomic data available both within and between species, and we argue that it is a promising tool to investigate the evolution of quantitative traits.
 
 %TC:ignore
@@ -715,11 +712,6 @@ The independent contrast $\contrast_{j}$ defined as change in trait along the br
     \label{eq:DistribBrownian}
     \contrast_{j} = \frac{\Brownian_{\mathcal{R}(j)} - \Brownian_{\mathcal{A}(j)} }{\sqrt {d_{j}}} \sim \mathcal{N}\left(\VecZero, \CovarianceMatrix \right).
 \end{equation}
-The {prior} on the covariance matrix as an inverse Wishart distribution, with $\Ntrait + 1$ degrees of freedom:
-\begin{equation}
-    \label{eq:Distribcovariance}
-    \CovarianceMatrix \sim \text{Wishart}^{-1} (\Identitymatrix, \Ntrait + 1).
-\end{equation}
 
 \subsection{Sampling the covariance matrix}\label{subsec:sampling-the-covariance-matrix}
 From the independent contrast at each branch of the tree ($\contrast_{j}$), we can define the $\Ntrait \times \Ntrait$ scatter matrix, $\Scattermatrix$, as:
@@ -728,6 +720,11 @@ From the independent contrast at each branch of the tree ($\contrast_{j}$), we c
 \end{equation}
 where $\Nbranch$ is the number of branches in the tree and $\NbrTaxa$ the number of taxa.
 
+The {prior} on the covariance matrix is an inverse Wishart distribution, with $\Ntrait + 1$ degrees of freedom:
+\begin{equation}
+    \label{eq:Distribcovariance}
+    \CovarianceMatrix \sim \text{Wishart}^{-1} (\Identitymatrix, \Ntrait + 1).
+\end{equation}
 By Bayes theorem, the {posterior} on $\CovarianceMatrix$, conditional on a particular realization of $\Brownian$ (and thus of $\contrast$) is an invert Wishart distribution, of parameter $\Identitymatrix + \Scattermatrix$ and with $\WishartPostDf$ degrees of freedom.
 \begin{equation}
     \CovarianceMatrix \sim \text{Wishart}^{-1}\left( \Identitymatrix + \Scattermatrix, \WishartPostDf\right)\label{eq:bayes-posterior}
