@@ -145,6 +145,7 @@
 \linenumbers
 \frenchspacing
 
+\newsavebox{\Maketitle}
 \title{Detecting diversifying selection for a trait from within and between-species genotypes and phenotypes}
 \rhead{\scshape Trait selection from within and between-species variation}
 
@@ -156,10 +157,14 @@ $^{1}$Department of Computational Biology, Université de Lausanne, Lausanne, Sw
 $^{2}$Laboratoire de Biométrie et Biologie Evolutive, UMR5558, Université Lyon 1, Villeurbanne, France \\
 \texttt{\href{mailto:thibault.latrille@ens-lyon.org}{thibault.latrille@ens-lyon.org}} \\
 }
-\author{~}
+
 \begin{document}
 
+\sbox{\Maketitle}{%
+\begin{minipage}{\textwidth}
 \maketitle
+\end{minipage}}
+\noindent\usebox{\Maketitle}
 
 % Abstract (≤ 250 words)
 %TC:endignore
@@ -660,10 +665,23 @@ For example, at the primate scale, the evidence for $\EstNI > 1$ does not necess
 In conclusion, our study provided a statistical framework to test for diversifying selection acting on a quantitative trait while integrating the trove of genomic data available both within and between species, and we believe that our new approach is a promising tool to investigate the evolution of quantitative traits.
 
 
+\subsection*{Acknowledgements}
+ We gratefully acknowledge the help of Nicolas Lartillot, Philippe Veber, Isabela Jeronimo do Ó, Anna Marcionetti, Julien Clavel, and Daniele Silvestro for their insightful discussions and Julien Joseph for his advice and reviews concerning this manuscript.
+
+\subsection*{Competing interests:}
+The authors declare no conflicts of interest.
+
+\subsection*{Data and materials availability:}
+The data that support the findings of this study are openly available in GitHub at \href{https://github.com/ThibaultLatrille/MicMac}{github.com/ThibaultLatrille/MicMac}. Snakemake pipeline, analysis scripts and documentation are available in the repository to replicate the study.
+
+
+
 %TC:ignore
 \printbibliography
 
 \newpage
+
+\noindent\usebox{\Maketitle}
 
 \part*{Supplementary materials}
 \renewcommand{\thetable}{S\arabic{table}}
@@ -763,7 +781,7 @@ And from these multivariate samples, $\CovarianceMatrix$ is Gibbs sampled as:
 \newpage
 \section{Bayesian and Maximum-likelihood implementation}\label{sec:implementation}
 
-Implementation is included within the \textit{BayesCode} software, available at \censor{\url{https://github.com/ThibaultLatrille/bayescode}}.
+Implementation is included within the \textit{BayesCode} software, available at \url{https://github.com/ThibaultLatrille/bayescode}.
 
 \subsection{Data formatting}\label{subsec:data-formatting}
 
