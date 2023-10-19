@@ -1,13 +1,70 @@
-import os
-import argparse
 import numpy as np
-import pandas as pd
 from natsort import natsorted
 from glob import glob
-from collections import defaultdict
 from os.path import basename, isdir
-from neutrality_index import brownian_fitting, open_tree
-from libraries import hist_plot, scatter_plot
+from neutrality_index import *
+from libraries import *
+from scipy.optimize import curve_fit
+from sklearn.metrics import r2_score
+
+
+def compute_distance(tree: Tree, trait: str, dico_nuc_d: dict, dico_pheno_d: dict) -> (float, float):
+    leaves = tree.get_leaves()
+    n = len(leaves)
+    x = [float(getattr(leaf, trait)) for i, leaf in enumerate(leaves)]
+
+    for i, j in itertools.product(range(n), range(n)):
+        if i >= j:
+            continue
+        leaf_i, leaf_j = leaves[i].name, leaves[j].name
+        d = tree.get_distance(leaves[i], leaves[j]) * 4
+        dico_nuc_d[(leaf_i, leaf_j)].append(d)
+        dico_pheno_d[(leaf_i, leaf_j)].append(np.var([x[i], x[j]]))
+
+
+def saturation_fit(x, a, b):
+    return a * (x / (b + x))
+
+
+def linear_fit(x, a, b):
+    return a * x + b
+
+
+# define function to calculate r-squared
+def polyfit(x_array, y_array, func, label, ax, color):
+    popt, pcov = curve_fit(func, x_array, y_array, bounds=(0, np.inf))
+    y_pred = func(x_array, *popt)
+    r2 = r2_score(y_array, y_pred)
+    if label == "saturation":
+        reg = f"y = {popt[0]:.2g}x / ({popt[1]:.2g} + x) ($r^2$={r2:.2g})"
+    else:
+        reg = f"y = {popt[0]:.2g}x + {popt[1]:.2g} ($r^2$={r2:.2g})"
+    x_line = np.linspace(np.min(x_array), np.max(x_array), 100)
+    ax.plot(x_line, func(x_line, *popt), linestyle="--", label=reg, color=color)
+
+
+def distance_plot(x_dico, y_dico, output):
+    x_mean = {k: np.mean(v) for k, v in x_dico.items()}
+    y_mean = {k: np.mean(v) for k, v in y_dico.items()}
+    y_lower = {k: np.percentile(v, 10) for k, v in y_dico.items()}
+    y_upper = {k: np.percentile(v, 90) for k, v in y_dico.items()}
+    fig = plt.figure(figsize=(1280 / my_dpi, 640 / my_dpi), dpi=my_dpi)
+    ax = fig.add_subplot(1, 1, 1)
+    x_array = np.array(list(x_mean.values()))
+    y_array = np.array(list(y_mean.values()))
+    polyfit(x_array, y_array, saturation_fit, "saturation", ax, "blue")
+    polyfit(x_array, y_array, linear_fit, "linear", ax, "red")
+    ax.scatter(x_array, y_array, s=12, color="black")
+    #for k in x_mean.keys():
+    #    ax.errorbar(x_mean[k], y_mean[k], color="black", alpha=0.05, linewidth=0.5,
+    #                yerr=[[y_mean[k] - y_lower[k]], [y_upper[k] - y_mean[k]]])
+    ax.set_xlabel('Nucleotide distance', weight='bold')
+    ax.set_ylabel('Phenotypic distance', weight='bold')
+    ax.legend(fontsize=fontsize_legend)
+    plt.savefig(output, format="pdf")
+    plt.savefig(replace_last(output, ".pdf", ".png"), format="png")
+    plt.close('all')
+    print(output)
 
 
 def main(folder, neutral_tree_path, output):
@@ -24,6 +81,8 @@ def main(folder, neutral_tree_path, output):
     neutral_tree = open_tree(neutral_tree_path)
     var_dict = defaultdict(lambda: defaultdict(list))
     for m in models:
+        nuc_distance = defaultdict(list)
+        pheno_distance = defaultdict(list)
         for f, filepath in enumerate(replicates[m]):
             tree = open_tree(filepath)
             assert tree.get_leaf_names() == neutral_tree.get_leaf_names()
@@ -57,6 +116,10 @@ def main(folder, neutral_tree_path, output):
             geno_anc, var_between_geno = brownian_fitting(tree, trait="Genotype_mean")
             var_dict['between_geno'][m].append(var_between_geno)
 
+            compute_distance(tree, trait="Phenotype_mean", dico_nuc_d=nuc_distance, dico_pheno_d=pheno_distance)
+            assert len(nuc_distance) == len(pheno_distance), "Error in the computation of the distances."
+
+        distance_plot(nuc_distance, pheno_distance, replace_last(output, ".tsv.gz", f".distance.{m}.pdf"))
     # Output the dictionary as a dataframe
     dict_of_df = {k: pd.DataFrame(v) for k, v in var_dict.items()}
     df = pd.concat(dict_of_df, axis=1)
@@ -64,10 +127,11 @@ def main(folder, neutral_tree_path, output):
     df.to_csv(output, sep="\t", index=False)
     x_str = r"Neutrality index $\left( \rho \right)$"
     ratio_scaled = {m: np.array(var_dict["between"][m]) / np.array(var_dict["within"][m]) for m in models}
-    hist_plot(ratio_scaled, x_str, output.replace(".tsv.gz", ".hist.pheno.pdf"))
+    hist_plot(ratio_scaled, x_str, replace_last(output, ".tsv.gz", ".hist.pheno.pdf"))
 
-    ratio_scaled_geno = {m: np.array(var_dict["between_geno"][m]) / np.array(var_dict["within_geno"][m]) for m in models}
-    hist_plot(ratio_scaled_geno, x_str, output.replace(".tsv.gz", ".hist.geno.pdf"))
+    ratio_scaled_geno = {m: np.array(var_dict["between_geno"][m]) / np.array(var_dict["within_geno"][m]) for m in
+                         models}
+    hist_plot(ratio_scaled_geno, x_str, replace_last(output, ".tsv.gz", ".hist.geno.pdf"))
 
     mut_str = r"Variance mutational $\left( \sigma^2_{M} \right)$"
     within_str = r"Variance within $\left( \sigma^2_{W} \right)$"
