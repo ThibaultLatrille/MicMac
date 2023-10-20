@@ -1,0 +1,94 @@
+################################################################################
+#
+# RevBayes Example: Model selection between OU and BM
+#
+#
+# authors: Michael R. May and Sebastian Höhna
+#
+################################################################################
+
+input_tree <- "tree.nex"
+input_data <- "traits.nex"
+output_file <- "simple_OU_RJ.log"
+
+#######################
+# Reading in the Data #
+#######################
+
+### Select the trait to analyze
+trait <- 1
+
+### Read in the trees
+T <- readTrees(input_tree)[1]
+
+### Read in the character data
+data <- readContinuousCharacterData(input_data)
+data.excludeAll()
+data.includeCharacter( trait )
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+##########################
+# Specify the tree model #
+##########################
+
+tree <- T
+
+##########################
+# Specify the rate model #
+##########################
+
+sigma2 ~ dnLoguniform(1e-3, 1e1)
+moves.append( mvScale(sigma2, weight=1.0) )
+
+root_age := tree.rootAge()
+
+alpha ~ dnReversibleJumpMixture(0.0, dnExponential( abs(root_age / 2.0 / ln(2.0)) ), 0.5)
+moves.append( mvRJSwitch(alpha, weight=1.0) )
+moves.append( mvScale(alpha, weight=1.0) )
+
+theta ~ dnUniform(-10, 10)
+moves.append( mvSlide(theta, weight=1.0) )
+
+# also add an adaptive mutlivariate normal move
+avmvn_move = mvAVMVN(weight=5, waitBeforeLearning=500, waitBeforeUsing=1000)
+avmvn_move.addVariable(sigma2)
+avmvn_move.addVariable(alpha)
+avmvn_move.addVariable(theta)
+moves.append( avmvn_move )
+
+is_OU := ifelse(alpha != 0.0, 1, 0)
+is_BM := ifelse(alpha == 0.0, 1, 0)
+
+##########################
+# Specify the BM process #
+##########################
+
+X ~ dnPhyloOrnsteinUhlenbeckREML(tree, alpha, theta, sigma2^0.5, rootStates=theta)
+X.clamp( data )
+
+#############
+# The Model #
+#############
+
+mymodel = model(tree)
+
+### set up the monitors that will output parameter values to file and screen
+monitors.append( mnModel(filename=output_file, printgen=10) )
+monitors.append( mnScreen(printgen=1000, sigma2, alpha, theta, is_OU) )
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed")
+
+### run the MCMC ###
+mymcmc.burnin(generations=1000, tuningInterval=100)
+mymcmc.run(generations=50000)
+
+## quit ##
+q()
