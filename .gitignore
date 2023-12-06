@@ -36,3 +36,4 @@ test
 *.bbl
 *.blg
 out/
+/data_simulated/docs/include-figures.tex

@@ -26,10 +26,17 @@ def main(folder, output):
             filepath = f"{folderpath}/simple_OU_RJ.log"
             df = pd.read_csv(filepath, sep="\t")
             var_dict["model"][m].append(m)
-            var_dict["is_OU"][m].append(np.mean(df["is_OU"]))
+            for col in ["alpha", "is_BM", "is_OU", "sigma2", "theta"]:
+                var_dict[col][m].append(np.mean(df[col][len(df) // 2:]))
+            var_dict["t_half"][m].append(np.log(2) / np.mean(df["alpha"][len(df) // 2:]))
 
     rename = lambda x: output.replace(".tsv.gz", x)
-    hist_plot(var_dict["is_OU"], "p[OU]", rename(f".is_OU.pdf"))
+    hist_plot(var_dict["is_OU"], "p[OU]", rename(f".is_OU.pdf"), xscale="uniform")
+    hist_plot(var_dict["is_BM"], "p[BM]", rename(f".is_BM.pdf"), xscale="uniform")
+    hist_plot(var_dict["t_half"], "t 1/2", rename(f".t_half.pdf"), xscale="log")
+    hist_plot(var_dict["alpha"], "alpha", rename(f".alpha.pdf"), xscale="log")
+    hist_plot(var_dict["sigma2"], "sigma2", rename(f".sigma2.pdf"), xscale="log")
+    hist_plot(var_dict["theta"], "theta", rename(f".theta.pdf"), xscale="linear")
 
     out_dict = defaultdict(list)
     for m in models:

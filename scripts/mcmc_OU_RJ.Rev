@@ -40,7 +40,7 @@ tree <- T
 # Specify the rate model #
 ##########################
 
-sigma2 ~ dnLoguniform(1e-3, 1e1)
+sigma2 ~ dnLoguniform(1e-3, 1e4)
 moves.append( mvScale(sigma2, weight=1.0) )
 
 root_age := tree.rootAge()

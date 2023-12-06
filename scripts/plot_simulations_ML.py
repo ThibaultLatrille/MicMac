@@ -9,17 +9,21 @@ from sklearn.metrics import r2_score
 
 
 def compute_distance(tree: Tree, trait: str, dico_nuc_d: dict, dico_pheno_d: dict) -> (float, float):
-    leaves = tree.get_leaves()
-    n = len(leaves)
-    x = [float(getattr(leaf, trait)) for i, leaf in enumerate(leaves)]
-
-    for i, j in itertools.product(range(n), range(n)):
-        if i >= j:
+    for node in tree.traverse("postorder"):
+        if node.is_leaf():
             continue
-        leaf_i, leaf_j = leaves[i].name, leaves[j].name
-        d = tree.get_distance(leaves[i], leaves[j]) * 4
-        dico_nuc_d[(leaf_i, leaf_j)].append(d)
-        dico_pheno_d[(leaf_i, leaf_j)].append(np.var([x[i], x[j]]))
+        leaves = node.get_leaves()
+        x = [float(getattr(leaf, trait)) for i, leaf in enumerate(leaves)]
+        n = len(leaves)
+        list_nuc, list_pheno = [], []
+        for i, j in itertools.product(range(n), range(n)):
+            if i >= j:
+                continue
+            d = tree.get_distance(leaves[i], leaves[j]) * 4
+            list_nuc.append(d)
+            list_pheno.append(np.var([x[i], x[j]]))
+        dico_nuc_d[node.name].append(np.mean(list_nuc))
+        dico_pheno_d[node.name].append(np.mean(list_pheno))
 
 
 def saturation_fit(x, a, b):
@@ -55,12 +59,18 @@ def distance_plot(x_dico, y_dico, output):
     polyfit(x_array, y_array, saturation_fit, "saturation", ax, "blue")
     polyfit(x_array, y_array, linear_fit, "linear", ax, "red")
     ax.scatter(x_array, y_array, s=12, color="black")
-    #for k in x_mean.keys():
-    #    ax.errorbar(x_mean[k], y_mean[k], color="black", alpha=0.05, linewidth=0.5,
-    #                yerr=[[y_mean[k] - y_lower[k]], [y_upper[k] - y_mean[k]]])
-    ax.set_xlabel('Nucleotide distance', weight='bold')
-    ax.set_ylabel('Phenotypic distance', weight='bold')
+    for k in x_mean.keys():
+        ax.errorbar(x_mean[k], y_mean[k], color="black", alpha=0.05, linewidth=0.5,
+                    yerr=[[y_mean[k] - y_lower[k]], [y_upper[k] - y_mean[k]]])
+    ax.set_xlabel('Nucleotide distance', weight='bold', fontsize=fontsize)
+    ax.set_ylabel('Phenotypic distance', weight='bold', fontsize=fontsize)
     ax.legend(fontsize=fontsize_legend)
+    # Change x and y ticks font size
+    for tick in ax.xaxis.get_major_ticks():
+        tick.label.set_fontsize(fontsize)
+    for tick in ax.yaxis.get_major_ticks():
+        tick.label.set_fontsize(fontsize)
+    plt.tight_layout()
     plt.savefig(output, format="pdf")
     plt.savefig(replace_last(output, ".pdf", ".png"), format="png")
     plt.close('all')

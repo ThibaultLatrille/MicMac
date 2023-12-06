@@ -72,7 +72,10 @@ def scatter_plot(x_input, y_input, x_label, y_label, output, histy_log=False, lo
 
 def hist_plot(x_input, x_label, output, xscale="log"):
     x = {k: np.array(v) for k, v in x_input.items()}
-    xy_filtered = {k: (np.isfinite(x[k]) & (x[k] >= 0)) for k in x.keys()}
+    if xscale == "log":
+        xy_filtered = {k: (np.isfinite(x[k]) & (x[k] > 0)) for k in x.keys()}
+    else:
+        xy_filtered = {k: np.isfinite(x[k]) for k in x.keys()}
     x = {k: x[k][xy_filtered[k]] for k in x.keys()}
     output = output.replace("scatter_plot", "histogram")
     color_models = colors(x)
@@ -96,13 +99,16 @@ def hist_plot(x_input, x_label, output, xscale="log"):
                     label=f'{m.replace("_", " ").capitalize()} (mean {x_mean:.2g})')
     else:
         for id_m, m in enumerate(x):
-            ax.plot((0, 0), (0, 0), linewidth=3, color=color_models[id_m],
+            ax.plot((min_x, min_x), (0, 0), linewidth=3, color=color_models[id_m],
                     label=f'{m.replace("_", " ").capitalize()}')
 
     ax.set_xlabel(x_label, fontsize=fontsize)
     if xscale == "log":
         ax.set_xlim((0.95 * min_x, 1.05 * max_x))
         ax.set_xscale("log")
+    elif xscale == "linear":
+        ax.set_xlim((min_x, max_x))
+        ax.set_xscale("linear")
     else:
         ax.set_xlim((-0.01, 1.01))
         ax.set_yscale("log")
