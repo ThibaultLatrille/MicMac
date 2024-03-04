@@ -76,7 +76,9 @@ def hist_plot(x_input, x_label, output, xscale="log"):
         xy_filtered = {k: (np.isfinite(x[k]) & (x[k] > 0)) for k in x.keys()}
     else:
         xy_filtered = {k: np.isfinite(x[k]) for k in x.keys()}
-    x = {k: x[k][xy_filtered[k]] for k in x.keys()}
+    x = {k: x[k][xy_filtered[k]] for k in x.keys() if len(x[k][xy_filtered[k]]) > 0}
+    if len(x) == 0:
+        return
     output = output.replace("scatter_plot", "histogram")
     color_models = colors(x)
     fig = plt.figure(figsize=(1280 / my_dpi, 640 / my_dpi), dpi=my_dpi)

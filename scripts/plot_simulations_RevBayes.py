@@ -10,6 +10,16 @@ from os.path import basename, isdir
 from libraries import hist_plot, scatter_plot
 
 
+def open_log(path):
+    df = pd.read_csv(path, sep="\t")
+    df["t_half"] = np.log(2) / df["alpha"]
+    return df
+
+
+def posterior(df, col="alpha", burnin=0.5):
+    return np.nanmean(df[col][int(len(df) * burnin):])
+
+
 def main(folder, output):
     os.makedirs(os.path.dirname(output), exist_ok=True)
 
@@ -20,29 +30,43 @@ def main(folder, output):
     replicates = {m: natsorted([i for i in glob(f"{p}/*") if isdir(i)]) for m, p in models_path.items()}
     assert len(set([len(g) for g in replicates.values()])) == 1
 
-    var_dict = defaultdict(lambda: defaultdict(list))
+    simple_OU_dict = defaultdict(lambda: defaultdict(list))
+    relaxed_OU_dict = defaultdict(lambda: defaultdict(list))
     for m in models:
         for f, folderpath in enumerate(replicates[m]):
-            filepath = f"{folderpath}/simple_OU_RJ.log"
-            df = pd.read_csv(filepath, sep="\t")
-            var_dict["model"][m].append(m)
-            for col in ["alpha", "is_BM", "is_OU", "sigma2", "theta"]:
-                var_dict[col][m].append(np.mean(df[col][len(df) // 2:]))
-            var_dict["t_half"][m].append(np.log(2) / np.mean(df["alpha"][len(df) // 2:]))
+            simple_df = open_log(f"{folderpath}/simple_OU_RJ.log.gz")
+            simple_OU_dict["model"][m].append(m)
+            for col in ["alpha", "is_BM", "is_OU", "sigma2", "theta", "t_half"]:
+                simple_OU_dict[col][m].append(posterior(simple_df, col=col, burnin=0.5))
+
+            relaxed_df = open_log(f"{folderpath}/relaxed_OU_RJ.log.gz")
+            relaxed_OU_dict["model"][m].append(m)
+            for col in ["alpha", "num_theta_changes", "sigma2", "theta_root", "t_half"]:
+                relaxed_OU_dict[col][m].append(posterior(relaxed_df, col=col, burnin=0.5))
 
     rename = lambda x: output.replace(".tsv.gz", x)
-    hist_plot(var_dict["is_OU"], "p[OU]", rename(f".is_OU.pdf"), xscale="uniform")
-    hist_plot(var_dict["is_BM"], "p[BM]", rename(f".is_BM.pdf"), xscale="uniform")
-    hist_plot(var_dict["t_half"], "t 1/2", rename(f".t_half.pdf"), xscale="log")
-    hist_plot(var_dict["alpha"], "alpha", rename(f".alpha.pdf"), xscale="log")
-    hist_plot(var_dict["sigma2"], "sigma2", rename(f".sigma2.pdf"), xscale="log")
-    hist_plot(var_dict["theta"], "theta", rename(f".theta.pdf"), xscale="linear")
+
+    hist_plot(simple_OU_dict["is_OU"], "p[OU]", rename(f".simple_OU.is_OU.pdf"), xscale="uniform")
+    hist_plot(simple_OU_dict["is_BM"], "p[BM]", rename(f".simple_OU.is_BM.pdf"), xscale="uniform")
+    hist_plot(simple_OU_dict["t_half"], "t 1/2", rename(f".simple_OU.t_half.pdf"), xscale="log")
+    hist_plot(simple_OU_dict["alpha"], "alpha", rename(f".simple_OU.alpha.pdf"), xscale="log")
+    hist_plot(simple_OU_dict["sigma2"], "sigma2", rename(f".simple_OU.sigma2.pdf"), xscale="log")
+    hist_plot(simple_OU_dict["theta"], "theta", rename(f".simple_OU.theta.pdf"), xscale="linear")
+
+    hist_plot(relaxed_OU_dict["t_half"], "t 1/2", rename(f".relaxed_OU.t_half.pdf"), xscale="log")
+    hist_plot(relaxed_OU_dict["alpha"], "alpha", rename(f".relaxed_OU.alpha.pdf"), xscale="log")
+    hist_plot(relaxed_OU_dict["sigma2"], "sigma2", rename(f".relaxed_OU.sigma2.pdf"), xscale="log")
+    hist_plot(relaxed_OU_dict["theta_root"], "theta_root", rename(f".relaxed_OU.theta_root.pdf"), xscale="linear")
+    hist_plot(relaxed_OU_dict["num_theta_changes"], "num_theta_changes", rename(f".relaxed_OU.num_theta_changes.pdf"),
+              xscale="linear")
 
     out_dict = defaultdict(list)
     for m in models:
-        for col, values in var_dict.items():
-            out_dict[col].extend(values[m])
-        print(f"{m}: {np.mean(var_dict['is_OU'][m])}")
+        for col, values in simple_OU_dict.items():
+            out_dict[f"simple_OU.{col}"].extend(values[m])
+        for col, values in relaxed_OU_dict.items():
+            out_dict[f"relaxed_OU.{col}"].extend(values[m])
+        print(f"{m}: {np.mean(simple_OU_dict['is_OU'][m])}")
     df = pd.DataFrame(out_dict)
     df.to_csv(output, sep="\t", index=False)
 

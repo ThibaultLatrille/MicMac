@@ -171,24 +171,34 @@ rule convert_to_RevBayes:
     shell:
         'python3 {input.script} --input_tree {input.tree} --input_traits {input.traits} --output_tree {output.nexus_tree} --output_traits {output.nexus_traits}'
 
-rule run_RevBayes:
+rule run_OU_RevBayes:
     input:
         exec=exec_dico['rb'],
-        rev_file=f"{ROOT}/scripts/mcmc_OU_RJ.Rev",
+        rev_file=f"{ROOT}/scripts/mcmc_{{rb}}_RJ.Rev",
         tree=rules.convert_to_RevBayes.output.nexus_tree,
         traits=rules.convert_to_RevBayes.output.nexus_traits
     output:
-        log=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/simple_OU_RJ.log"
+        log=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/{{rb}}_RJ.log"
     params:
         folder=lambda wildcards: f"{FOLDER}/RevBayes/{wildcards.simulator}/{wildcards.scaling}_seed{wildcards.seed}"
     shell:
         'cd {params.folder} && {input.exec} {input.rev_file}'
 
+rule compress_RevBayes_log:
+    input:
+        log=rules.run_OU_RevBayes.output.log
+    output:
+        log=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/{{rb}}_RJ.log.gz"
+    params:
+        prefix=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/{{rb}}_RJ"
+    shell:
+        'for f in {params.prefix}*; do if [ ! -f $f.gz ]; then gzip $f; fi; done'
+
 
 rule gather_RevBayes_log:
     input:
         script=f"{ROOT}/scripts/plot_simulations_RevBayes.py",
-        tsv=expand(rules.run_RevBayes.output.log,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"])
+        rb_log=expand(rules.compress_RevBayes_log.output.log,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"],rb=["simple_OU", "relaxed_OU"])
     output:
         plot=f"{FOLDER}/results/inference_RevBayes.tsv.gz"
     log:
