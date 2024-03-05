@@ -1,0 +1,32 @@
+\documentclass{beamer}
+\geometry{margin=0pt, nohead, nofoot, paperwidth=1440pt,paperheight=720pt}
+\usepackage{pdfpages}
+\usepackage{graphicx}
+\pdfinclusioncopyfonts=1
+\usepackage{pgfplots,pgf}
+\usepgfplotslibrary{fillbetween}
+\usebackgroundtemplate{\tikz\node[opacity=0]{};}
+\setbeamertemplate{footline}[frame number]{}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+\usefonttheme{serif}
+
+\begin{document}
+
+
+\centering
+\begin{minipage}{0.495\textwidth}
+    \includegraphics[width=\textwidth, page=1] {artworks/cst_L5000.rho}
+\end{minipage}
+\begin{minipage}{0.495\textwidth}
+    \includegraphics[width=\textwidth, page=1] {artworks/cst_L5000.pvalues}
+\end{minipage}
+\begin{minipage}{0.495\textwidth}
+    \includegraphics[width=\textwidth, page=1] {artworks/fluNe_L5000.rho}
+\end{minipage}
+\begin{minipage}{0.495\textwidth}
+    \includegraphics[width=\textwidth, page=1] {artworks/fluNe_L5000.pvalues}
+\end{minipage}
+
+
+\end{document}

@@ -1,0 +1,45 @@
+\documentclass[10pt]{beamer}
+\geometry{margin=0pt, nohead, nofoot, paperwidth=1080pt,paperheight=375pt}
+\usepackage{pdfpages}
+\usepackage{graphicx}
+\pdfinclusioncopyfonts=1
+\usepackage{pgfplots,pgf}
+\usepgfplotslibrary{fillbetween}
+\usebackgroundtemplate{\tikz\node[opacity=0]{};}
+\setbeamertemplate{footline}[frame number]{}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+\usefonttheme{serif}
+
+\begin{document}
+
+    \centering
+    \begin{minipage}{0.32\textwidth}
+        \begin{center}
+            \LARGE $\mu =\mu_{\text{ref}} / 2 $
+        \end{center}
+        \includegraphics[width=\textwidth, page=1] {artworks/distance.neutral.low_u.pdf}
+    \end{minipage}
+    \begin{minipage}{0.32\textwidth}
+        \begin{center}
+            \LARGE $\mu =\mu_{\text{ref}} \cdot 4 $
+        \end{center}
+        \includegraphics[width=\textwidth, page=1] {artworks/distance.neutral.high_u.pdf}
+    \end{minipage}
+    \begin{minipage}{0.32\textwidth}
+        \begin{center}
+            \LARGE $\mu =\mu_{\text{ref}} \cdot 20 $
+        \end{center}
+        \includegraphics[width=\textwidth, page=1] {artworks/distance.neutral.very_high_u.pdf}
+    \end{minipage}
+    \begin{minipage}{0.32\textwidth}
+        \includegraphics[width=\textwidth, page=1] {artworks/pvalues.low_u.pdf}
+    \end{minipage}
+    \begin{minipage}{0.32\textwidth}
+        \includegraphics[width=\textwidth, page=1] {artworks/pvalues.high_u.pdf}
+    \end{minipage}
+    \begin{minipage}{0.32\textwidth}
+        \includegraphics[width=\textwidth, page=1] {artworks/pvalues.very_high_u.pdf}
+    \end{minipage}
+
+\end{document}

@@ -171,14 +171,14 @@
 \keywords{Quantitative genetics \and Trait evolution \and Selection \and Phylogenetics \and Population genetics }
 
 % Research Article (7500 words)
-\section*{Introduction}\label{sec:introduction}
+\section{Introduction}\label{sec:introduction}
 
 Determining whether a trait is under a particular regime of selection has been a long-standing goal in evolutionary biology.
 Fundamentally, distinguishing neutral evolution from selection requires determining which selective regime is supported by the observed variation of traits or sequences.
 The variation of phenotypes (traits) and genotypes (sequences) can be observed at different scales, across different development stages at the individual level, across different individuals and populations at the species level, and finally across different species at the phylogenetic level.
 All these systems require different assumptions and methodologies, and the endeavor to determine the selective regime for a given trait has thus incorporated theories, methods, and developments across various fields of evolutionary biology such as quantitative genetics, population genetics, phylogenetics and comparative genomics~\parencite{lynch_genetics_1998, walsh_evolution_2018}.
 
-Leveraging individual variations within the same species, Genome-Wide Association Studies (GWAS) in humans have shown that traits are mostly polygenic (many loci associated with a given trait) and under stabilizing selection, while the loci affecting those traits are mostly pleiotropic (many traits associated with a given locus) with additive effects~\parencite{simons_population_2018, sella_thinking_2019}. 
+Leveraging individual variations within the same species, Genome-Wide Association Studies (GWAS) in humans have shown that traits are mostly polygenic (many loci associated with a given trait) and under stabilizing selection, while the loci affecting those traits are mostly pleiotropic (many traits associated with a given locus) with additive effects~\parencite{simons_population_2018, sella_thinking_2019}.
 Across several populations, by contrasting both trait and genetic differentiation, \QstFst\ methods have been used to determine the selective regime and to quantify the strength of selection acting on a trait~\parencite{merila_comparison_2001, leinonen_comparative_2008}.
 A trait differentiation (\Qst) higher than genetic differentiation (\Fst) is interpreted as a signature of diversifying selection due to adaptation to different optimum trait values in the different populations~\parencite{lamy_qst_2012}.
 Contrarily, \Qst\ lower than \Fst\ is interpreted as a signature of stabilizing selection.
@@ -219,16 +219,16 @@ From the field of phylogenetics, our study can be seen as an alternative to the 
 % Basically, we are testing whether the variance of means is greater than the mean of variances
 
 
-\section*{Materials and Methods}\label{sec:materials-and-methods}
-\subsection*{Neutrality index for a quantitative trait}\label{subsec:neutrality-index-for-a-quantitative-trait}
+\section{Materials and Methods}\label{sec:materials-and-methods}
+\subsection{Neutrality index for a quantitative trait}\label{subsec:neutrality-index-for-a-quantitative-trait}
 
-While observing trait variations across individuals of several species, we ask if the variation within species compared to variation between species is compatible with neutral evolution or not. 
+While observing trait variations across individuals of several species, we ask if the variation within species compared to variation between species is compatible with neutral evolution or not.
 In statistical terms, this can also be framed as: Is the variance of means equal to the mean of variances?
 The difficulty in such a study is that individuals are not independent samples, but are from species that diverged at different times, and each species has a putatively different population size.
-By reviewing theoretical expectations and leveraging nucleotide sequence variations, the goal of this section is thus to obtain normalized trait variation between and within species that are equal if the trait is neutral. 
+By reviewing theoretical expectations and leveraging nucleotide sequence variations, the goal of this section is thus to obtain normalized trait variation between and within species that are equal if the trait is neutral.
 Here we denote these normalized trait variations as respectively $\RateWhithin$ for within species and as $\RateBetween$ for between species.
 
-\subsubsection*{Within-species trait variations}
+\subsubsection{Within-species trait variations}
 
 For a given trait, the genetic architecture is mainly defined by the number of loci encoding the trait ($\NbrLoci$) and the random additive effect of a mutation on the trait ($a$).
 At the individual level, the mutational variance ($\VarMutation$) is the rate at which new mutations contribute to the trait variance per generation.
@@ -269,7 +269,7 @@ Which leads to $\RateWhithin$ being a function of $\VarPhenotype$ and $\Heritabi
     & = \frac{\MutationRatePheno \Multiply \GenArchi}{\MutationRateNuc} \text{ from eq.~\ref{eq:rate-pop}} \label{eq:rate-pheno-pop}
 \end{align}
 
-\subsubsection*{Between-species trait variations}
+\subsubsection{Between-species trait variations}
 
 For a given species, we denote by $\MeanTrait$ the mean value of the trait across the individuals in the species at generation $\Time$.
 If the trait is neutral and encoded by many loci as assumed by the infinitesimal model, $\MeanTrait$ evolves as a Brownian process~\parencite{felsenstein_phylogenies_1985, hansen_translating_1996}.
@@ -309,7 +309,7 @@ In other words, the standard deviation in mean phenotypes across lineages ($\Std
 
 \begin{figure*}[!ht]
     \centering
-    \includegraphics[width=\textwidth, page=1] {artworks/fig-input-output}
+    \includegraphics[width=\textwidth, page=1] {figure1}
     \caption{
         Between species, the change along the phylogeny of the mean phenotypic trait allows the estimation of between-species trait variation, $\EstRateBetween$, which is normalized by nucleotide divergence.
         Within species, the genetic variance allows the estimation of within-species trait variation, $\EstRateWhithin$, which is  normalized by nucleotide diversity.
@@ -322,7 +322,7 @@ In other words, the standard deviation in mean phenotypes across lineages ($\Std
     \label{fig:methods}
 \end{figure*}
 
-\subsubsection*{Neutrality index}
+\subsubsection{Neutrality index}
 
 The variability between either individuals or species can be obtained for both quantitative traits and genomic sequences.
 At the population level, the variability of the trait between individuals can be combined with the nucleotide diversity of any neutrally evolving genomic region to obtain $\RateWhithin$.
@@ -341,13 +341,13 @@ We define a neutrality index $\NI$ as:
 Both $\RateBetween$ and $\RateWhithin$ can be estimated using quantitative trait and genomic sequences within and between species, while neither the mutation rates ($\MutationRatePheno$ and $\MutationRateNuc$), nor the effective population size ($\Ne$) or time of divergence ($\Time$) need to be estimated.
 Moreover, the sequence from which $\pi$ and $d$ are estimated should be neutrally evolving, but they are not necessarily linked to the quantitative trait under study.
 
-\subsection*{Estimation}\label{subsec:estimate}
+\subsection{Estimation}\label{subsec:estimate}
 
 We denote $\EstNI$, $\EstRateBetween$ and $\EstRateWhithin$ the point estimates of respectively $\NI$, $\RateBetween$ and $\RateWhithin$.
-At the phylogenetic scale, $\EstRateBetween$ (defined eq. \ref{eq:def-rate-phy}) can be seen as an estimate of the rate of the evolution of the quantitative trait along a phylogeny, when the tree is measured in unit of $4d$ instead of time as is usually the case in the comparative framework~\parencite{felsenstein_phylogenies_1985, omeara_testing_2006}. 
+At the phylogenetic scale, $\EstRateBetween$ (defined eq. \ref{eq:def-rate-phy}) can be seen as an estimate of the rate of the evolution of the quantitative trait along a phylogeny, when the tree is measured in unit of $4d$ instead of time as is usually the case in the comparative framework~\parencite{felsenstein_phylogenies_1985, omeara_testing_2006}.
 We provide a maximum likelihood estimate for $\NI$ as well as a Bayesian estimate to derive posterior probabilities that the null model of neutrality (i.e.~$\NI = 1$) is rejected.
 
-\subsubsection*{Maximum likelihood estimate}
+\subsubsection{Maximum likelihood estimate}
 At the phylogenetic scale, for $\NbrTaxa$ taxa in the tree, $\DistanceMatrix$ ($\NbrTaxa \times \NbrTaxa$) is the distance matrix computed from the branch lengths ($d$ as nucleotide divergence in units of substitutions per site) and the topology of the phylogenetic tree.
 The diagonal $\Distance_{\Spi,\Spi}$ represents the total distances from the root of the tree to each taxon ($\Spi$).
 The off-diagonal elements ($\Distance_{\Spi,\Spj} = \Distance_{\Spj,\Spi}$) are the distances between the root and the most recent common ancestor of taxa $\Spi$ and $\Spj$.
@@ -374,16 +374,16 @@ As depicted in fig.~\ref{fig:methods}, the neutrality index is estimated as:
     \EstNI = \frac{\EstRateBetween}{\EstRateWhithin}. \label{eq:estimated-NI}
 \end{gather}
 
-\subsubsection*{Multivariate Brownian process}
+\subsubsection{Multivariate Brownian process}
 
-In the previous section, $\EstNI$ is estimated independently for each trait of interest. 
+In the previous section, $\EstNI$ is estimated independently for each trait of interest.
 Here we generalize to $\Ntrait$ traits co-varying along the phylogenetic tree.
 Trait variation along the phylogenetic tree is modeled as a $\Ntrait$-dimensional Brownian process $\Brownian$ ($1 \times \Ntrait$) starting at the root and branching along the tree topology~\parencite{huelsenbeck_detecting_2003, lartillot_phylogenetic_2011, lartillot_joint_2012, latrille_inferring_2021}.
 The rate of change of the Brownian process is determined by the positive semi-definite and symmetric covariance matrix between traits $\CovarianceMatrix$ ($\Ntrait \times \Ntrait$).
 Importantly, the branch length of the tree on which the Brownian process runs is measured in units of $4d$ ($d$ is the nucleotide divergence), and not time as is usually the case in the comparative method. The off-diagonal elements of $\CovarianceMatrix$ are the covariance between traits, and the diagonal elements are the variance of each trait when measured in $4d$ units, and thus equate to $\EstRateBetween$ (see section~S\ref{subsec:multivariate-brownian-process}).
 
 
-\subsubsection*{Bayesian estimate}
+\subsubsection{Bayesian estimate}
 The Bayesian framework allows obtaining the posterior distribution of neutrality index ($\EstNI$) for traits of interest.
 We used the \textit{BayesCode} software to model $\Ntrait$-dimensional Brownian processes along a phylogenetic tree~\parencite{latrille_inferring_2021}.
 With an inverse Wishart distribution as the {prior} on the covariance matrix, the {posterior} on $\CovarianceMatrix$, conditional on $\brownian$ is also an invert Wishart distribution (see section~S\ref{subsec:sampling-the-covariance-matrix}).
@@ -393,7 +393,7 @@ Heritability and phenotypic variance for each trait are combined with nucleotide
 From $\EstRateWhithin$ and $\CovarianceMatrix$, the posterior distribution of $\EstNI$ (as in eq.~\ref{eq:estimated-NI}) is obtained for each trait.
 The posterior distribution of $\EstNI$ thus allows testing for deviation from neutrality (Fig.~\ref{fig:methods}), for example, by computing $\proba [\EstNI > 1 ]$ to test for evidence of diversifying selection and $\proba [\EstNI < 1 ]$ to test for evidence of stabilizing selection.
 
-\subsubsection*{Applicability to empirical data}
+\subsubsection{Applicability to empirical data}
 
 Our method assumes that the narrow-sense heritability ($\Heritability$) of a trait is known such as to estimate additive genetic variance ($\VarGenetic$) from phenotypic variance ($\VarPhenotype$) as $\VarGenetic = \Heritability \Multiply \VarPhenotype$.
 Fortunately, if heritability is not known, the test for diversifying selection can still be performed, although it is underpowered.
@@ -404,7 +404,7 @@ Similarly, using the broad-sense heritability ($H^2$) instead of narrow-sense he
 In contrast, the test for stabilizing selection is invalid if $\EstNI$ is underestimated.
 Several assumptions made by our test might not hold on empirical data and their consequences on the neutrality index and the test that can be performed are shown in Table~\ref{table:assumptions}.
 
-\subsection*{Simulation}\label{subsec:simulations}
+\subsection{Simulation}\label{subsec:simulations}
 
 % vG: 13.8, vP: 69.0, vE: 55.2, nbr_loci: 5000, a: 1.0, mut_rate: 1.38e-05, pop_size: 50, h2: 0.2
 % pS = 0.0027577478571428568
@@ -452,7 +452,7 @@ Heritability was thus not a given parameter of the simulations, but rather measu
 
 \begin{figure*}[!ht]
     \centering
-    \includegraphics[width=\textwidth, page=1] {artworks/fig-simulator}
+    \includegraphics[width=\textwidth, page=1] {figure2}
     \caption{
         Wright-Fisher simulations with mutation, selection and drift.
         Left panel: For a given individual, the trait phenotypic value is the sum of genotypic value and a environmental effect (standard deviation $\VarEnv$).
@@ -465,7 +465,7 @@ Heritability was thus not a given parameter of the simulations, but rather measu
     \label{fig:simulator}
 \end{figure*}
 
-\subsection*{Empirical dataset}\label{subsec:empirical-dataset}
+\subsection{Empirical dataset}\label{subsec:empirical-dataset}
 
 We analyzed a dataset of body and brain masses from mammals.
 The log-transformed values of body and brain masses were taken from \textcite{tsuboi_breakdown_2018}.
@@ -476,9 +476,9 @@ The mammalian nucleotide diversity was obtained from the Zoonomia project~\paren
 We also analyzed a dataset of primate species, with the nucleotide variation obtained from \textcite{kuderna_global_2023} and the quantitative trait variation also from \textcite{tsuboi_breakdown_2018}, using the same filtering as for the mammalian dataset.
 However, the primate nucleotide divergence was not obtained on a set of neutral markers as for the mammalian dataset, but across the whole genome.
 
-\section*{Results}\label{sec:results}
+\section{Results}\label{sec:results}
 
-\subsection*{Neutrality index}
+\subsection{Neutrality index}
 
 For a neutral trait, the genetic architecture, meaning the number of loci encoding the trait and the average effect of a mutation on the trait, is formally related to both within and between-species variation of the trait.
 We defined the neutrality index as $\NI = \RateBetween/\RateWhithin$, which equals $1$ for a neutral trait (see Materials and Methods), suggesting that traits for which this relationship was not verified were putatively under selection.
@@ -491,7 +491,7 @@ We also devised a Bayesian estimate to obtain the posterior distribution of the 
 Our neutrality index made a series of assumptions that we described in details in the Material and Methods section.
 Table \ref{table:assumptions} summarized these assumptions and outlined possible consequences for the neutrality test that we proposed.
 
-\subsection*{Results against simulations}\label{subsec:results-against-simulations}
+\subsection{Results against simulations}\label{subsec:results-against-simulations}
 
 The inference framework was first tested on independently simulated datasets matching an empirically relevant mammalian empirical regime (see Materials and Methods).
 Under constant population size ($\Ne$) and constant mutation rates ($\MutationRatePheno$ and $\MutationRateNuc$) across the phylogenetic tree (fig.~\ref{fig:results-simulations}, top row), we found no false negative for simulations of stabilizing ($\proba [\EstNI < 1] > 0.975$; blue in fig.~\ref{fig:results-simulations}) or diversifying ($\proba [\EstNI > 1] > 0.975$; red in fig.~\ref{fig:results-simulations}) selection.
@@ -501,18 +501,7 @@ For simulations under neutral evolution, 51\% of the simulations were correctly 
 
 \begin{figure*}[!ht]
     \centering
-    \begin{minipage}{0.49\textwidth}
-        \includegraphics[width=\textwidth, page=1] {artworks/cst_L5000.rho}
-    \end{minipage}
-    \begin{minipage}{0.49\textwidth}
-        \includegraphics[width=\textwidth, page=1] {artworks/cst_L5000.pvalues}
-    \end{minipage}
-    \begin{minipage}{0.49\textwidth}
-        \includegraphics[width=\textwidth, page=1] {artworks/fluNe_L5000.rho}
-    \end{minipage}
-    \begin{minipage}{0.49\textwidth}
-        \includegraphics[width=\textwidth, page=1] {artworks/fluNe_L5000.pvalues}
-    \end{minipage}
+    \includegraphics[width=\textwidth, page=1] {figure3}
     \caption{
         $10,000$ simulations of trait evolution along a phylogenetic tree under different selection regimes.
         Traits simulated under stabilizing selection (blue), under a neutral evolution (yellow), and under a moving optimum (red).
@@ -560,7 +549,7 @@ For simulations under neutral evolution, 51\% of the simulations were correctly 
     \label{table:empirical}
 \end{table*}
 
-\subsection*{Results on empirical data}\label{subsec:results-on-empirical-data}
+\subsection{Results on empirical data}\label{subsec:results-on-empirical-data}
 
 For mammalian body and brain mass, we obtained male (\Male) and female (\Female) trait variations.
 Combined with nucleotide diversity and divergence, we estimated $\EstNI$ and posterior probabilities of diversifying selection under different assumptions for trait heritability as shown in the Table~\ref{table:empirical}.
@@ -596,9 +585,9 @@ However, the genetic markers used to normalize trait variance with nucleotide di
     The last two columns indicate whether the test for diversifying selection ($\NI > 1$) and for stabilizing selection $\NI < 1$ are conservative or invalid due to violated assumptions.
     }
     \label{table:assumptions}
-\end{table*} 
+\end{table*}
 
-\section*{Discussion}\label{sec:discussion}
+\section{Discussion}\label{sec:discussion}
 
 % Summary of the method and results
 In this study, we proposed a neutrality index for a quantitative trait that can be used within a statistical framework to test for selection.
@@ -705,7 +694,7 @@ In conclusion, our study provided a statistical framework to test for diversifyi
 
 \begin{center}
     \captionof{figure}{summary of trait's genetic architecture.}
-    \includegraphics[width=0.6\textwidth, page=1] {artworks/fig-simulator-model}
+    \includegraphics[width=0.6\textwidth, page=1] {figureS1}
     \label{fig:simulator-summary}
 \end{center}
 
