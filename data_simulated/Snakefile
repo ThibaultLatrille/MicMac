@@ -4,8 +4,15 @@ import numpy as np
 ROOT = os.path.abspath('../../..')
 FOLDER = os.path.abspath('.')
 
+executable_list = ["nodetraits", "readnodetraits"]
 exec_dico = {}
-for executable in ["nodetraits", "readnodetraits", 'rb']:
+if 'revbayes_inference' in config and config['revbayes_inference']:
+    executable_list.append("rb")
+else:
+    print("RevBayes inference not requested.")
+    exec_dico["rb"] = ""
+
+for executable in executable_list:
     exec_path = ""
     for b in ["BayesCode", "bayescode", "Bayescode", "bayesCode", "BAYESCODe", "BayesCODE"]:
         exec_path = os.path.join(ROOT,f'utils/{b}/bin/{executable}')
@@ -43,6 +50,7 @@ SEED_MUT_RATE = 42
 output_pdf = [f"{FOLDER}/results/inference_ML.tsv.gz"]
 if 'bayes_inference' in config and config['bayes_inference']:
     output_pdf.append(f"{FOLDER}/results/inference_bayesian.tsv.gz")
+if 'revbayes_inference' in config and config['revbayes_inference']:
     output_pdf.append(f"{FOLDER}/results/inference_RevBayes.tsv.gz")
 
 rule all:
