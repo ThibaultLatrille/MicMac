@@ -1,7 +1,7 @@
 %DIF 1c1
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL main.tex            Wed Mar  6 16:12:09 2024
-%DIF ADD main-revision.tex   Wed Mar  6 16:12:09 2024
+%DIF ADD main-revision.tex   Wed Mar 13 11:58:57 2024
 %DIF < %! BibTeX Compiler = biber
 %DIF -------
 %! BibTeX Compiler = bibtex %DIF > 
@@ -98,32 +98,34 @@
 \newcommand{\pnps}{\pn / \ps}
 \newcommand{\proba}{\mathbb{P}}
 \newcommand{\pfix}{\proba_{\text{fix}}}
+%DIF 87a86-88
+\newcommand{\Indiv}{k} %DIF > 
+\newcommand{\Branch}{b} %DIF > 
+\newcommand{\WishartIDD}{m} %DIF > 
+%DIF -------
 \newcommand{\Spi}{i}
 \newcommand{\Spj}{j}
 \newcommand{\NbrTaxa}{n}
-%DIF 90c89-92
-%DIF < \newcommand{\Time}{t}
-%DIF -------
-\newcommand{\Time}{T} %DIF > 
-\newcommand{\GenTime}{\tau} %DIF > 
+\newcommand{\Time}{t}
+%DIF 91a93-94
 \newcommand{\NbrGen}{t_{\Spi, \Spj}} %DIF > 
 \newcommand{\NucDiv}{d_{\Spi, \Spj}} %DIF > 
 %DIF -------
 \newcommand{\Trait}{P}
 \newcommand{\Heritability}{h^2}
 \newcommand{\HeritabilitySpi}{\Heritability_{\Spi}}
-%DIF 94c96
+%DIF 94c98
 %DIF < \newcommand{\MeanTrait}{\bar{\Trait_{\Time}}}
 %DIF -------
 \newcommand{\MeanTrait}{\bar{\Trait}} %DIF > 
 %DIF -------
 \newcommand{\VecTrait}{\UniDimArray{\bar{\Trait}}}
-%DIF 96-98c98-99
+%DIF 96-98c100-101
 %DIF < \newcommand{\Root}{0}
 %DIF < \newcommand{\RootTrait}{\Trait_{\Root}}
 %DIF < \newcommand{\VarPhy}{\Var \left[\MeanTrait\right]}
 %DIF -------
-\newcommand{\RootTrait}{\theta} %DIF > 
+\newcommand{\RootTrait}{\phi} %DIF > 
 \newcommand{\VarPhy}{\Cov \left( \MeanTrait_{\Spi}, \MeanTrait_{\Spj}\right)} %DIF > 
 %DIF -------
 \newcommand{\VecZero}{\UniDimArray{0}}
@@ -131,7 +133,7 @@
 \newcommand{\Distance}{\BiDimArray{D}}
 \newcommand{\DistanceMatrix}{\BiDimArray{\Distance}}
 \newcommand{\MutationRatePheno}{\mu}
-%DIF 104a105
+%DIF 104a107
 \newcommand{\MutationRateNuc}{u} %DIF > 
 %DIF -------
 \newcommand{\SubRate}{q}
@@ -148,8 +150,13 @@
 \newcommand{\RateWhithin}{\sigma^2_{\mathrm{W}}}
 \newcommand{\RateWhithinSpi}{\sigma^2_{\mathrm{W}, \Spi}}
 \newcommand{\VecRateWhithin}{\UniDimArray{\RateWhithin}}
-\newcommand{\EstRateBetween}{\widehat{\RateBetween}}
-\newcommand{\EstRateWhithin}{\widehat{\RateWhithin}}
+%DIF 118-119c122-123
+%DIF < \newcommand{\EstRateBetween}{\widehat{\RateBetween}}
+%DIF < \newcommand{\EstRateWhithin}{\widehat{\RateWhithin}}
+%DIF -------
+\newcommand{\EstRateBetween}{\widehat{\sigma}^2_{\mathrm{B}}} %DIF > 
+\newcommand{\EstRateWhithin}{\widehat{\sigma}^2_{\mathrm{W}}} %DIF > 
+%DIF -------
 \newcommand{\NI}{\rho}
 \newcommand{\EstNI}{\widehat{\rho}}
 \newcommand{\StdSelection}{\sigma}
@@ -290,23 +297,34 @@ The variation of phenotypes (traits) and genotypes (sequences) can be observed a
 All these systems require different assumptions and methodologies, and the endeavor to determine the selective regime for a given trait has thus incorporated theories, methods, and developments across various fields of evolutionary biology such as quantitative genetics, population genetics, phylogenetics and comparative genomics~\citep{lynch_genetics_1998, walsh_evolution_2018}.
 
 Leveraging individual variations within the same species, Genome-Wide Association Studies (GWAS) in humans have shown that traits are mostly polygenic (many loci associated with a given trait) and under stabilizing selection, while the loci affecting those traits are mostly pleiotropic (many traits associated with a given locus) with additive effects~\citep{simons_population_2018, sella_thinking_2019}.
-Across several populations, by contrasting both trait and genetic differentiation, \QstFst\ methods have been used to determine the selective regime and to quantify the strength of selection acting on a trait~\citep{merila_comparison_2001, leinonen_comparative_2008}.
-A trait differentiation (\Qst) higher than genetic differentiation (\Fst) is interpreted as a signature of diversifying selection due to adaptation \DIFdelbegin \DIFdel{in }\DIFdelend \DIFaddbegin \DIFadd{to }\DIFaddend different optimum trait \DIFdelbegin \DIFdel{value }\DIFdelend \DIFaddbegin \DIFadd{values }\DIFaddend in the different populations\DIFdelbegin \DIFdel{~\mbox{%DIFAUXCMD
+\DIFaddbegin \DIFadd{Given this genetic architecture of traits, from two diverging populations, it is possible to distinguish which traits have evolved under natural selection in controlled experimental settings, by performing genetic cross between individuals~\mbox{%DIFAUXCMD
+\citep{fraser_detecting_2020}}\hskip0pt%DIFAUXCMD
+.
+}\DIFaddend Across several populations, by contrasting both trait \DIFaddbegin \DIFadd{differentiation (\Qst) }\DIFaddend and genetic differentiation \DIFdelbegin \DIFdel{, }\DIFdelend \DIFaddbegin \DIFadd{(\Fst), so-called }\DIFaddend \QstFst\ methods have been used to determine the selective regime and to quantify the strength of selection acting on a trait~\citep{merila_comparison_2001, leinonen_comparative_2008}.
+\DIFdelbegin \DIFdel{A trait differentiation (\Qst) higher than genetic differentiation (\Fst) }\DIFdelend \DIFaddbegin \DIFadd{\Qst\ higher than \Fst\ }\DIFaddend is interpreted as a signature of diversifying selection due to adaptation \DIFdelbegin \DIFdel{in }\DIFdelend \DIFaddbegin \DIFadd{to }\DIFaddend different optimum trait \DIFdelbegin \DIFdel{value }\DIFdelend \DIFaddbegin \DIFadd{values }\DIFaddend in the different populations\DIFdelbegin \DIFdel{~\mbox{%DIFAUXCMD
 \citep{lamy_qst_2012}}\hskip0pt%DIFAUXCMD
 }\DIFdelend .
-Contrarily, \Qst\ lower than \Fst\ is interpreted as a signature of stabilizing selection\DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
+Contrarily, \Qst\ lower than \Fst\ is interpreted as a signature of stabilizing selection\DIFdelbegin \DIFdel{.
+However, \QstFst\ methods have been found to require many populations~\mbox{%DIFAUXCMD
+\citep{ohara_bias_2005}}\hskip0pt%DIFAUXCMD
+, and that various factors can generate a spurious signal of selection~\mbox{%DIFAUXCMD
+\citep{pujol_are_2008, edelaar_comparisons_2011}}\hskip0pt%DIFAUXCMD
+.
+Moreover, the test for diversifying selection is }\DIFdelend \DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
 \citep{lamy_qst_2012}}\hskip0pt%DIFAUXCMD
-}\DIFaddend .
-However, \DIFaddbegin \DIFadd{it has been found that }\DIFaddend \QstFst\ methods \DIFdelbegin \DIFdel{have been found to }\DIFdelend require many populations~\citep{ohara_bias_2005}, and that various factors can generate a spurious signal of selection~\citep{pujol_are_2008, edelaar_comparisons_2011}.
-\DIFaddbegin \DIFadd{Alternatively, methods derived the statistical distribution of population means generated by random genetic drift and used the probability density of this distribution to test whether the observed pattern could be generated by drift alone~\mbox{%DIFAUXCMD
+.
+Other frameworks explicitly model genetic drift as a random process generating both trait and genetic differences between individuals and populations.
+This integrated framework can discriminate between selection and genetic drift as a cause of trait differentiation between populations of the same species~\mbox{%DIFAUXCMD
 \citep{ovaskainen_new_2011}}\hskip0pt%DIFAUXCMD
 .
-}\DIFaddend Moreover, the test for diversifying selection is limited to recent local adaptation since the test is based on the variation observed within a single species.
+However, regardless of the strengths and weaknesses of each method\mbox{%DIFAUXCMD
+\citep{pujol_are_2008, edelaar_comparisons_2011, ovaskainen_new_2011}}\hskip0pt%DIFAUXCMD
+, tests of trait differentiation between populations are ultimately }\DIFaddend limited to recent local adaptation since \DIFdelbegin \DIFdel{the test is }\DIFdelend \DIFaddbegin \DIFadd{they are }\DIFaddend based on the variation observed within a single species.
 \DIFaddbegin 
 
 %DIF >  Pair of species
 \DIFaddend To disentangle selection from neutral evolution, trait variation can also be observed at a larger time scale.
-For example, \DIFdelbegin \DIFdel{change in mean trait value accumulates }\DIFdelend \DIFaddbegin \DIFadd{starting from the same ancestral population, divergent lineages accumulate phenotypic changes reaching fixation in the population.
+For example, \DIFdelbegin \DIFdel{change in mean trait value accumulates }\DIFdelend \DIFaddbegin \DIFadd{starting from the same ancestral population, divergent lineages accumulate phenotypic changes that will reach fixation in the population.
 These changes ultimately result in different mean trait values across lineages.
 Theoretically, the variance in mean trait value (between lineages) does increase }\DIFaddend linearly with time of divergence\DIFdelbegin \DIFdel{from a sister species}\DIFdelend , and also proportionally to the trait variance \DIFaddbegin \DIFadd{at the population scale}\DIFaddend ~\citep{lande_genetic_1980, turelli_heritable_1984}.
 %DIF <  #I would add some examples here that do not use expression data, and then make a clear transition to the use of expression data
@@ -325,7 +343,7 @@ For example, change in mean trait value accumulates linearly with time of diverg
 . %DIF <  #I would add some examples here that do not use expression data, and then make a clear transition to the use of expression data
 Gene expression exhibits a similar accumulation as divergence in expression accumulates faster for genes with large within-species variation~\mbox{%DIFAUXCMD
 \citep{khaitovich_neutral_2004}}\hskip0pt%DIFAUXCMD
-}\DIFdelend \DIFaddbegin \DIFadd{Analogously, in the context of protein-coding DNA sequences, leveraging within species variation and divergence to a sister species is the crux of the \mbox{%DIFAUXCMD
+}\DIFdelend \DIFaddbegin \DIFadd{As an analogy, in the context of protein-coding DNA sequences, leveraging within species variation and divergence to a sister species is the crux of the \mbox{%DIFAUXCMD
 \citet{mcdonald_adaptative_1991} }\hskip0pt%DIFAUXCMD
 test.
 In such a test, inflation of divergence to the sister species is compared to polymorphism within species, while neutral makers (usually synonymous sites) are used to determine the neutral expectation and thus are used for normalization}\DIFaddend .
@@ -356,11 +374,11 @@ We build a novel framework that integrates trait variation at the phylogenetic a
 It allowed us to define an expected ratio of normalized variance between and within species while setting the threshold of this ratio for neutral, stabilizing, and diversifying selection.
 The ratio that we propose can be considered as a neutrality index for a any quantitative trait articulating trait and nucleotide variation within and between species.
 Importantly, our neutrality index also leverages nucleotide divergence and polymorphism to normalize trait variation at both scales, such that it does not require estimating population size (within-species) or speciation time (between species).
-From the field of population genetics, our study can be seen as the macro-evolutionary generalization of \QstFst\ methods to account for phylogenetic relationships between species\DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
-\citep{ovaskainen_new_2011}}\hskip0pt%DIFAUXCMD
-}\DIFaddend .
+From the field of population genetics, \DIFaddbegin \DIFadd{while \QstFst\ methods and their derivatives ultimately seek trait differentiation among different populations from the same species~\mbox{%DIFAUXCMD
+\citep{pujol_are_2008, ovaskainen_new_2011}}\hskip0pt%DIFAUXCMD
+, }\DIFaddend our study can be seen as \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{their }\DIFaddend macro-evolutionary generalization \DIFdelbegin \DIFdel{of \QstFst\ methods }\DIFdelend to account for phylogenetic relationships between species.
 From the field of phylogenetics, our study can be seen as an alternative to the EVE model~\citep{rohlfs_modeling_2014, rohlfs_phylogenetic_2015} for a single trait, where we set a threshold for neutral evolution by leveraging species nucleotide polymorphism and divergence.
-% Basically, we are testing whether the variance of means is greater than the mean of variances
+%DIF <  Basically, we are testing whether the variance of means is greater than the mean of variances
 
 
 \section*{Materials and Methods}\label{sec:materials-and-methods}
@@ -368,7 +386,7 @@ From the field of phylogenetics, our study can be seen as an alternative to the 
 
 \DIFdelbegin \DIFdel{Prior to developing our neutrality index, we review theoretical expectations for variationsof quantitative traits and genomic sequences under neutralevolution for both within- and between-species variation}\DIFdelend \DIFaddbegin \DIFadd{While observing trait variations across individuals of several species, we ask if the variation within species compared to variation between species is compatible with neutral evolution or not.
 In statistical terms, this can also be framed as: Is the variance of means equal to the mean of variances?
-The difficulty in such a study is that individuals are not independent samples, but are from species that diverged at different times, and each species has a putatively different population size.
+The difficulty in such a study is that individuals are not independent samples, but are from species that diverged at different times.
 By reviewing theoretical expectations and leveraging nucleotide sequence variations, the goal of this section is thus to obtain normalized trait variation between and within species that are equal if the trait is neutral.
 Here we denote these normalized trait variations as respectively $\RateWhithin$ for within species and as $\RateBetween$ for between species}\DIFaddend .
 
@@ -377,7 +395,7 @@ Here we denote these normalized trait variations as respectively $\RateWhithin$ 
 For a given trait, the genetic architecture is mainly defined by the number of loci encoding the trait ($\NbrLoci$) and the random additive effect of a mutation on the trait ($a$).
 \DIFdelbegin \DIFdel{New mutations are generating trait variance and the average effect of a mutation on the trait is $\RateMut = \NbrLoci \Multiply  \E [a^2]$.
 At the individuallevel}\DIFdelend \DIFaddbegin \DIFadd{For a diploid individual}\DIFaddend , the mutational variance ($\VarMutation$) is the rate at which new mutations contribute to the trait variance per generation.
-As shown in \citet{lande_quantitative_1979, lande_sexual_1980}, $\VarMutation$ is a function of the mutation rate per loci per generation ($\MutationRatePheno$) and \DIFdelbegin \DIFdel{$\RateMut$:
+As shown in \citet{lande_quantitative_1979, lande_sexual_1980}, $\VarMutation$ is a function of the mutation rate per \DIFdelbegin \DIFdel{loci }\DIFdelend \DIFaddbegin \DIFadd{locus }\DIFaddend per generation ($\MutationRatePheno$) and \DIFdelbegin \DIFdel{$\RateMut$:
 }\DIFdelend \DIFaddbegin \DIFadd{the genetic architecture of the trait as:
 }\DIFaddend \begin{gather}
     \VarMutation = 2 \MutationRatePheno \Multiply \DIFdelbegin \DIFdel{\RateMut }\DIFdelend \DIFaddbegin \GenArchi \DIFaddend \label{eq:var-mutation}.
@@ -390,34 +408,34 @@ For a neutral trait at equilibrium between mutation and drift~\citep{lynch_mutat
     & = 4 \Ne \Multiply \MutationRatePheno \Multiply \DIFdelbegin \DIFdel{\RateMut }\DIFdelend \DIFaddbegin \GenArchi \DIFaddend \text{ from eq.~\ref{eq:var-mutation}}\label{eq:var-genetic}.
 \end{align}
 
-For any neutral genomic region of interest, the nucleotide diversity, $\pi$, is \DIFdelbegin \DIFdel{measured as the number of mutations segregating in the population divided by the length of }\DIFdelend the \DIFdelbegin \DIFdel{region}\DIFdelend \DIFaddbegin \DIFadd{average number of differences between pairs of sequences drawn at random, which is also equal to the sum of expected heterozygosities over all loci~\mbox{%DIFAUXCMD
+For any neutral genomic region of interest, the nucleotide diversity, $\pi$, is \DIFdelbegin \DIFdel{measured as the number of mutations segregating in the population divided by the length of }\DIFdelend the \DIFdelbegin \DIFdel{region}\DIFdelend \DIFaddbegin \DIFadd{average number of differences between pairs of sequences drawn at random, which is also equal to the sum of expected heterozygosities over all nucleotide sites~\mbox{%DIFAUXCMD
 \citep{tajima_statistical_1989}}\hskip0pt%DIFAUXCMD
 }\DIFaddend .
 Any segregating mutations will eventually reach fixation or extinction due to random genetic drift and $\pi$ is also at a balance between mutations and drift.
-As shown in \citet{tajima_statistical_1989}, $\pi$ is a function of the mutation rate per loci per generation (\DIFdelbegin \DIFdel{$\MutationRatePheno$}\DIFdelend \DIFaddbegin \DIFadd{$\MutationRateNuc$}\DIFaddend ) and the effective population size ($\Ne$):
+As shown in \citet{tajima_statistical_1989}, $\pi$ is a function of the mutation rate \DIFdelbegin \DIFdel{per loci per generation}\DIFdelend (\DIFdelbegin \DIFdel{$\MutationRatePheno$}\DIFdelend \DIFaddbegin \DIFadd{$\MutationRateNuc$, per nucleotide site per generation}\DIFaddend ) and the effective population size ($\Ne$):
 \begin{gather}
     \pi = 4 \Ne \Multiply \DIFdelbegin \DIFdel{\MutationRatePheno }\DIFdelend \DIFaddbegin \DIFadd{\MutationRateNuc }\DIFaddend \label{eq:genetic-diversity}.
 \end{gather}
 
-We define $\RateWhithin$ as the ratio of additive genetic variance of the trait ($\VarGenetic$) over $\pi$ of any neutral genomic region of interest.
-This ratio allows removing the effect of $\Ne$\DIFdelbegin \DIFdel{and $\MutationRatePheno$, which are parameters not related to the genetic architecture of the trait, }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend giving $\RateWhithin$ as a proxy of \DIFdelbegin \DIFdel{$\RateMut$:
-}\DIFdelend \DIFaddbegin \DIFadd{the underlying genetic architecture:
+\DIFdelbegin \DIFdel{We }\DIFdelend \DIFaddbegin \DIFadd{To remove the effect of $\Ne$, we }\DIFaddend define $\RateWhithin$ as the ratio of additive genetic variance of the trait ($\VarGenetic$) over $\pi$ of any neutral genomic region of interest.
+\DIFdelbegin \DIFdel{This ratio allows removing the effect of $\Ne$ and $\MutationRatePheno$, which are parameters not related to the genetic architecture of the trait, giving $\RateWhithin$ asa proxy of $\RateMut$:
+}\DIFdelend \DIFaddbegin \DIFadd{After simplification, $\RateWhithin$ is then solely a function of the underlying genetic architecture as:
 }\DIFaddend \begin{align}
     \RateWhithin & \defEqual \frac{\VarGenetic }{\pi} \DIFaddbegin \label{eq:def-rate-pop}\DIFaddend , \\
     & = \DIFdelbegin \DIFdel{\frac{4 \Ne \Multiply \MutationRatePheno \Multiply \RateMut}{4 \Ne \Multiply \MutationRatePheno} }\DIFdelend \DIFaddbegin \DIFadd{\frac{4 \Ne \Multiply \MutationRatePheno \Multiply \GenArchi}{4 \Ne \Multiply \MutationRateNuc} }\DIFaddend \text{ from eq.~\ref{eq:var-mutation} and~\ref{eq:genetic-diversity}}, \\
     & = \DIFdelbegin \DIFdel{\RateMut}\DIFdelend \DIFaddbegin \DIFadd{\frac{\MutationRatePheno \Multiply \GenArchi}{\MutationRateNuc}}\DIFaddend . \label{eq:rate-pop}
 \end{align}
 
-The additive genetic variance is also equal to the observed phenotypic variance ($\VarPhenotype$) multiplied by narrow-sense heritability\DIFdelbegin \DIFdel{(}\DIFdelend \DIFaddbegin \DIFadd{, denoted }\DIFaddend $\Heritability$\DIFdelbegin \DIFdel{; \mbox{%DIFAUXCMD
+\DIFdelbegin \DIFdel{The additive genetic variance is also equal }\DIFdelend \DIFaddbegin \DIFadd{If $\VarGenetic$ is not empirically accessible, it can be related }\DIFaddend to the observed phenotypic variance ($\VarPhenotype$)\DIFaddbegin \DIFadd{, }\DIFaddend multiplied by narrow-sense heritability \DIFaddbegin \DIFadd{of the trait }\DIFaddend ($\Heritability$\DIFdelbegin \DIFdel{; \mbox{%DIFAUXCMD
 \citep{hill_data_2008}}\hskip0pt%DIFAUXCMD
-), which }\DIFdelend \DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
+), which }\DIFdelend \DIFaddbegin \DIFadd{), as~\mbox{%DIFAUXCMD
 \citep{hill_data_2008}}\hskip0pt%DIFAUXCMD
-, as:
+:
 }\begin{align}
     \DIFadd{\VarGenetic }& \DIFadd{= \Heritability \Multiply \VarPhenotype.\label{eq:var-gen-pheno}
 }\end{align}
 \DIFadd{Which }\DIFaddend leads to $\RateWhithin$ being a function of $\VarPhenotype$ and $\Heritability$ \DIFdelbegin \DIFdel{:
-}\DIFdelend \DIFaddbegin \DIFadd{as:
+}\DIFdelend \DIFaddbegin \DIFadd{instead of $\VarGenetic$ as:
 }\DIFaddend \begin{align}
     \RateWhithin & = \frac{\Heritability \Multiply \VarPhenotype }{\pi } \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{\text{ from definition eq.~\ref{eq:def-rate-pop} and~\ref{eq:var-gen-pheno}}, }\label{eq:def-rate-pheno-pop} \\
     & \DIFadd{= \frac{\MutationRatePheno \Multiply \GenArchi}{\MutationRateNuc} \text{ from eq.~\ref{eq:rate-pop}} }\DIFaddend \label{eq:rate-pheno-pop}
@@ -438,15 +456,15 @@ Then, the covariance between $\MeanTrait_{\Spi}$ and $\MeanTrait_{\Spj}$ depends
 by:
 }\DIFaddend \begin{align}
     \VarPhy & = \frac{\VarGenetic}{\Ne} \Multiply \DIFdelbegin \DIFdel{\Time }\DIFdelend \DIFaddbegin \DIFadd{\NbrGen }\DIFaddend \\
-    & = 4 \DIFdelbegin \DIFdel{\Time }\DIFdelend \DIFaddbegin \DIFadd{\NbrGen }\DIFaddend \Multiply \MutationRatePheno \Multiply \DIFdelbegin \DIFdel{\RateMut }\DIFdelend \DIFaddbegin \GenArchi \DIFaddend \label{eq:covar},\text{ from eq.~\ref{eq:var-genetic}},
-\end{align}
+    & = 4 \DIFdelbegin \DIFdel{\Time }\DIFdelend \DIFaddbegin \DIFadd{\NbrGen }\DIFaddend \Multiply \MutationRatePheno \Multiply \DIFdelbegin \DIFdel{\RateMut }\DIFdelend \DIFaddbegin \GenArchi \DIFaddend \label{eq:covar},\text{ from eq.~\ref{eq:var-genetic}}\DIFdelbegin \DIFdel{,
+}\DIFdelend \DIFaddbegin \DIFadd{.
+}\DIFaddend \end{align}
 \DIFdelbegin %DIFDELCMD < 
 
 %DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \DIFadd{where $\NbrGen$ is the number of generation between the root of the tree and the most recent common ancestor of taxa $\Spi$ and $\Spj$.
-}\DIFaddend Moreover, for any genomic region under neutral evolution, some mutations will eventually reach fixation due to random genetic drift, resulting in a substitution of a nucleotide at the species level.
+\DIFdelend Moreover, for any genomic region under neutral evolution, some mutations will eventually reach fixation due to random genetic drift, resulting in a substitution of a nucleotide at the species level.
 The probability of fixation ($\pfix$) of a neutral mutation is $1/2\Ne$\DIFaddbegin \DIFadd{~}\DIFaddend \citep{kimura_probability_1962}.
-We can derive the substitution rate per generation \DIFaddbegin \DIFadd{per loci (}\DIFaddend $\SubRate$\DIFaddbegin \DIFadd{) }\DIFaddend as the number of mutations per generation \DIFdelbegin \DIFdel{($2\Ne \Multiply \MutationRatePheno$}\DIFdelend \DIFaddbegin \DIFadd{per loci ($2\Ne \Multiply \MutationRateNuc$}\DIFaddend ) multiplied by the probability of fixation for each newly arisen mutations $\pfix$~\DIFdelbegin \DIFdel{\mbox{%DIFAUXCMD
+We can derive the substitution rate \DIFdelbegin \DIFdel{per generation }\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend $\SubRate$\DIFaddbegin \DIFadd{, per nucleotide site per generation) }\DIFaddend as the number of \DIFdelbegin \DIFdel{mutations per generation ($2\Ne \Multiply \MutationRatePheno$}\DIFdelend \DIFaddbegin \DIFadd{newly arisen mutations ($2\Ne \Multiply \MutationRateNuc$}\DIFaddend ) multiplied by the probability of fixation for each newly arisen mutations $\pfix$~\DIFdelbegin \DIFdel{\mbox{%DIFAUXCMD
 \citep{mccandlish_modeling_2014}}\hskip0pt%DIFAUXCMD
 }\DIFdelend \DIFaddbegin \DIFadd{\mbox{%DIFAUXCMD
 \citep{kimura_evolutionary_1968}}\hskip0pt%DIFAUXCMD
@@ -456,33 +474,40 @@ We can derive the substitution rate per generation \DIFaddbegin \DIFadd{per loci
     & = 2 \Ne  \Multiply \DIFdelbegin \DIFdel{\MutationRatePheno  }\DIFdelend \DIFaddbegin \DIFadd{\MutationRateNuc  }\DIFaddend \Multiply \dfrac{1}{2\Ne}, \\
     & = \DIFdelbegin \DIFdel{\MutationRatePheno}\DIFdelend \DIFaddbegin \DIFadd{\MutationRateNuc}\DIFaddend . \label{eq:substitution-rate}
 \end{align}
-That is, if mutations are neutral, the rate of substitution within a genomic region equals the rate at which new mutations arise per generation for the same genomic region~\DIFdelbegin \DIFdel{\mbox{%DIFAUXCMD
+That is, if mutations are neutral, the rate of substitution \DIFaddbegin \DIFadd{per generation }\DIFaddend within a genomic region equals the rate at which new mutations arise per generation for the same genomic region~\DIFdelbegin \DIFdel{\mbox{%DIFAUXCMD
 \citep{kimura_evolutionary_1968}}\hskip0pt%DIFAUXCMD
 }\DIFdelend \DIFaddbegin \DIFadd{\mbox{%DIFAUXCMD
 \citep[review]{mccandlish_modeling_2014}}\hskip0pt%DIFAUXCMD
 }\DIFaddend .
 
 \DIFdelbegin \DIFdel{After $\Time$ generations and assuming }\DIFdelend \DIFaddbegin \DIFadd{Next, we denote $\NucDiv$ as the nucleotide divergence between the root of the tree and the most recent common ancestor of taxa $\Spi$ and $\Spj$.
-In other words, $\NucDiv$ is the number of observed substitutions per loci during the $\NbrGen$ generations.
-Assuming }\DIFaddend that no multiple substitutions occurred at the same site, \DIFdelbegin \DIFdel{the nucleotide divergence $d$, which is the fraction of the genomic region that generated a substitution, will be $\Time$ }\DIFdelend \DIFaddbegin \DIFadd{$\NucDiv$ is $\NbrGen$ }\DIFaddend multiplied by the nucleotide substitution rate per generation ($\SubRate$):
+In other words, $\NucDiv$ is the expected number of substitutions per nucleotide site during the $\NbrGen$ generations.
+Assuming }\DIFaddend that no multiple substitutions occurred at the same site, \DIFdelbegin \DIFdel{the nucleotide divergence $d$, which is the fraction of the genomic region that generated a substitution, will be $\Time$ }\DIFdelend \DIFaddbegin \DIFadd{$\NucDiv$ is the number of generations ($\NbrGen$) }\DIFaddend multiplied by the nucleotide substitution rate per generation ($\SubRate$):
 \begin{align}
     \DIFdelbegin \DIFdel{d }\DIFdelend \DIFaddbegin \DIFadd{\NucDiv }\DIFaddend & = \DIFdelbegin \DIFdel{\Time }\DIFdelend \DIFaddbegin \DIFadd{\NbrGen }\DIFaddend \Multiply \SubRate \\
     & = \DIFdelbegin \DIFdel{\Time }\DIFdelend \DIFaddbegin \DIFadd{\NbrGen }\DIFaddend \Multiply \DIFdelbegin \DIFdel{\MutationRatePheno }\DIFdelend \DIFaddbegin \DIFadd{\MutationRateNuc }\DIFaddend \text{ from eq.~\ref{eq:substitution-rate}}. \label{eq:distance}
 \end{align}
-We define $\RateBetween$ as the variance in the mean trait value ($\VarPhy$) normalized by \DIFaddbegin \DIFadd{4 times }\DIFaddend the nucleotide divergence of any neutral genomic region (\DIFdelbegin \DIFdel{$d$}\DIFdelend \DIFaddbegin \DIFadd{$4\NucDiv$}\DIFaddend ).
-This ratio allows removing the effect of \DIFdelbegin \DIFdel{$\Time$ and $\MutationRatePheno$, which are parameters not related to the genetic architecture of the trade}\DIFdelend \DIFaddbegin \DIFadd{the number of generations ($\NbrGen$)}\DIFaddend , giving $\RateBetween$ as another proxy of \DIFdelbegin \DIFdel{$\RateMut$:
-}\DIFdelend \DIFaddbegin \DIFadd{the underlying genetic architecture:
-}\DIFaddend \begin{align}
-    \RateBetween & \defEqual \DIFdelbegin \DIFdel{\frac{\VarPhy}{4 d}}\DIFdelend \DIFaddbegin \DIFadd{\frac{\VarPhy}{4 \NucDiv} }\label{eq:def-rate-phy}\DIFaddend ,\\
-    & = \DIFdelbegin \DIFdel{\frac{4 \Time \Multiply \MutationRatePheno \Multiply \RateMut}{4 \Time \Multiply \MutationRatePheno}}\DIFdelend \DIFaddbegin \DIFadd{\frac{4 \NbrGen \Multiply \MutationRatePheno \Multiply \GenArchi}{4 \NbrGen \Multiply \MutationRateNuc}}\DIFaddend \text{ from eq.~\ref{eq:covar} and~\ref{eq:distance}}, \\
-    & = \DIFdelbegin \DIFdel{\RateMut }\DIFdelend \DIFaddbegin \DIFadd{\frac{\MutationRatePheno \Multiply \GenArchi}{\MutationRateNuc} }\DIFaddend \label{eq:rate-phy}.
-\end{align}
+\DIFdelbegin \DIFdel{We }\DIFdelend \DIFaddbegin \DIFadd{To remove the effect of the number of generations ($\NbrGen$) first, and to also equate to $\RateWhithin$ (eq.~\ref{eq:rate-pop}), we }\DIFaddend define $\RateBetween$ as the \DIFdelbegin \DIFdel{variance }\DIFdelend \DIFaddbegin \DIFadd{covariance }\DIFaddend in the mean trait value ($\VarPhy$) normalized by \DIFaddbegin \DIFadd{4 times }\DIFaddend the nucleotide divergence of any neutral genomic region (\DIFdelbegin \DIFdel{$d$).
+This ratio allows removing the effect of $\Time$ and $\MutationRatePheno$, which are parameters not related to }\DIFdelend \DIFaddbegin \DIFadd{$4\NucDiv$).
+After simplification, $\RateBetween$ is also solely a function of the underlying genetic architecture as:
+}\begin{align}
+    \DIFadd{\RateBetween }& \DIFadd{\defEqual \frac{\VarPhy}{4 \NucDiv} \label{eq:def-rate-phy},}\\
+    & \DIFadd{= \frac{4 \NbrGen \Multiply \MutationRatePheno \Multiply \GenArchi}{4 \NbrGen \Multiply \MutationRateNuc}\text{ from eq.~\ref{eq:covar} and~\ref{eq:distance}}, }\\
+    & \DIFadd{= \frac{\MutationRatePheno \Multiply \GenArchi}{\MutationRateNuc}. \label{eq:rate-phy}
+}\end{align}
 
-\DIFaddbegin \DIFadd{In equation~\ref{eq:rate-phy}, we show that the covariance in mean trait value between a pair of species ($\VarPhy$) does increase linearly with shared nucleotide divergence ($\NucDiv$), if the trait and sequences are neutrally evolving and the genetic architecture of the trait has not changed.
-Importantly, since the number of generations is the ratio of time and generation time (average time between two consecutive generations), removing the effect of the number of generations in equation~\ref{eq:rate-phy} also removes the effect of both time and generation time.
-}
+\DIFadd{In equation~\ref{eq:rate-phy}, we show that the covariance in mean trait value between a pair of species ($\VarPhy$) does increase linearly with shared nucleotide divergence ($\NucDiv$), if the trait and sequences are neutrally evolving and }\DIFaddend the genetic architecture of the \DIFdelbegin \DIFdel{trade, giving $\RateBetween$ as another proxy of $\RateMut$:
+}\begin{align*}
+    \DIFdel{\RateBetween }& \DIFdel{\defEqual \frac{\VarPhy}{4 d},}\\
+    & \DIFdel{= \frac{4 \Time \Multiply \MutationRatePheno \Multiply \RateMut}{4 \Time \Multiply \MutationRatePheno}\text{ from eq.~\ref{eq:covar} and~\ref{eq:distance}}, }\\
+    & \DIFdel{= \RateMut %DIFDELCMD < \label{eq:rate-phy}%%%
+.
+}\end{align*}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{trait has not changed.
+Importantly, since the number of generations is the ratio of time divided by generation time (average time between two consecutive generations), removing the effect of the number of generations in equation~\ref{eq:rate-phy} also removes the effect of both time and generation time.
+}\DIFaddend 
 
-\DIFaddend \begin{figure*}[!ht]
+\begin{figure*}[!ht]
     \centering
     \includegraphics[width=\textwidth, page=1] {figure1}
     \caption{
@@ -519,7 +544,7 @@ We define a neutrality index \DIFdelbegin \DIFdel{$\NI = \RateBetween / \RateWhi
 \DIFadd{\NI \defEqual \frac{\RateBetween}{\RateWhithin},
 }\end{align}
  \DIFadd{which will equal to }\DIFaddend $1$ for a trait evolving neutrally.
-Both $\RateBetween$ and $\RateWhithin$ can be estimated using quantitative trait and genomic sequences within and between species, while neither the mutation \DIFdelbegin \DIFdel{rate }\DIFdelend \DIFaddbegin \DIFadd{rates }\DIFaddend ($\MutationRatePheno$ \DIFaddbegin \DIFadd{and $\MutationRateNuc$}\DIFaddend ), nor the effective population size ($\Ne$)\DIFaddbegin \DIFadd{, generation time ($\GenTime$) }\DIFaddend or time of divergence (\DIFdelbegin \DIFdel{$\Time$}\DIFdelend \DIFaddbegin \DIFadd{$\NbrGen$}\DIFaddend ) need to be estimated.
+Both $\RateBetween$ and $\RateWhithin$ can be estimated using quantitative trait and genomic sequences within and between species, while neither the mutation \DIFdelbegin \DIFdel{rate }\DIFdelend \DIFaddbegin \DIFadd{rates }\DIFaddend ($\MutationRatePheno$ \DIFaddbegin \DIFadd{and $\MutationRateNuc$}\DIFaddend ), nor the effective population size ($\Ne$)\DIFaddbegin \DIFadd{, generation time }\DIFaddend or time of divergence (\DIFdelbegin \DIFdel{$\Time$}\DIFdelend \DIFaddbegin \DIFadd{$\NbrGen$}\DIFaddend ) need to be estimated.
 Moreover, the \DIFaddbegin \DIFadd{nucleotide }\DIFaddend sequence from which $\pi$ and \DIFdelbegin \DIFdel{$d$ are estimated }\DIFdelend \DIFaddbegin \DIFadd{$\NucDiv$ are obtained }\DIFaddend should be neutrally evolving, but they are not necessarily linked to the quantitative trait under study.
 
 \subsection*{\DIFdelbegin \DIFdel{Estimate}\DIFdelend \DIFaddbegin \DIFadd{Estimation}\DIFaddend }\label{subsec:estimate}
@@ -532,15 +557,16 @@ Thus, $\EstRateWhithin$ can be obtained by averaging out across all the sampled 
 On the other hand, $\RateBetween$ such as as defined in eq.~\ref{eq:def-rate-phy} only refers to a pair of species, and thus must be generalized to account for different species divergence, as is done in the comparative framework~\mbox{%DIFAUXCMD
 \citep{felsenstein_phylogenies_1985, omeara_testing_2006}}\hskip0pt%DIFAUXCMD
 .
-Generally, $\EstRateWhithin$ can thus be seen as an estimate of the rate of the evolution of the quantitative trait along a phylogeny, when the tree is measured in units of $4d$ ($d$ is the nucleotide divergence).
+Generally, $\EstRateWhithin$ can thus be seen as an estimate of the rate of evolution of the quantitative trait along a phylogenetic tree, when the tree is measured in units of $4d$ ($d$ being the nucleotide divergence).
 As such, any phylogenetic comparative methods that allow the estimation of phenotypic rates of evolution on a tree scaled by $4d$, instead of time as is usually the case, can be used to estimate $\EstRateWhithin$.
 We }\DIFaddend provide a maximum likelihood estimate for $\NI$ as well as a Bayesian estimate to derive posterior probabilities that the null model of neutrality (i.e.~$\NI = 1$) is rejected.
 
 \subsubsection*{Maximum likelihood estimate}
 At the phylogenetic scale, for $\NbrTaxa$ taxa in the tree, $\DistanceMatrix$ ($\NbrTaxa \times \NbrTaxa$) is the \DIFaddbegin \DIFadd{symmetric }\DIFaddend distance matrix computed from the branch lengths \DIFdelbegin \DIFdel{($d$ as nucleotide divergence in units of substitutions per site) }\DIFdelend and the topology of the phylogenetic tree.
 The diagonal $\Distance_{\Spi,\Spi}$ represents the total \DIFdelbegin \DIFdel{distances }\DIFdelend \DIFaddbegin \DIFadd{nucleotide divergence }\DIFaddend from the root of the tree to each taxon ($\Spi$).
-The off-diagonal elements (\DIFdelbegin \DIFdel{$\Distance_{\Spi,\Spj} = \Distance_{\Spj,\Spi}$}\DIFdelend \DIFaddbegin \DIFadd{$\Distance_{\Spi,\Spj} = \NucDiv$}\DIFaddend ) are the distances between the root and the most recent common ancestor of taxa $\Spi$ and $\Spj$\DIFaddbegin \DIFadd{, as in equation~\ref{eq:distance}}\DIFaddend .
-The state $\RootTrait$ at the root of the tree for the trait can be estimated from the $\NbrTaxa \times 1$ vector of mean trait values $\VecTrait$ at the tips of the tree using maximum likelihood~\citep{omeara_testing_2006}:
+The off-diagonal elements (\DIFdelbegin \DIFdel{$\Distance_{\Spi,\Spj} = \Distance_{\Spj,\Spi}$}\DIFdelend \DIFaddbegin \DIFadd{$\Distance_{\Spi,\Spj} = \NucDiv$}\DIFaddend ) are the distances between the root and the most recent common ancestor of taxa $\Spi$ and $\Spj$\DIFdelbegin \DIFdel{.
+The state $\RootTrait$ }\DIFdelend \DIFaddbegin \DIFadd{, as in equation~\ref{eq:distance}.
+The mean trait value }\DIFaddend at the root of the tree \DIFdelbegin \DIFdel{for the trait }\DIFdelend \DIFaddbegin \DIFadd{($\RootTrait$) }\DIFaddend can be estimated from the $\NbrTaxa \times 1$ vector of mean trait values $\VecTrait$ at the tips of the tree using maximum likelihood~\citep{omeara_testing_2006}:
 \begin{gather}
     \RootTrait = \left( \VecOne\tr \MultiplyMatrix \DistanceMatrix\inv \MultiplyMatrix \VecOne \right)\inv \Multiply \left( \VecOne\tr \MultiplyMatrix \DistanceMatrix\inv \MultiplyMatrix \VecTrait \right), \label{eq:estimated-root-trait}
 \end{gather}
@@ -573,7 +599,7 @@ Here }\DIFaddend we generalize to $\Ntrait$ traits co-varying along the phylogen
 }\DIFdelend .
 Trait variation along the phylogenetic tree is modeled as a $\Ntrait$-dimensional Brownian process $\Brownian$ ($1 \times \Ntrait$) starting at the root and branching along the tree topology~\citep{huelsenbeck_detecting_2003, lartillot_phylogenetic_2011, lartillot_joint_2012, latrille_inferring_2021}.
 The rate of change of the Brownian process is determined by the positive semi-definite and symmetric covariance matrix between traits $\CovarianceMatrix$ ($\Ntrait \times \Ntrait$).
-The \DIFaddbegin \DIFadd{branch length of the tree on which the Brownian process runs is measured in units of $4d$ ($d$ is the nucleotide divergence).
+The \DIFaddbegin \DIFadd{branch lengths of the tree used to model the Brownian process runs is measured in units of $4d$ ($d$ being the nucleotide divergence).
 The }\DIFaddend off-diagonal elements of $\CovarianceMatrix$ are the covariance between traits, and the diagonal elements are the variance of each trait \DIFdelbegin \DIFdel{, thus corresponding }\DIFdelend \DIFaddbegin \DIFadd{when measured in $4d$ units, and thus equate }\DIFaddend to $\EstRateBetween$ (see section~S\ref{subsec:multivariate-brownian-process}).
 \DIFaddbegin 
 
@@ -597,7 +623,7 @@ Fortunately, if heritability is not known, the test for diversifying selection c
 Indeed, if the additive genetic variance is substituted by phenotypic variance, it is equivalent to assuming complete heritability ($\Heritability = 1$).
 Because $\Heritability \leq 1$ by definition, we overestimate the within-species variation and thus underestimate $\EstNI$.
 It is, however, possible to test for diversifying selection because testing for $\EstNI > 1$ while using phenotypic variance instead of additive genetic variance means that knowing the additive genetic variance would have only increased the evidence for diversifying selection.
-\DIFdelbegin \DIFdel{Similarly, }\DIFdelend \DIFaddbegin \DIFadd{Additionally, empirical estimates of $\Heritability$ are surprisingly stable across species and falling within the range of 0.2-0.5 in a vast majority of phenotypes tested~\mbox{%DIFAUXCMD
+\DIFdelbegin \DIFdel{Similarly, }\DIFdelend \DIFaddbegin \DIFadd{Additionally, empirical estimates of $\Heritability$ are surprisingly stable across species and fall within the range of 0.2-0.5 in a vast majority of phenotypic traits tested~\mbox{%DIFAUXCMD
 \citep{hansen_heritability_2011, hansen_evolvability_2021}}\hskip0pt%DIFAUXCMD
 .
 Alternatively, }\DIFaddend using the broad-sense heritability ($H^2$) instead of narrow-sense heritability ($\Heritability$) results in an underestimation of $\EstNI$ since $\Heritability \leq H^2$.
@@ -629,12 +655,12 @@ Assuming a diploid panmictic population of size $\Ne=50$ at the root of the tree
 For each offspring, the number of mutations was drawn from a Poisson distribution with mean $2 \Multiply \MutationRatePheno \Multiply \NbrLoci $, with the mutation rate per \DIFaddbegin \DIFadd{locus per }\DIFaddend generation $\MutationRatePheno$.
 From the empirical mammalian dataset (see next section), we computed an average nucleotide divergence from the root to leaves of $0.18$ and average genetic diversity of $0.00276$.
 We scaled parameters in our simulations to fit plausible values for mammals.
-We thus used a \DIFaddbegin \DIFadd{nucleotide }\DIFaddend mutation rate of \DIFdelbegin \DIFdel{$\MutationRatePheno=0.00276 / 4 \Ne = 1.38 \times 10^{-5}$ }\DIFdelend \DIFaddbegin \DIFadd{$\MutationRateNuc=0.00276 / 4 \Ne = 1.38 \times 10^{-5}$ }\DIFaddend per generation per locus and a total of \DIFdelbegin \DIFdel{$\Time = 0.18 / 1.38 \times 10^{-5} = 13,500$ }\DIFdelend \DIFaddbegin \DIFadd{$0.18 / 1.38 \times 10^{-5} = 13,500$ }\DIFaddend generations from root to leaves, and the number of generations along each branch was proportional to the branch length.
+We thus used a \DIFaddbegin \DIFadd{nucleotide }\DIFaddend mutation rate of \DIFdelbegin \DIFdel{$\MutationRatePheno=0.00276 / 4 \Ne = 1.38 \times 10^{-5}$ per generation per locus }\DIFdelend \DIFaddbegin \DIFadd{$\MutationRateNuc=0.00276 / 4 \Ne = 1.38 \times 10^{-5}$ per site per generation  }\DIFaddend and a total of \DIFdelbegin \DIFdel{$\Time = 0.18 / 1.38 \times 10^{-5} = 13,500$ }\DIFdelend \DIFaddbegin \DIFadd{$0.18 / 1.38 \times 10^{-5} = 13,500$ }\DIFaddend generations from root to leaves, and the number of generations along each branch was proportional to the branch length.
 \DIFaddbegin \DIFadd{We set $\MutationRatePheno=\MutationRateNuc$ without loss in generality since the genetic architecture ($\NbrLoci$ and $a$) is assumed constant in the simulator.
 }\DIFaddend 
 
 The changes in \DIFdelbegin \DIFdel{log-}\DIFdelend $\MutationRatePheno$ and \DIFdelbegin \DIFdel{log-}\DIFdelend $\Ne$ along the lineages were both modeled by a \DIFdelbegin \DIFdel{geometric Brownian process (}\DIFdelend \DIFaddbegin \DIFadd{Brownian process on the log scale (log-$\MutationRatePheno$ and log-$\Ne$), leading to geometric Brownian motion on the linear scale ($\MutationRatePheno$ and $\Ne$).
-These processes are parameterized as }\DIFaddend $\brownian \left(0, \sigma_{\MutationRatePheno}=0.0086\right)$ and $\brownian \left(0, \sigma_{\Ne}=0.0086\right)$, which \DIFdelbegin \DIFdel{led }\DIFdelend \DIFaddbegin \DIFadd{if counted across $13,500$ generations leads }\DIFaddend to a standard deviation of $0.0086 \Multiply \sqrt {13,500} = 1.0$\DIFdelbegin \DIFdel{in log-space from root to leaves}\DIFdelend \DIFaddbegin \DIFadd{.
+These processes are parameterized as }\DIFaddend $\brownian \left(0, \sigma_{\MutationRatePheno}=0.0086\right)$ and $\brownian \left(0, \sigma_{\Ne}=0.0086\right)$, which\DIFdelbegin \DIFdel{led }\DIFdelend \DIFaddbegin \DIFadd{, if counted across $13,500$ generations, leads }\DIFaddend to a standard deviation of $0.0086 \Multiply \sqrt {13,500} = 1.0$\DIFdelbegin \DIFdel{in log-space from root to leaves}\DIFdelend \DIFaddbegin \DIFadd{.
 In other words, the deviation in log-$\Ne$ and log-$\MutationRatePheno$  between the extant species and the root is $1.0$}\DIFaddend .
 An Ornstein-Uhlenbeck process was overlaid to the instant value of log-$\Ne$ provided by the geometric Brownian process to account for short-term changes between generations ($\text{OU} \left(0, \sigma_{\Ne}=0.1, \theta_{\Ne}=0.9\right)$).
 The geometric Brownian motion accounted for long-term fluctuations (low rate of changes $\sigma_{\Ne}$ but unbounded), while the Ornstein-Uhlenbeck introduced short-term fluctuations (high rate of changes $\sigma_{\Ne}$ but bounded and mean-reverting).
@@ -682,7 +708,7 @@ More specifically, nucleotide divergence is estimated }\DIFaddend on a set of ne
 
 We also analyzed a dataset of primate species, with the nucleotide variation obtained from \citet{kuderna_global_2023} and the quantitative trait variation also from \citet{tsuboi_breakdown_2018}, using the same filtering as for the mammalian dataset.
 However, the primate nucleotide divergence was not obtained on a set of neutral markers as for the mammalian dataset, but across the whole genome.
-\DIFaddbegin \DIFadd{As such, the evidence for $\EstNI > 1$ does not necessarily imply that the trait is evolving under diversifying selection since non-neutral markers for divergence can lead to a spurious $\EstNI > 1$ (see table~\ref{table:assumptions}).
+\DIFaddbegin \DIFadd{As such, the evidence for $\EstNI > 1$ does not necessarily imply that the trait is evolving under diversifying selection since non-neutral markers included in the estimate of divergence can lead to a spurious $\EstNI > 1$ (see table~\ref{table:assumptions}).
 }\DIFaddend 
 
 \section*{Results}\label{sec:results}
@@ -691,7 +717,7 @@ However, the primate nucleotide divergence was not obtained on a set of neutral 
 
 For a neutral trait, the genetic architecture, meaning the number of loci encoding the trait and the average effect of a mutation on the trait, is formally related to both within and between-species variation of the trait.
 We defined the neutrality index as $\NI = \RateBetween/\RateWhithin$, which equals $1$ for a neutral trait (see Materials and Methods), suggesting that traits for which this relationship was not verified were putatively under selection.
-Under stabilizing selection, the variation between species is depleted because the mean trait value is maintained \DIFdelbegin \DIFdel{similar }\DIFdelend \DIFaddbegin \DIFadd{toward similar values }\DIFaddend between different species, which leads to $\NI < 1$.
+Under stabilizing selection, the variation between species is depleted because the mean trait \DIFdelbegin \DIFdel{value is maintained similar }\DIFdelend \DIFaddbegin \DIFadd{is maintained toward similar values }\DIFaddend between different species, which leads to $\NI < 1$.
 In contrast, under diversifying selection, the variation between species is inflated because species will have potentially different trait values~\citep{hansen_stabilizing_1997}, which leads to $\NI > 1$.
 Our neutrality index for a quantitative trait leveraged the data for any number of species, and took advantage of the signal over the whole phylogenetic tree, while at the same time taking into account phylogenetic inertia and addressing the non-independence between species (Fig.~\ref{fig:methods}).
 This statistic was obtained as a maximum likelihood estimate ($\EstNI$), from eq.~\ref{eq:estimated-rate-pop} and~\ref{eq:estimated-rate-phy}.
@@ -809,8 +835,8 @@ Technically, the neutrality index can be estimated either as a maximum likelihoo
 The latter also enabled the estimation of the posterior credible interval to test for departure from a neutrally evolving trait (e.g. $ \proba [ \EstNI > 1 ]$).
 We tested our statistical procedure against simulated data and showed that our test was able to correctly detect simulations under diversifying selection (test of $\EstNI > 1$) or under stabilizing selection (test of $\EstNI < 1$).
 However, our test detected a spurious signal of stabilizing selection ($\EstNI < 1$) when we simulated the evolution of a neutral trait.
-\DIFdelbegin \DIFdel{We }\DIFdelend \DIFaddbegin \DIFadd{An assumption in our test is that the neutral phenotypic trait is evolving as a Brownian process and is unbounded.
-However, the phenotype is encoded by a genetic architecture and is thus ultimately bounded, even more so if the trait is encoded by a few loci (see table~\ref{table:assumptions}).
+\DIFdelbegin \DIFdel{We }\DIFdelend \DIFaddbegin \DIFadd{An assumption of our test is that the neutral phenotypic trait is evolving as a Brownian process and is, therefore, unbounded.
+However, the phenotype is encoded by a genetic architecture, and is thus ultimately bounded, even more so if the trait is encoded by a few loci (see table~\ref{table:assumptions}).
 At the macro-evolutionary scale, phenotypic divergence should plateau at some point, resulting in a reduced between-species trait variation.
 We argue that this effect can result in a spurious signal of stabilizing selection ($\EstNI < 1$), especially for deeper phylogeny (figure~\ref{fig:supp-distance} and section~S\ref{sec:supp-distance})
 We }\DIFaddend thus argue that our method should be used to detect diversifying selection, but that it had low accuracy to detect stabilizing selection due to false positives.
@@ -830,18 +856,18 @@ These studies have further compared their statistic }\DIFdelend \DIFaddbegin \DI
 First, one empirical strategy is to compare the ratio of between to within variation }\DIFaddend across a pool of traits, which \DIFdelbegin \DIFdel{allowed them }\DIFdelend \DIFaddbegin \DIFadd{allow }\DIFaddend to identify outlier traits putatively under diversifying selection\DIFdelbegin \DIFdel{but without testing for selection on a single trait at a time}\DIFdelend \DIFaddbegin \DIFadd{~\mbox{%DIFAUXCMD
 \citep{rohlfs_modeling_2014}}\hskip0pt%DIFAUXCMD
 .
-However, this method does not allow formally testing for diversifying selection, and requires many traits such as expression level data to seek outliers genes}\DIFaddend ~\citep{rohlfs_phylogenetic_2015, gillard_comparative_2021}.
+However, this method does not formally allow testing for diversifying selection, and requires many traits such as expression level data to seek outliers genes}\DIFaddend ~\citep{rohlfs_phylogenetic_2015, gillard_comparative_2021}.
 \DIFdelbegin \DIFdel{Instead, our procedure can be applied to a single trait, estimating the neutrality index and giving a statistical }\DIFdelend \DIFaddbegin \DIFadd{Second, other methods leverage Lande’s generalized genetic distance (LGGD), which relate the ratio of between to within variations to population-genetic parameters~\mbox{%DIFAUXCMD
 \citep{lynch_analysis_1990, lemos_evolutionary_2001, lemos_rates_2005, weaver_were_2007, porto_rate_2015}}\hskip0pt%DIFAUXCMD
 .
-Specifically, by either assuming constancy or by leveraging estimates of effective population size ($\Ne$) and number of generations between species, these methods can }\DIFaddend test for departures from the null model of neutral evolution for a single \DIFdelbegin \DIFdel{test.
+Specifically, by leveraging estimates of effective population size ($\Ne$) and number of generations between species, or alternatively by assuming their constancy, these methods can }\DIFaddend test for departures from the null model of neutral evolution for a single \DIFdelbegin \DIFdel{test.
 Our }\DIFdelend \DIFaddbegin \DIFadd{trait.
 Such methods have been successful in identifying specific instances of diversifying selection\mbox{%DIFAUXCMD
 \citep{schroeder_evolution_2017, machado_preeminent_2022} }\hskip0pt%DIFAUXCMD
 and near-drift~\mbox{%DIFAUXCMD
 \citep{machado_using_2023}}\hskip0pt%DIFAUXCMD
 .
-However, $\Ne$ and the number of generations are complex parameters to correctly infer, and is usually done for a pair of species or few species, and ultimately requires large genomic datasets and heavy statistical methods~\mbox{%DIFAUXCMD
+However, $\Ne$ and the number of generations are complex parameters to correctly infer, and is usually done for a pair or only a few species, and ultimately requires large genomic datasets and heavy statistical methods~\mbox{%DIFAUXCMD
 \citep{wilder_contribution_2023}}\hskip0pt%DIFAUXCMD
 .
 Instead, our }\DIFaddend diversity index opens new avenues to revisit these studies \DIFdelbegin \DIFdel{and better test }\DIFdelend \DIFaddbegin \DIFadd{testing }\DIFaddend for the selective regime affecting the quantitative traits, \DIFdelbegin \DIFdel{assuming we have access to genomic datasets to estimate }\DIFdelend \DIFaddbegin \DIFadd{by formally incorporating }\DIFaddend nucleotide divergence and polymorphism\DIFaddbegin \DIFadd{, bypassing estimation of $\Ne$, generation time and calibration of ancestral node ages~\mbox{%DIFAUXCMD
@@ -850,12 +876,14 @@ Instead, our }\DIFaddend diversity index opens new avenues to revisit these stud
 
 % Why is our test different
 \DIFdelbegin \DIFdel{The }\DIFdelend \DIFaddbegin \DIFadd{As such, the }\DIFaddend main novelty of our study was to use the nucleotide divergence and polymorphism to normalize trait variation between and within species.
-In \DIFdelbegin \DIFdel{the contextof within species variation, }\DIFdelend \DIFaddbegin \DIFadd{this context, our test bears many similarities to }\DIFaddend \QstFst\ tests \DIFaddbegin \DIFadd{that }\DIFaddend have been developed to \DIFdelbegin \DIFdel{compare trait and sequence }\DIFdelend \DIFaddbegin \DIFadd{test for selection of a trait }\DIFaddend across several populations \DIFdelbegin \DIFdel{to test for selection~\mbox{%DIFAUXCMD
-\citep{martin_multivariate_2008, leinonen_qst_2013}}\hskip0pt%DIFAUXCMD
+In \DIFdelbegin \DIFdel{the contextof within species variation, }\DIFdelend \DIFaddbegin \DIFadd{this context, our test bears many similarities to }\DIFaddend \QstFst\ tests \DIFaddbegin \DIFadd{(and their derivatives) that }\DIFaddend have been developed to \DIFdelbegin \DIFdel{compare trait and sequence }\DIFdelend \DIFaddbegin \DIFadd{test for selection of a trait }\DIFaddend across several populations \DIFdelbegin \DIFdel{to test for selection~\mbox{%DIFAUXCMD
+\citep{martin_multivariate_2008, leinonen_qst_2013} }\hskip0pt%DIFAUXCMD
 .
 Our neutrality index also used the genetic sequences from which nucleotide divergence and polymorphism are estimated.
 Although the sequences }\DIFdelend \DIFaddbegin \DIFadd{while also leveraging sequence variation~\mbox{%DIFAUXCMD
-\citep{martin_multivariate_2008, ovaskainen_new_2011, leinonen_qst_2013}}\hskip0pt%DIFAUXCMD
+\citep{martin_multivariate_2008, leinonen_qst_2013} }\hskip0pt%DIFAUXCMD
+or co-ancestry between individuals~\mbox{%DIFAUXCMD
+\citep{ovaskainen_new_2011}}\hskip0pt%DIFAUXCMD
 .
 Our method can be seen as an extension at the phylogenetic scale, where although the sequences used }\DIFaddend should be neutrally evolving, they \DIFdelbegin \DIFdel{do not have to be necessarily linked to the quantitative traitunder study.
 Nucleotide variation allows normalizing for diversity driven by confounding factors such as population sizes ($\Ne$), mutation rates ($\MutationRatePheno$) and generation time~\mbox{%DIFAUXCMD
@@ -872,11 +900,12 @@ The }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend normalization by nucleotide
 }\DIFaddend 
 
 \DIFaddbegin \DIFadd{In the context of phylogenetic comparative methods, modeling mean trait evolution as a function of nucleotide divergence ($d$) instead of time has more general consequences.
-As an example, for a neutrally evolving trait, since generation time will change along the phylogeny, we argue that using time-calibrated trees can produce biases, such that $d$-scaled trees should be used instead~\mbox{%DIFAUXCMD
+As an example, trait variation is often modeled as a Brownian process running on a time-calibrated tree, which can produce biases~\mbox{%DIFAUXCMD
 \citep{litsios_effects_2012}}\hskip0pt%DIFAUXCMD
 .
-Using nucleotide divergence would also remove the potential effect of molecular clocks and calibration assumptions required to estimate ancestral node ages.
-We argue, that the soundness of studying trait evolution on $d$-scaled trees can be evaluated by absolute fit of a model to the data~\mbox{%DIFAUXCMD
+Indeed, for a neutrally evolving trait, trait variation depends directly on the number of generations, which in turn correlates with time. But, since species generation time might vary along the phylogenetic tree, $d$-scaled trees absorbing changes in generation time should be used instead of time-scaled trees.
+Using nucleotide divergence would also remove the potential effect of model assumptions required to calibrate ancestral node ages (e.g. molecular clocks).
+We argue, that the soundness of studying trait evolution on $d$-scaled trees can be evaluated by the absolute fit of a model to the data~\mbox{%DIFAUXCMD
 \citep{pennell_model_2015}}\hskip0pt%DIFAUXCMD
 .
 More generally, genomic information could potentially be seen as a way to disentangle congruence models~\mbox{%DIFAUXCMD
@@ -888,9 +917,8 @@ More generally, genomic information could potentially be seen as a way to disent
 
 \DIFaddend % How is our test related to other tests of selection on sequences
 Even though our test was developed for a quantitative trait, analogies with other tests of selection developed for molecular sequences also provided insight into its behavior.
-First, we acknowledge that our test took inspiration from the \citet{mcdonald_adaptative_1991} test devised for protein-coding DNA sequences \DIFaddbegin \DIFadd{in a pair of species, except that the non-synonymous versus synonymous distinction is replaced by one between quantitative trait versus neutral genomic sequence.
-Second, at the phylogenetic scale across several species}\DIFaddend , \DIFdelbegin \DIFdel{where synonymous mutations were used to determine the neutral expectation, and the inflation of divergence was compared to polymorphism within species.
-Second, because $\NI$ was compared to 1, our test ultimately bear analogy to the }\DIFdelend \DIFaddbegin \DIFadd{our test also bears analogy to }\DIFaddend codon-based test of selection, where the ratio of non-synonymous to synonymous substitutions ($\dnds$) is compared to 1~\citep{goldman_codonbased_1994, muse_likelihood_1994}.
+First, we acknowledge that our test took inspiration from the \citet{mcdonald_adaptative_1991} test devised for protein-coding DNA sequences \DIFdelbegin \DIFdel{, where synonymous mutations were used to determine the neutral expectation, and the inflation of divergence was compared to polymorphism within species}\DIFdelend \DIFaddbegin \DIFadd{in a pair of species, except that the non-synonymous versus synonymous distinction is replaced by the comparison between quantitative trait and neutral genomic sequence}\DIFaddend .
+Second, \DIFdelbegin \DIFdel{because $\NI$ was compared to 1, our test ultimately bear analogy to the }\DIFdelend \DIFaddbegin \DIFadd{at the phylogenetic scale, when comparison is done across several species, our test also bears analogy to }\DIFaddend codon-based test of selection, where the ratio of non-synonymous to synonymous substitutions ($\dnds$) is compared to 1~\citep{goldman_codonbased_1994, muse_likelihood_1994}.
 As $\dnds < 1$ is interpreted as purifying selection acting on the protein, $\NI < 1$ is interpreted as stabilizing selection acting on the trait.
 Similarly, the interpretation of adaptation for $\dnds > 1$ is analogous to diversifying selection for $\NI > 1$.
 With this analogy in mind, we could leverage the vast literature discussing and interpreting the results of these tests and their pitfalls~\citep{nielsen_molecular_2005, anisimova_investigating_2009, jensen_importance_2019}.
@@ -963,10 +991,10 @@ In conclusion, our study provided a statistical framework to test for diversifyi
     \item $\NbrLoci$ is the number of loci encoding the trait.
     \item $a_l \sim \mathcal{N}(0,a^2)$ is the effect of a mutation on the trait at locus $l \in \{1, \hdots, \NbrLoci\}$.
     \item $\Ne$ is the effective number of individuals.
-    \item $g_{i,l} \in \{0, 1, 2\}$ is the genotypic value at locus $l$ for individual $i \in \{1, \hdots, \Ne\}$.
-    \item $G_i = \sum_{l=1}^{\NbrLoci} a_l \times g_{i,l}$ is the genotypic value for individual $i$.
-    \item $\xi_i \sim \mathcal{N}(0, \VarEnv)$ is the effect of environment on the trait for individual i.
-    \item $\Trait_i = G_i + \xi_i$ is the phenotype for individual $i$.
+    \item \DIFdelbegin \DIFdel{$g_{i,l} \in \{0, 1, 2\}$ }\DIFdelend \DIFaddbegin \DIFadd{$g_{\Indiv,l} \in \{0, 1, 2\}$ }\DIFaddend is the genotypic value at locus $l$ for individual \DIFdelbegin \DIFdel{$i \in \{1, \hdots, \Ne\}$}\DIFdelend \DIFaddbegin \DIFadd{$\Indiv \in \{1, \hdots, \Ne\}$}\DIFaddend .
+    \item \DIFdelbegin \DIFdel{$G_i = \sum_{l=1}^{\NbrLoci} a_l \times g_{i,l}$ }\DIFdelend \DIFaddbegin \DIFadd{$G_{\Indiv} = \sum_{l=1}^{\NbrLoci} a_l \times g_{\Indiv,l}$ }\DIFaddend is the genotypic value for individual \DIFdelbegin \DIFdel{$i$}\DIFdelend \DIFaddbegin \DIFadd{$\Indiv$}\DIFaddend .
+    \item \DIFdelbegin \DIFdel{$\xi_i \sim \mathcal{N}(0, \VarEnv)$ }\DIFdelend \DIFaddbegin \DIFadd{$\xi_{\Indiv} \sim \mathcal{N}(0, \VarEnv)$ }\DIFaddend is the effect of environment on the trait for individual \DIFdelbegin \DIFdel{i}\DIFdelend \DIFaddbegin \DIFadd{$\Indiv$}\DIFaddend .
+    \item \DIFdelbegin \DIFdel{$\Trait_i = G_i + \xi_i$ }\DIFdelend \DIFaddbegin \DIFadd{$\Trait_{\Indiv} = G_{\Indiv}+ \xi_i$ }\DIFaddend is the phenotype for individual \DIFdelbegin \DIFdel{$i$}\DIFdelend \DIFaddbegin \DIFadd{$\Indiv$}\DIFaddend .
 \end{itemize}
 
 \begin{center}
@@ -977,7 +1005,7 @@ In conclusion, our study provided a statistical framework to test for diversifyi
 
 within-species, the mean ($\bar{G}$) and variance ($\VarGenetic$) of the genotype are:
 \begin{equation}
-    \bar{G} = \frac{1}{\Ne}\sum_{i=1}^{\Ne} G_i  \text{\quad and \quad} \VarGenetic = \frac{1}{\Ne}\sum_{i=1}^{\Ne}\left(G_i - \bar{G} \right)^2\label{eq:simu-genotype}
+    \bar{G} = \frac{1}{\Ne}\sum\DIFdelbegin \DIFdel{_{i=1}}\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv=1}}\DIFaddend ^{\Ne} G\DIFdelbegin \DIFdel{_i  }\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv} }\DIFaddend \text{\quad and \quad} \VarGenetic = \frac{1}{\Ne}\sum\DIFdelbegin \DIFdel{_{i=1}}\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv=1}}\DIFaddend ^{\Ne}\left(G\DIFdelbegin \DIFdel{_i }\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv}}\DIFaddend - \bar{G} \right)^2\label{eq:simu-genotype}
 \end{equation}
 The theoretical additive genetic variance ($\VarGenetic$) is a function of the number of loci ($\NbrLoci$) and the effect of a mutation ($a$) as:
 \begin{equation}
@@ -986,7 +1014,7 @@ The theoretical additive genetic variance ($\VarGenetic$) is a function of the n
 
 The mean ($\bar{\Trait}$) and variance ($\VarPhenotype$) of the phenotype are:
 \begin{equation}
-    \bar{\Trait} = \frac{1}{\Ne}\sum_{i=1}^{\Ne} \Trait_i \text{\quad and \quad} \VarPhenotype = \frac{1}{\Ne}\sum_{i=1}^{\Ne}\left(\Trait_i - \bar{\Trait} \right)^2 \label{eq:simu-between}
+    \bar{\Trait} = \frac{1}{\Ne}\sum\DIFdelbegin \DIFdel{_{i=1}}\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv=1}}\DIFaddend ^{\Ne} \Trait\DIFdelbegin \DIFdel{_i }\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv}}\DIFaddend \text{\quad and \quad} \VarPhenotype = \frac{1}{\Ne}\sum\DIFdelbegin \DIFdel{_{i=1}}\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv=1}}\DIFaddend ^{\Ne}\left(\Trait\DIFdelbegin \DIFdel{_i }\DIFdelend \DIFaddbegin \DIFadd{_{\Indiv} }\DIFaddend - \bar{\Trait} \right)^2 \label{eq:simu-between}
 \end{equation}
 
 Heritability ($\Heritability$) is defined as:
@@ -1002,20 +1030,22 @@ Altogether, effective population size ($\Ne$), the number of loci ($\NbrLoci$) a
 \section{Bayesian estimate}\label{sec:bayesian-estimate}
 
 \subsection{Multivariate Brownian process}\label{subsec:multivariate-brownian-process}
-Here we generalize to $\Ntrait$ traits evolving along the phylogeny and are correlated between them.
+Here we \DIFdelbegin \DIFdel{generalize to }\DIFdelend \DIFaddbegin \DIFadd{model }\DIFaddend $\Ntrait$ traits evolving along the \DIFdelbegin \DIFdel{phylogeny and }\DIFdelend \DIFaddbegin \DIFadd{phylogenetic tree that }\DIFaddend are correlated between them.
 Their variation along the phylogeny is modeled as a $\Ntrait$-dimensional Brownian process $\Brownian$ ($1 \times \Ntrait$) starting at the root and branching along the tree topology.
 The rate of change of the Brownian process is determined by the positive semi-definite and symmetric covariance matrix between traits $\CovarianceMatrix$ ($\Ntrait \times \Ntrait$).
-Along branch $j$ with length $d_{j}$, the Brownian process start at the ancestral node $\mathcal{A}(j)$ with value $\Brownian(\mathcal{A}(j))$, and ends at node $\mathcal{R}(j)$  with value $\Brownian(\mathcal{R}(j))$.
-The independent contrast $\contrast_{j}$ defined as change in trait along the branch normalized by $\sqrt {d_{j}}$ is a multivariate Gaussian:
+Along branch \DIFdelbegin \DIFdel{$j$ with length $d_{j}$}\DIFdelend \DIFaddbegin \DIFadd{$\Branch$ with length $d_{\Branch}$}\DIFaddend , the Brownian process start at the ancestral node \DIFdelbegin \DIFdel{$\mathcal{A}(j)$ with value $\Brownian(\mathcal{A}(j))$}\DIFdelend \DIFaddbegin \DIFadd{$\mathcal{A}(\Branch)$ with value $\Brownian(\mathcal{A}(\Branch))$}\DIFaddend , and ends at node \DIFdelbegin \DIFdel{$\mathcal{R}(j)$  with value $\Brownian(\mathcal{R}(j))$}\DIFdelend \DIFaddbegin \DIFadd{$\mathcal{R}(\Branch)$  with value $\Brownian(\mathcal{R}(\Branch))$}\DIFaddend .
+The independent contrast \DIFdelbegin \DIFdel{$\contrast_{j}$ }\DIFdelend \DIFaddbegin \DIFadd{$\contrast_{\Branch}$ }\DIFaddend defined as change in trait along the branch normalized by \DIFdelbegin \DIFdel{$\sqrt {d_{j}}$ }\DIFdelend \DIFaddbegin \DIFadd{$\sqrt {d_{\Branch}}$ }\DIFaddend is a multivariate Gaussian:
 \begin{equation}
     \label{eq:DistribBrownian}
-    \contrast_{j} = \frac{\Brownian (\mathcal{R}(j)) - \Brownian (\mathcal{A}(j)) }{\sqrt {d_{j}}} \sim \mathcal{N}\left(\VecZero, \CovarianceMatrix \right).
+    \contrast\DIFdelbegin \DIFdel{_{j} }\DIFdelend \DIFaddbegin \DIFadd{_{\Branch} }\DIFaddend = \DIFdelbegin \DIFdel{\frac{\Brownian (\mathcal{R}(j)) - \Brownian (\mathcal{A}(j)) }{\sqrt {d_{j}}} }\DIFdelend \DIFaddbegin \DIFadd{\frac{\Brownian (\mathcal{R}(\Branch)) - \Brownian (\mathcal{A}(\Branch)) }{\sqrt {d_{\Branch}}} }\DIFaddend \sim \mathcal{N}\left(\VecZero, \CovarianceMatrix \right).
 \end{equation}
 
 \subsection{Sampling the covariance matrix}\label{subsec:sampling-the-covariance-matrix}
-From the independent contrast at each branch of the tree ($\contrast_{j}$), we can define the $\Ntrait \times \Ntrait$ scatter matrix, $\Scattermatrix$, as:
+From the independent contrast at each branch of the tree (\DIFdelbegin \DIFdel{$\contrast_{j}$}\DIFdelend \DIFaddbegin \DIFadd{$\contrast_{\Branch}$}\DIFaddend ), we can define the $\Ntrait \times \Ntrait$ scatter matrix, $\Scattermatrix$, as:
 \begin{equation}
-    \Scattermatrix = \sum\limits_{j=1}^{\Nbranch} \contrast_{j} \MultiplyMatrix \left[\contrast_{j}\right]\tr\label{eq:bayes-scatter},
+    \Scattermatrix = \sum\limits\DIFdelbegin \DIFdel{_{j=1}}\DIFdelend \DIFaddbegin \DIFadd{_{\Branch=1}}\DIFaddend ^{\Nbranch} \contrast\DIFdelbegin \DIFdel{_{j} }\DIFdelend \DIFaddbegin \DIFadd{_{\Branch} }\DIFaddend \MultiplyMatrix \DIFdelbegin %DIFDELCMD < \left[%%%
+\DIFdelend \contrast\DIFdelbegin \DIFdel{_{j}}%DIFDELCMD < \right]%%%
+\DIFdelend \DIFaddbegin \DIFadd{_{\Branch}}\DIFaddend \tr\label{eq:bayes-scatter},
 \end{equation}
 where $\Nbranch$ is the number of branches in the tree and $\NbrTaxa$ the number of taxa.
 
@@ -1029,13 +1059,14 @@ By Bayes theorem, the {posterior} on $\CovarianceMatrix$, conditional on a parti
 \begin{equation}
     \CovarianceMatrix \sim \text{Wishart}^{-1}\left( \Identitymatrix + \Scattermatrix, \WishartPostDf\right)\label{eq:bayes-posterior}
 \end{equation}
-This invert Wishart distribution can be obtained by sampling $\WishartPostDf$ independent and identically distributed multivariate normal random variables $\Multivariate_{k}$ defined by
-\begin{equation}
-    \Multivariate_{k} \sim \mathcal{N} \left( \VecZero, \left[ \Identitymatrix + \Scattermatrix\right]^{-1} \right).\label{eq:bayes-multivariate}
+This invert Wishart distribution can be obtained by sampling $\WishartPostDf$ independent and identically distributed multivariate normal random variables \DIFdelbegin \DIFdel{$\Multivariate_{k}$ defined by
+}\DIFdelend \DIFaddbegin \DIFadd{$\Multivariate_{\WishartIDD}$ defined by
+}\DIFaddend \begin{equation}
+    \Multivariate\DIFdelbegin \DIFdel{_{k} }\DIFdelend \DIFaddbegin \DIFadd{_{\WishartIDD} }\DIFaddend \sim \mathcal{N} \left( \VecZero, \left[ \Identitymatrix + \Scattermatrix\right]^{-1} \right).\label{eq:bayes-multivariate}
 \end{equation}
 And from these multivariate samples, $\CovarianceMatrix$ is Gibbs sampled as:
 \begin{equation}
-    \CovarianceMatrix = \left( \sum\limits_{k=1}^{\WishartPostDf} \Multivariate_{k} \MultiplyMatrix  \left[\Multivariate_{k} \right] \tr \right)\inv \label{eq:bayes-gibbs}
+    \CovarianceMatrix = \left( \sum\limits\DIFdelbegin \DIFdel{_{k=1}}\DIFdelend \DIFaddbegin \DIFadd{_{\WishartIDD=1}}\DIFaddend ^{\WishartPostDf} \Multivariate\DIFdelbegin \DIFdel{_{k} }\DIFdelend \DIFaddbegin \DIFadd{_{\WishartIDD} }\DIFaddend \MultiplyMatrix  \left[\Multivariate\DIFdelbegin \DIFdel{_{k} }\DIFdelend \DIFaddbegin \DIFadd{_{\WishartIDD} }\DIFaddend \right] \tr \right)\inv \label{eq:bayes-gibbs}
 \end{equation}
 
 \newpage
