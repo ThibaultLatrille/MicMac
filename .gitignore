@@ -11,6 +11,7 @@ data_empirical/data/science.*
 Legacy.*
 /manuscript/slides
 /manuscript/slides/
+/manuscript/submitted
 /utils/
 *~
 .DS_Store
