@@ -19,6 +19,7 @@ cmake-build-debug
 __pycache__
 build
 test
+bin/
 .snakemake
 .idea/
 out/
