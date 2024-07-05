@@ -13,7 +13,6 @@ Legacy.*
 /manuscript/slides/
 /manuscript/submitted
 /utils/CMakeLists.txt
-/utils/BayesCode
 *~
 .DS_Store
 cmake-build-debug
