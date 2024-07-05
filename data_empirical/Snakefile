@@ -23,26 +23,18 @@ for executable in ["nodetraits", "readnodetraits"]:
     print(f"Found {executable} at {exec_path}")
 
 
-def data_dS(dataset, empirical=True):
-    if empirical:
-        dico_dS = {"E": "Edempdnds.dsom.tre",
-                   "Zoo": "Zoo739_empiricaldnds.dsom.tre"}
-    else:
-        dico_dS = {"E": "Ed708genebrdnds.dsom.tre",
-                   "Zoo": "Zoo739_sub1to5_genebranchdnds.dsom.tre"}
-    dico_dS["Primates"] = "science.abn7829.primates/science.abn7829_data_s3.nw.tree"
-    dico_dS["PrimatesNeutral"] = "science.abn7829.primates/science.abn7829_data_s3.scaled.nw.tree"
-    dico_dS["Zoonomia"] = "241-mammalian-2020v2.phast-242.nh"
-    dico_dS["Consensus30"] = "science.abl8189.Timescale/PreliminaryTopologies/X_lessGC40_241.tree"
-    dico_dS["Consensus75"] = "science.abl8189.Timescale/PreliminaryTopologies/200Mammals_X_lessGC40_75consensus.tr"
-    dico_dS[
-        "NeutralPhyloP"] = "science.abl8189.Timescale/Table_S2_RootedTrees/Concatenation_HRA_neutral_241_10miss_rooted.tree"
+def data_dS(dataset):
+    dico_dS = {"Primates": "science.abn7829.primates/science.abn7829_data_s3.nw.tree",
+               "PrimatesNeutral": "science.abn7829.primates/science.abn7829_data_s3.scaled.nw.tree",
+               "Zoonomia": "241-mammalian-2020v2.phast-242.nh",
+               "Consensus30": "science.abl8189.Timescale/PreliminaryTopologies/X_lessGC40_241.tree",
+               "Consensus75": "science.abl8189.Timescale/PreliminaryTopologies/200Mammals_X_lessGC40_75consensus.tr",
+               "NeutralPhyloP": "science.abl8189.Timescale/Table_S2_RootedTrees/Concatenation_HRA_neutral_241_10miss_rooted.tree"}
     return dico_dS[dataset]
 
 
 def data_pS(dataset):
-    dico_pS = {"E": "EdtableTHV_158sp",
-               "Zoo": "ZootableTHV_180Zoonomia_8traits_7287genes_withgc3andHzoo"}
+    dico_pS = {}
     for k in ["Zoonomia", "Consensus30", "Consensus75", "NeutralPhyloP"]:
         dico_pS[k] = "science.abn5856.Ne/science.abn5856_table_s1.csv"
     for k in ["Primates", "PrimatesNeutral"]:
@@ -67,7 +59,7 @@ rule scale_primate_tree:
 rule pre_processed_traits:
     input:
         script=f"{ROOT}/scripts/pre_processed_traits_mammals.py",
-        input_dS=lambda wildcards: f"{FOLDER}/data/{data_dS(wildcards.dataset,empirical=True)}",
+        input_dS=lambda wildcards: f"{FOLDER}/data/{data_dS(wildcards.dataset)}",
         input_pS=lambda wildcards: f"{FOLDER}/data/{data_pS(wildcards.dataset)}",
         input_traits=f"{FOLDER}/data/Tsuboi_etal_NEE_mammal.csv"
     output:

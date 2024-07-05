@@ -6,28 +6,20 @@ FOLDER = os.path.abspath('.')
 
 executable_list = ["nodetraits", "readnodetraits"]
 exec_dico = {}
-if 'revbayes_inference' in config and config['revbayes_inference']:
-    executable_list.append("rb")
-else:
-    print("RevBayes inference not requested.")
-    exec_dico["rb"] = ""
 
 for executable in executable_list:
     exec_path = ""
-    for b in ["BayesCode", "bayescode", "Bayescode", "bayesCode", "BAYESCODe", "BayesCODE"]:
+    for b in ["BayesCode", "bayescode", "Bayescode", "bayesCode", "BAYESCODE", "BayesCODE"]:
         exec_path = os.path.join(ROOT,f'utils/{b}/bin/{executable}')
         if os.path.exists(exec_path):
             break
-    if executable == "rb":
-        exec_path = os.path.join(ROOT,f'utils/revbayes/projects/cmake/rb')
     if not os.path.exists(exec_path):
         # Find executable in the path using whereis. If not found, raise an error.
         split = os.popen(f'whereis {executable}').read().split()
         if len(split) > 1:
             exec_path = split[1].strip()
         else:
-            pg = "RevBayes" if executable == 'rb' else "BayesCode"
-            raise FileNotFoundError(f'{executable} not found. Please install {pg} and add it to your path.')
+            raise FileNotFoundError(f'{executable} not found. Please install BayesCode and add it to your path.')
     exec_dico[executable] = exec_path
     print(f"Found {executable} at {exec_path}")
 
@@ -50,8 +42,6 @@ SEED_MUT_RATE = 42
 output_pdf = [f"{FOLDER}/results/inference_ML.tsv.gz"]
 if 'bayes_inference' in config and config['bayes_inference']:
     output_pdf.append(f"{FOLDER}/results/inference_bayesian.tsv.gz")
-if 'revbayes_inference' in config and config['revbayes_inference']:
-    output_pdf.append(f"{FOLDER}/results/inference_RevBayes.tsv.gz")
 
 rule all:
     input: output_pdf
@@ -166,50 +156,3 @@ rule plot_simulations_bayesian:
         stdout=f"{FOLDER}/results/inference_bayesian.log"
     shell:
         'python3 {input.script} --folder {FOLDER} --output {output.plot} 1> {log.stdout}'
-
-
-rule convert_to_RevBayes:
-    input:
-        script=f"{ROOT}/scripts/convert_to_nexus.py",
-        tree=f"{ROOT}/simulator/{config['tree']}",
-        traits=rules.pre_processed_traits.output.traits
-    output:
-        nexus_tree=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/tree.nex",
-        nexus_traits=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/traits.nex"
-    shell:
-        'python3 {input.script} --input_tree {input.tree} --input_traits {input.traits} --output_tree {output.nexus_tree} --output_traits {output.nexus_traits}'
-
-rule run_OU_RevBayes:
-    input:
-        exec=exec_dico['rb'],
-        rev_file=f"{ROOT}/scripts/mcmc_{{rb}}_RJ.Rev",
-        tree=rules.convert_to_RevBayes.output.nexus_tree,
-        traits=rules.convert_to_RevBayes.output.nexus_traits
-    output:
-        log=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/{{rb}}_RJ.log"
-    params:
-        folder=lambda wildcards: f"{FOLDER}/RevBayes/{wildcards.simulator}/{wildcards.scaling}_seed{wildcards.seed}"
-    shell:
-        'cd {params.folder} && {input.exec} {input.rev_file}'
-
-rule compress_RevBayes_log:
-    input:
-        log=rules.run_OU_RevBayes.output.log
-    output:
-        log=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/{{rb}}_RJ.log.gz"
-    params:
-        prefix=f"{FOLDER}/RevBayes/{{simulator}}/{{scaling}}_seed{{seed}}/{{rb}}_RJ"
-    shell:
-        'for f in {params.prefix}*; do if [ ! -f $f.gz ]; then gzip $f; fi; done'
-
-
-rule gather_RevBayes_log:
-    input:
-        script=f"{ROOT}/scripts/plot_simulations_RevBayes.py",
-        rb_log=expand(rules.compress_RevBayes_log.output.log,scaling=REPLICATES,seed=SEEDS,simulator=config["simulators"],rb=["simple_OU", "relaxed_OU"])
-    output:
-        plot=f"{FOLDER}/results/inference_RevBayes.tsv.gz"
-    log:
-        stdout=f"{FOLDER}/results/inference_bayesian.log"
-    shell:
-        'python3 {input.script} --folder {FOLDER}/RevBayes --output {output.plot} 1> {log.stdout}'

@@ -12,7 +12,8 @@ Legacy.*
 /manuscript/slides
 /manuscript/slides/
 /manuscript/submitted
-/utils/
+/utils/CMakeLists.txt
+/utils/BayesCode
 *~
 .DS_Store
 cmake-build-debug
@@ -21,6 +22,7 @@ build
 test
 .snakemake
 .idea/
+out/
 *.svg
 *.ai
 *.indd
@@ -36,5 +38,3 @@ test
 *.out
 *.bbl
 *.blg
-out/
-/data_simulated/docs/include-figures.tex

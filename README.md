@@ -1,92 +1,54 @@
-**A test of diversifying selection for a trait from within and between species variations**\
-Thibault Latrille, Mélodie Bastian, Théo Gaboriau, Nicolas Salamin\
-_bioRxiv_\
-[doi.org/10.1101/2023.10.02.559886](https://doi.org/10.1101/2023.10.02.559886)
+## **Detecting diversifying selection for a trait from within and between-species genotypes and phenotypes**
 
-**Compiled binaries and instructions for BayesCode are available
-at [github.com/ThibaultLatrille/bayescode](https://github.com/ThibaultLatrille/bayescode)**
-
-# MicMac
-
-This repository is meant to provide the necessary scripts and data to reproduce the figures shown in the manuscript.
-The experiments can either run on a local computer or in a cluster configuration (slurm).
-
+This repository is meant to provide the necessary scripts and data to reproduce the figures shown in the manuscript.\
+The experiments can either run on a local computer or in a cluster configuration (slurm).\
 The experiments are meant to run on Linux/Unix/MacOS operating systems.
 
-If problems and/or questions are encountered, feel free
-to [open issues](https://github.com/ThibaultLatrille/MicMac/issues).
+## Repository structure
 
-## 0. Local copy
+The repository is split into six main directories, some of which have subdirectories.\
+Within each directory is a `README.md` file which summarizes the purpose of that directory.\
+The main directories are as follows:
 
-Clone the repository and `cd` to the dir.
+### **`data_empirical`**
+This folder contains the snakemake pipeline (`Snakefile`) and data to run the empirical analysis shown in table 1.\
+The details are described in the `README.md` file in the `data_empirical` folder.
 
-```
-git clone https://github.com/ThibaultLatrille/MicMac
-cd MicMac
-```
+### **`data_simulated`**
+This folder contains the snakemake pipeline (`Snakefile`) and data to run simulated analysis shown in figure 3 and S2.\
+The details are described in the `README.md` file in the `data_simulated` folder.
 
-## 1. Installation
+### **`manuscripts`**
+This folder contains the different versions of the manuscript (.tex), supplementary material (.tex) and figures (.pdf).
 
-### General dependencies
+### **`scripts`**
+This folder contains the python scripts used by the snakemake pipelines to run the analysis (see `data_empirical` and `data_simulated`).
 
-Install python3 packages
+### **`simulator`**
+This folder contains the simulation program to generate the data for the simulated analysis, required to run the experiments in the `data_simulated` folder.\
+The details to compile the simulation program and its usage are described in the `README.md` file in the `simulator` folder.
+
+### **`utils`**
+This folder contains the [BayesCode](https://github.com/ThibaultLatrille/bayescode) software, necessary to run the analysis in the `data_simulated` and `data_empirical` folders.\
+The details to install BayesCode and its usage are described in the `README.md` file in the `utils` folder.
+
+## Installation and dependencies
+
+### Python and snakemake dependencies
+
+Install python3, snakemake and the necessary python packages.
 
 ```
 sudo apt install -qq -y python3-dev python3-pip
 pip3 install snakemake scipy numpy matplotlib pandas ete3 bio statsmodels --user
 ```
 
-Install [BayesCode](https://github.com/ThibaultLatrille/bayescode) to obtain the executable `nodetraits`
-and `readnodetraits`:
+### BayesCode and simulator dependencies
+The [BayesCode](https://github.com/ThibaultLatrille/bayescode) software is necessary to run the analysis in the `data_simulated` and `data_empirical` folders.\
+See the `README.md` file in the `utils` folder to install BayesCode.
 
-```
-conda install -c bioconda -c conda-forge bayescode
-```
-
-Alternatively, you can compile BayesCode from source in the `utils` folder:
-
-```bash
-mkdir utils
-cd utils
-git clone https://github.com/ThibaultLatrille/BayesCode
-cd BayesCode
-make tiny
-``` 
-
-## 2. Run empirical analysis
-
-In folder `data_empirical` run `snakemake`:
-
-```
-cd data_empirical
-snakemake -j 8 -k
-```
-
-## 3. Run simulated analysis
-
-Compile simulation program (requires `g++`, `make` and `cmake`):
-
-```
-cd simulator
-make release
-cd ..
-```
-
-In folder `data_simulated` run one the experiment with the configuration file:
-
-```
-cd data_simulated
-python3 simulated_experiment.py -c constant_pop_size.yaml -j 32
-```
-
-This will create a folder `data_simulated/constant_pop_size` with the configuration file `constant_pop_size.yaml` and
-run the experiment with 32 threads.
-
-## Add features or debug in the python scripts
-
-You made modifications to one of the python script, a notebook, this README.md, or you added new features.
-You wish this work benefits to all (futur) users of this repository?
-Please, feel free to open a [pull-request](https://github.com/ThibaultLatrille8/MicMac/pulls)
+The simulator program is necessary to run the experiments in the `data_simulated` folder.\
+See the `README.md` file in the `simulator` folder to compile the simulation program.
 
 ## Licence
 

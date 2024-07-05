@@ -1,0 +1,260 @@
+%! BibTeX Compiler = bibtex
+%TC:ignore
+\documentclass{article}
+\usepackage{caption}
+\usepackage{censor}
+\usepackage{xcolor, colortbl}
+\definecolor{BLUELINK}{HTML}{0645AD}
+\definecolor{DARKBLUELINK}{HTML}{0B0080}
+\definecolor{LIGHTGREY}{gray}{0.9}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage[colorlinks=false]{hyperref}
+% for linking between references, figures, TOC, etc in the pdf document
+\hypersetup{colorlinks,
+    linkcolor=DARKBLUELINK,
+    anchorcolor=DARKBLUELINK,
+    citecolor=DARKBLUELINK,
+    filecolor=DARKBLUELINK,
+    menucolor=DARKBLUELINK,
+    urlcolor=BLUELINK
+} % Color citation links in purple
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{naturalnames}{hyperref}
+
+\usepackage{biorxiv}
+
+\usepackage{url}
+\usepackage{amssymb,amsfonts,amsmath,amsthm,mathtools}
+\usepackage{lmodern}
+\usepackage{xfrac, nicefrac}
+\usepackage{bm}
+\usepackage{listings, enumerate, enumitem}
+\usepackage[export]{adjustbox}
+\usepackage{graphicx}
+\usepackage{bbold}
+\usepackage{pdfpages}
+\pdfinclusioncopyfonts=1
+\usepackage{lineno}
+\usepackage{tabu}
+\usepackage{hhline}
+\usepackage{multicol,multirow,array}
+\usepackage{etoolbox}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{marvosym}
+
+% -- Defining colors:
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}% Definig a custom style:
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    basicstyle=\ttfamily\scriptsize\bfseries,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=t,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}% -- Setting up the custom style:
+\lstset{style=mystyle}
+\captionsetup[table]{hypcap=false}
+\captionsetup[figure]{hypcap=false}
+
+\newcommand{\defEqual}{\stackrel{\text{def}}{=}}
+\newcommand{\Multiply}{\cdot}
+\newcommand{\MultiplyMatrix}{\times}
+\newcommand{\UniDimArray}[1]{\bm{#1}}
+\newcommand{\BiDimArray}[1]{\bm{#1}}
+\newcommand{\tr}{^{\intercal}}
+\newcommand{\inv}{^{-1}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{\text{var}}
+\DeclareMathOperator{\Cov}{\text{cov}}
+\newcommand{\Qst}{Q$_\text{ST}$}
+\newcommand{\Fst}{F$_\text{ST}$}
+\newcommand{\QstFst}{\Qst--\Fst}
+\newcommand{\der}{\mathrm{d}}
+\newcommand{\e}{\text{e}}
+\newcommand{\Ne}{N_{\text{e}}}
+\newcommand{\dnds}{\omega}
+\newcommand{\pn}{\pi_N}
+\newcommand{\ps}{\pi_S}
+\newcommand{\pnps}{\pn / \ps}
+\newcommand{\proba}{\mathbb{P}}
+\newcommand{\pfix}{\proba_{\text{fix}}}
+\newcommand{\Indiv}{k}
+\newcommand{\Branch}{b}
+\newcommand{\WishartIDD}{m}
+\newcommand{\Spi}{i}
+\newcommand{\Spj}{j}
+\newcommand{\NbrTaxa}{n}
+\newcommand{\Time}{t}
+\newcommand{\NbrGen}{t_{\Spi, \Spj}}
+\newcommand{\NucDiv}{d_{\Spi, \Spj}}
+\newcommand{\Trait}{P}
+\newcommand{\Heritability}{h^2}
+\newcommand{\HeritabilitySpi}{\Heritability_{\Spi}}
+\newcommand{\MeanTrait}{\bar{\Trait}}
+\newcommand{\VecTrait}{\UniDimArray{\bar{\Trait}}}
+\newcommand{\RootTrait}{\phi}
+\newcommand{\VarPhy}{\Cov \left( \MeanTrait_{\Spi}, \MeanTrait_{\Spj}\right)}
+\newcommand{\VecZero}{\UniDimArray{0}}
+\newcommand{\VecOne}{\UniDimArray{1}}
+\newcommand{\Distance}{\BiDimArray{D}}
+\newcommand{\DistanceMatrix}{\BiDimArray{\Distance}}
+\newcommand{\MutationRatePheno}{\mu}
+\newcommand{\MutationRateNuc}{u}
+\newcommand{\SubRate}{q}
+\newcommand{\NbrLoci}{L}
+\newcommand{\VarPhenotype}{V_{\Trait}}
+\newcommand{\VarPhenotypeSpi}{V_{\Trait, \Spi}}
+\newcommand{\VarGenetic}{V_{\mathrm{A}}}
+\newcommand{\VarGeneticSpi}{V_{\mathrm{A}, \Spi}}
+\newcommand{\VarEnv}{V_{\mathrm{E}}}
+\newcommand{\VarMutation}{V_{\mathrm{M}}}
+\newcommand{\GenArchi}{\NbrLoci \Multiply \E \left[ a^2 \right]}
+\newcommand{\RateMut}{\sigma^2_{\mathrm{M}}}
+\newcommand{\RateBetween}{\sigma^2_{\mathrm{B}}}
+\newcommand{\RateWhithin}{\sigma^2_{\mathrm{W}}}
+\newcommand{\RateWhithinSpi}{\sigma^2_{\mathrm{W}, \Spi}}
+\newcommand{\VecRateWhithin}{\UniDimArray{\RateWhithin}}
+\newcommand{\EstRateBetween}{\widehat{\sigma}^2_{\mathrm{B}}}
+\newcommand{\EstRateWhithin}{\widehat{\sigma}^2_{\mathrm{W}}}
+\newcommand{\NI}{\rho}
+\newcommand{\EstNI}{\widehat{\rho}}
+\newcommand{\StdSelection}{\sigma}
+\newcommand{\VarSelection}{\StdSelection^2}
+
+% Tree
+\newcommand{\Nbranch}{2 \NbrTaxa - 2}
+\newcommand{\WishartPostDf}{2 \NbrTaxa + 1}
+\newcommand{\Ntrait}{K}
+\newcommand{\contrast}{\UniDimArray{C}}
+\newcommand{\Covariancematrix}{\Sigma}
+\newcommand{\CovarianceMatrix}{\BiDimArray{\Covariancematrix}}
+\newcommand{\Precisionmatrix}{\Omega}
+\newcommand{\PrecisionMatrix}{\BiDimArray{\Precisionmatrix}}
+\newcommand{\Identitymatrix}{\BiDimArray{I}}
+\newcommand{\brownian}{\mathcal{B}}
+\newcommand{\Brownian}{\UniDimArray{\brownian}}
+\newcommand{\Scattermatrix}{\BiDimArray{A}}
+\newcommand{\Multivariate}{\UniDimArray{Z}}
+
+\renewcommand{\baselinestretch}{1.5}
+\renewcommand{\arraystretch}{1.2}
+\frenchspacing
+
+\title{Detecting diversifying selection for a trait from within and between-species genotypes and phenotypes}
+\rhead{\scshape Trait selection from within and between-species variation}
+
+\author{~}
+\begin{document}
+
+\section{Bayesian implementation}\label{sec:implementation}
+
+Bayesian implementation is included within the \textit{BayesCode} software, available at \url{https://github.com/ThibaultLatrille/bayescode}.
+
+\subsection{Data formatting}\label{subsec:data-formatting}
+
+Running the analysis on your dataset and compute posterior probabilities requires three files:
+\begin{enumerate}
+    \item A phylogenetic tree in newick format, with branch lengths in number of substitutions per site (neutral markers), from which the values of nucleotide divergence ($d$) are used.
+    \item A file containing the mean trait values for each species.
+    \item A file containing the variation within-species for each trait and the genetic variation within-species (neutral markers).
+\end{enumerate}
+
+\subsubsection{Phylogenetic tree}
+
+The phylogenetic tree must be in newick format, with branch lengths in substitutions per site (neutral markers).
+
+\subsubsection{Mean trait for each species}
+
+The file containing mean trait values for each species must be in a tab-delimited file with the following format:
+\begin{center}
+    \begin{adjustbox}{width = 0.35\textwidth}
+        \begin{tabular}{|l|c|c|}
+            \hline
+            TaxonName            & Body\_mass & Brain\_mass \\
+            \hline
+            Panthera\_tigris     & 12.26      & 5.676       \\
+            Pithecia\_pithecia   & 7.256      & 3.436       \\
+            Colobus\_angolensis  & 9.176      & 4.284       \\
+            Saimiri\_boliviensis & 6.845      & 3.279       \\
+            $\vdots$             & $\vdots$   & $\vdots$    \\
+            \hline
+        \end{tabular}\label{tab:trait-mean}
+    \end{adjustbox}
+\end{center}
+
+The columns are:
+\begin{itemize}
+    \item \emph{TaxonName}: the name of the taxon matching the name in the alignment and the tree.
+    \item As many columns as traits, without spaces or special characters in the trait.
+    \item The values can be \texttt{NaN} to indicate that the trait is not available for that taxon.
+\end{itemize}
+
+\newpage
+\subsubsection{Trait variation for each species}
+
+The file containing trait variation for each species must be in a tab-delimited file with the following format:
+\begin{center}
+    \begin{adjustbox}{width = 1.0\textwidth}
+        \begin{tabular}{|l|c|c|c|c|c|c|}
+            \hline
+            TaxonName            & Nucleotide\_diversity & Body\_mass\_variance & Body\_mass\_heritability & Brain\_mass\_variance & Brain\_mass\_heritability \\
+            \hline
+            Pithecia\_pithecia   & 0.0016                & 0.22871              & 0.2                      & 0.00737               & 0.2                       \\
+            Colobus\_angolensis  & 0.0017                & 0.00393              & 0.2                      & 0.00416               & 0.2                       \\
+            Saimiri\_boliviensis & 0.0013                & 0.00022              & 0.2                      & 0.00045               & 0.2                       \\
+            Pygathrix\_nemaeus   & 0.0016                & 0.00347              & 0.2                      & 0.00097               & 0.2                       \\
+            $\vdots$             & $\vdots$              & $\vdots$             & $\vdots$                 & $\vdots$              & $\vdots$                  \\
+            \hline
+        \end{tabular}
+        \label{tab:trait-variance}
+    \end{adjustbox}
+\end{center}
+
+\begin{itemize}
+    \item \emph{TaxonName}: the name of the taxon matching the name in the alignment and the tree.
+    \item \emph{Nucleotide\_diversity}: the nucleotide diversity within-species (neutral markers), cannot be \texttt{NaN}.
+    \item As many columns as traits, without spaces or special characters in the trait.
+    \item \emph{TraitName\_variance}: the phenotypic variance of the trait within-species, can be \texttt{NaN} to indicate that the trait variance is not available for that taxon.
+    \item \emph{TraitName\_heritability} (optional): the heritability of the trait within-species, between 0 and 1, cannot be \texttt{NaN}.
+    \item The columns with the suffix \texttt{\_variance} and \texttt{\_heritability} are repeated for each trait.
+    \item \emph{TraitName\_heritability\_lower} (optional): the lower bound of the heritability of the trait within-species, between 0 and 1, cannot be \texttt{NaN}.
+    \item \emph{TraitName\_heritability\_upper} (optional): the upper bound of the heritability of the trait within-species, between 0 and 1, cannot be \texttt{NaN}.
+    \item If the columns with the suffix \texttt{\_heritability\_lower} and \texttt{\_heritability\_upper} are present, the heritability is randomly drawn from a uniform distribution between the lower and upper bounds.
+    \item If the columns with the suffix \texttt{\_heritability} is present, it is taken as is.
+    \item If the additive genetic variance (instead of phenotypic variance) is available for a trait, the heritability can be omitted and will automatically be set to 1.0.
+\end{itemize}
+
+\newpage
+\subsection{Bayesian estimation}\label{subsec:running-nodetraitsand-readnodetraits}
+
+The executable \texttt{nodetraits} from \textit{BayesCode} is used to run the Bayesian estimation of the model, and the executable \texttt{readnodetraits} is used to read the results.
+
+Assuming that the file \texttt{data/body\_size/mammals.male.tsv} contains the mean trait values for each species, the file \texttt{data/body\_size/mammals.male.var\_trait.tsv} contains the variation within-species for each trait and the genetic variation within-species (neutral markers), and the file \texttt{data/body\_size/mammals.male.tree} contains the phylogenetic tree, the following commands are used to run the model and read the results.
+
+\subsubsection{Running the model}
+\texttt{nodetraits} is run with the following command:
+\begin{lstlisting}[language = sh,label={lst:nodetraits-run}]
+nodetraits  --until 2000
+            --tree data/body_size/mammals.male.tree
+            --traitsfile data/body_size/mammals.male.tsv
+            run_mammals_male
+\end{lstlisting}
+
+\subsubsection{Reading the results}
+Once the model has run, the chain \texttt{run\_mammals\_male} is used to compute the posterior distribution of the ratio of between-species variation over within-species variation with \texttt{readnodetraits}:
+\begin{lstlisting}[language = sh,label={lst:readnodetraits-rho}]
+readnodetraits --burnin 1000
+               --var_within data/body_size/mammals.male.var_trait.tsv
+               --output results_mammals_male.tsv
+               run_mammals_male
+\end{lstlisting}
+The file \texttt{data\_empirical/chain\_name.ratio.tsv} then contains the posterior mean of the ratio of between-species variation over within-species variation, the 95\% and 99\% credible interval, and the posterior probability that the ratio is greater than 1.
+
+
+\end{document}
+%TC:endignore
