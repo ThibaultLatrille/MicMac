@@ -1,4 +1,9 @@
 ## **Detecting diversifying selection for a trait from within and between-species genotypes and phenotypes**
+Thibault Latrille, Melodie Bastian, Theo Gaboriau, Nicolas Salamin,\
+_Journal of Evolutionary Biology_,
+2024,
+[doi.org/10.1093/jeb/voae084](https://doi.org/10.1093/jeb/voae084)
+
 
 This repository is meant to provide the necessary scripts and data to reproduce the figures shown in the manuscript.\
 The experiments can either run on a local computer or in a cluster configuration (slurm).\
