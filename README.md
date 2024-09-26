@@ -1,4 +1,12 @@
-## **Detecting diversifying selection for a trait from within and between-species genotypes and phenotypes**
+**Detecting diversifying selection for a trait from within and between-species genotypes and phenotypes**,\
+Thibault Latrille, Melodie Bastian, Theo Gaboriau, Nicolas Salamin,\
+_Journal of Evolutionary Biology_, voae084,\
+2024,\
+[doi.org/10.1093/jeb/voae084](https://doi.org/10.1093/jeb/voae084)
+
+**Compiled binaries and instructions for BayesCode are available at [github.com/ThibaultLatrille/bayescode](https://github.com/ThibaultLatrille/bayescode)**
+
+# MicMac
 
 This repository is meant to provide the necessary scripts and data to reproduce the figures shown in the manuscript.\
 The experiments can either run on a local computer or in a cluster configuration (slurm).\
